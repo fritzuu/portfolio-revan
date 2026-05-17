@@ -84,8 +84,8 @@ export default function Navbar() {
             <Link
               key={link.to}
               to={link.to}
-              smooth
-              duration={700}
+              smooth="easeInOutQuint"
+              duration={900}
               offset={-80}
               style={{
                 fontFamily: 'Inter, sans-serif',
@@ -137,8 +137,8 @@ export default function Navbar() {
       >
         <Link
           to="hero"
-          smooth
-          duration={700}
+          smooth="easeInOutQuint"
+          duration={900}
           offset={-80}
           style={{
             fontFamily: 'Plus Jakarta Sans, sans-serif',
@@ -221,8 +221,8 @@ export default function Navbar() {
                 <Link
                   key={link.to}
                   to={link.to}
-                  smooth
-                  duration={700}
+                  smooth="easeInOutQuint"
+                  duration={900}
                   offset={-80}
                   onClick={() => setMobileOpen(false)}
                   style={{
@@ -251,8 +251,8 @@ export default function Navbar() {
 
               <Link
                 to="contact"
-                smooth
-                duration={700}
+                smooth="easeInOutQuint"
+                duration={900}
                 offset={-80}
                 onClick={() => setMobileOpen(false)}
                 style={{
