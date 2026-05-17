@@ -36,7 +36,7 @@ const projects = [
 
 function ProjectCard({ project, index }) {
   return (
-    <FadeInSection delay={index * 0.1}>
+    <FadeInSection delay={index * 0.1} style={{ flex: '1 1 300px', maxWidth: '400px' }}>
       <motion.div
         whileHover={{ y: -8 }}
         transition={{ type: 'spring', stiffness: 280 }}
@@ -186,7 +186,7 @@ export default function ProjectsSection() {
           </a>
         </FadeInSection>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '24px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '24px' }}>
           {projects.map((project, i) => (
             <ProjectCard key={project.title} project={project} index={i} />
           ))}

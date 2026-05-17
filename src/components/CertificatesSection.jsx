@@ -38,9 +38,9 @@ export default function CertificatesSection() {
           </p>
         </FadeInSection>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '24px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '24px' }}>
           {certs.map((cert, i) => (
-            <FadeInSection key={cert.title} delay={i * 0.12}>
+            <FadeInSection key={cert.title} delay={i * 0.12} style={{ flex: '1 1 280px', maxWidth: '340px' }}>
               <motion.div
                 whileHover={{ scale: 1.02, y: -4 }}
                 transition={{ type: 'spring', stiffness: 280 }}
