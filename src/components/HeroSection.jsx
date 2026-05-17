@@ -91,7 +91,7 @@ export default function HeroSection() {
             <motion.div variants={childVariants} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '9999px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', width: 'fit-content' }}>
               <span style={{ width: '8px', height: '8px', borderRadius: '9999px', background: 'var(--color-primary-container)', boxShadow: '0 0 8px #00D1FF', display: 'inline-block', animation: 'pulse 2s infinite' }} />
               <span style={{ fontFamily: 'Inter', fontSize: '14px', fontWeight: 600, letterSpacing: '0.05em', color: 'var(--color-on-surface-variant)' }}>
-                Revan Alifian Zhafran
+                Junior Web Developer
               </span>
             </motion.div>
 
