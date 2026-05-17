@@ -29,7 +29,7 @@ export default function CertificatesSection() {
   return (
     <section id="certificates" className="section-py">
       <div className="section-container">
-        <FadeInSection style={{ textAlign: 'center', marginBottom: '64px' }}>
+        <FadeInSection style={{ textAlign: 'center', marginBottom: '64px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontWeight: 700, fontSize: '32px', letterSpacing: '-0.02em', color: 'var(--color-on-surface)', marginBottom: '16px' }}>
             Professional Certifications
           </h2>

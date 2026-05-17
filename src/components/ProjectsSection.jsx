@@ -155,46 +155,35 @@ export default function ProjectsSection() {
   return (
     <section id="projects" className="section-py">
       <div className="section-container">
-        <FadeInSection>
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            gap: '24px',
-            marginBottom: '64px',
-          }}>
-            <div>
-              <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontWeight: 700, fontSize: '32px', letterSpacing: '-0.02em', color: 'var(--color-on-surface)', marginBottom: '16px' }}>
-                Selected Work
-              </h2>
-              <p style={{ color: 'var(--color-on-surface-variant)', maxWidth: '480px' }}>
-                A collection of recent projects showcasing my full stack capabilities.
-              </p>
-            </div>
-            <a
-              href="https://github.com/fritzuu"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: 'var(--color-primary)',
-                fontFamily: 'Inter',
-                fontSize: '14px',
-                fontWeight: 600,
-                letterSpacing: '0.05em',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'color 0.2s ease',
-              }}
-              onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary-container)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'var(--color-primary)'}
-            >
-              View GitHub
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>open_in_new</span>
-            </a>
-          </div>
+        <FadeInSection style={{ textAlign: 'center', marginBottom: '64px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontWeight: 700, fontSize: '32px', letterSpacing: '-0.02em', color: 'var(--color-on-surface)', marginBottom: '16px' }}>
+            Selected Work
+          </h2>
+          <p style={{ color: 'var(--color-on-surface-variant)', maxWidth: '480px', margin: '0 auto 24px' }}>
+            A collection of recent projects showcasing my full stack capabilities.
+          </p>
+          <a
+            href="https://github.com/fritzuu"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: 'var(--color-primary)',
+              fontFamily: 'Inter',
+              fontSize: '14px',
+              fontWeight: 600,
+              letterSpacing: '0.05em',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'color 0.2s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary-container)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--color-primary)'}
+          >
+            View GitHub
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>open_in_new</span>
+          </a>
         </FadeInSection>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '24px' }}>
