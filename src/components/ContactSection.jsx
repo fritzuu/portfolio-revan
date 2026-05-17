@@ -16,7 +16,7 @@ export default function ContactSection() {
   };
 
   const contactLinks = [
-    { icon: 'mail', label: 'hello@devpro.com', href: 'mailto:hello@devpro.com' },
+    { icon: 'mail', label: 'revanalifiandev@gmail.com', href: 'mailto:revanalifiandev@gmail.com' },
     { icon: 'link', label: 'LinkedIn Profile', href: 'https://www.linkedin.com/in/revanzhafran/' },
     { icon: 'code', label: 'GitHub', href: 'https://github.com/fritzuu' },
   ];
