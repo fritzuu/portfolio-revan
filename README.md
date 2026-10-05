@@ -21,11 +21,11 @@ To enable the admin dashboard, copy `.env.example` to `.env`, replace `ADMIN_TOK
 
 ## The adventure
 
-1. Enter the world and watch a three-scene pixel cutscene (skippable).
+1. Enter the world through a fullscreen three-act story: a late-night idea, a portal, and arrival in the city (skippable).
 2. Choose a masculine/feminine character, three skin tones, and four outfits.
 3. Explore a compact, full-screen city using WASD/arrows, click-to-walk, or the mobile direction pad.
 4. Approach a doorway and press **E** or **Enter**, or use the interaction button.
-5. Use the minimap to open the city atlas and fast travel to a destination. Visit all five locations to complete the exploration quest.
+5. Select a HUD menu, quest, or atlas destination to automatically walk around scenery to its building. The corresponding content opens only after arrival. WASD/arrows, a new click, or Escape cancels the trip. The right-hand quest journal can be collapsed; enter all five locations to finish it.
 
 | Location       | Portfolio content                                 |
 | -------------- | ------------------------------------------------- |
@@ -35,14 +35,14 @@ To enable the admin dashboard, copy `.env.example` to `.env`, replace `ADMIN_TOK
 | Memory museum  | UGM/AIESEC experience and certificates            |
 | Post & coffee  | Contact links and a private message form          |
 
-Every location is also reachable through keyboard-accessible navigation buttons in the game HUD. The gameplay canvas is decorative for assistive technology; the HTML panels contain the actual portfolio information. Dialogs use Radix focus management. OS reduced-motion preferences are respected; motion and the opt-in original synthesizer soundtrack can be configured in settings. Character appearance and discoveries are saved in localStorage on the current device. No visitor login is required.
+Every location is also reachable through keyboard-accessible navigation buttons in the game HUD. The gameplay canvas is decorative for assistive technology; the HTML panels contain the actual portfolio information. Dialogs use Radix focus management. OS reduced-motion preferences are respected; motion and the original upbeat chiptune (melody, arpeggios, bass and drums) can be configured in settings. PLAY enables music; the story also has a mute button. Character appearance and discoveries are saved in localStorage on the current device. No visitor login is required.
 
 ## Stack and structure
 
 - **React 19 + Vite** for the website and HTML interface.
-- **Phaser**, loaded separately, for the full-screen city, camera follow, NPCs, player, input, and building collisions.
+- **Phaser**, loaded separately, for the full-screen city, smooth camera follow, patrolling NPCs, animated player, input, depth-sorted props, and shared scenery collisions.
 - **Express 5 + Node SQLite** for real server-side persistence.
-- **Radix Dialog** for accessible panels, **Framer Motion** for small requested animations.
+- **Radix Dialog** for accessible panels; OS motion preferences are respected.
 - **Local Fontsource fonts** (VT323 and DM Sans); no runtime font requests.
 - Original procedural pixel artwork in `src/game/art.js`. Existing project screenshots, PDFs, and photo remain in `public/`.
 
@@ -50,8 +50,10 @@ Every location is also reachable through keyboard-accessible navigation buttons 
 src/App.jsx                       Website, cutscene/creation flow, progress
 src/game/World.jsx                Phaser scene and game lifecycle
 src/game/art.js                   Original pixel map and avatar drawing
-src/components/IntroArt.jsx       Three-scene pixel cutscene artwork
-src/components/WorldMap.jsx       Live minimap and fast-travel atlas
+src/game/navigation.js           Collision geometry and A* route finding
+src/components/Cutscene.jsx       Fullscreen animated story and dialogue
+src/hooks/useMusic.js             Original layered chiptune soundtrack
+src/components/WorldMap.jsx       Live minimap and walking-route atlas
 src/components/PortfolioContent.jsx  Portfolio panels and message forms
 src/components/Admin.jsx          Protected content editor, moderation, inbox
 src/data/portfolio.json           Original template content; initial database seed
@@ -86,7 +88,7 @@ npm run build
 npm run format:check
 ```
 
-API integration tests use isolated databases and verify moderation, private contact persistence, validation, rate limiting, protected content edits, and persistence after restart. Browser checks cover the cutscene/creator flow, character movement, portfolio panels, and responsive layout.
+API integration tests use isolated databases and verify moderation, private contact persistence, validation, rate limiting, protected content edits, and persistence after restart. Navigation tests check every solid prop, all building-to-building routes, and recovery when clicking blocked scenery. Browser checks cover the story/creator flow, automatic walking and arrival panels, quest collapse, and responsive layout.
 
 ## Production
 

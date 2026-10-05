@@ -1425,3 +1425,310 @@ textarea::placeholder {
     font-size: 32px;
   }
 }
+/* The story takes over the whole viewport, with cinematic letterboxing. */
+.cinematic {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: #142334;
+  color: #fff2d5;
+  outline: none;
+}
+.cinematic > canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+.cinema-top {
+  position: absolute;
+  inset: 0 0 auto;
+  min-height: 88px;
+  padding: 20px 34px;
+  background: #101d2bf5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 2px solid #536473;
+  font-size: 22px;
+}
+.cinema-top small {
+  display: block;
+  color: #a9bebc;
+  font-size: 14px;
+  margin-top: 4px;
+}
+.cinema-top > div {
+  display: flex;
+  gap: 12px;
+}
+.cinema-top button,
+.cinema-footer button {
+  background: #283e4c;
+  color: #fff1ce;
+  border: 1px solid #8da5a4;
+  min-height: 44px;
+  padding: 9px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font:
+    20px 'VT323',
+    monospace;
+}
+.cinema-top button:hover,
+.cinema-footer button:hover {
+  background: #49646a;
+}
+.cinema-dialogue {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 24px max(32px, calc((100vw - 1000px) / 2)) 22px;
+  background: #101d2bf5;
+  border-top: 3px solid #d3be87;
+  min-height: 208px;
+}
+.cinema-speaker {
+  color: #edc473;
+  font-size: 17px;
+  letter-spacing: 0.12em;
+}
+.cinema-dialogue p {
+  font:
+    22px/1.55 'DM Sans',
+    sans-serif;
+  min-height: 70px;
+  margin: 10px 0 14px;
+  max-width: 1000px;
+}
+.typing-caret {
+  color: #eac06f;
+}
+.cinema-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cinema-footer > span {
+  display: flex;
+  gap: 7px;
+}
+.cinema-footer i {
+  width: 24px;
+  height: 4px;
+  background: #50606a;
+}
+.cinema-footer i.active {
+  background: #e8bc68;
+}
+.quest-panel {
+  position: absolute;
+  top: 92px;
+  right: 25px;
+  width: 280px;
+  color: #fff0ce;
+  background: #263c43f0;
+  border: 2px solid #c1c8ab;
+  box-shadow: 4px 5px 0 #172c3480;
+}
+.quest-toggle {
+  background: #fff0ce;
+  color: #263c43;
+  border: 0;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font:
+    19px 'VT323',
+    monospace;
+  min-height: 44px;
+}
+.quest-toggle small {
+  margin-left: 12px;
+  font-size: 15px;
+}
+.quest-panel.collapsed {
+  width: 222px;
+}
+#quest-list {
+  padding: 12px;
+}
+#quest-list > p {
+  font:
+    12px/1.5 'DM Sans',
+    sans-serif;
+  color: #cfdbcb;
+  margin: 0 0 10px;
+}
+#quest-list > button {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #385059;
+  border: 1px solid #688079;
+  color: #fff2d1;
+  padding: 9px;
+  margin-bottom: 7px;
+  font:
+    18px 'VT323',
+    monospace;
+}
+#quest-list > button:hover {
+  background: #526969;
+  border-color: #edd19e;
+}
+#quest-list > button > span:last-child {
+  margin-left: auto;
+}
+#quest-list button small {
+  display: block;
+  font:
+    10px/1.5 'DM Sans',
+    sans-serif;
+  color: #d0d8ca;
+}
+#quest-list button.complete .quest-check {
+  color: #bce495;
+}
+.quest-check {
+  font-size: 19px;
+}
+.quest-progress {
+  height: 5px;
+  background: #162c34;
+  margin: 13px 0 8px;
+}
+.quest-progress > span {
+  display: block;
+  height: 100%;
+  background: #c5dfa0;
+  transition: width 0.3s;
+}
+#quest-list > small {
+  color: #cfdbcb;
+  font:
+    10px/1.5 'DM Sans',
+    sans-serif;
+  display: block;
+}
+.travel-status {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #263c43ee;
+  color: #fff2cf;
+  border: 2px solid #e7c58c;
+  padding: 10px 18px;
+  font-size: 20px;
+  text-align: center;
+  pointer-events: none;
+}
+.travel-status small {
+  display: block;
+  font:
+    10px 'DM Sans',
+    sans-serif;
+  color: #c2cfbf;
+  margin-top: 5px;
+}
+.walking-icon {
+  display: inline-block;
+  animation: walking-bounce 0.7s ease-in-out infinite alternate;
+}
+.city-navigation > button.travelling {
+  background: #efb87c;
+  border-color: #82472e;
+}
+@keyframes walking-bounce {
+  from {
+    transform: translateY(-2px);
+  }
+  to {
+    transform: translateY(2px);
+  }
+}
+@media (max-height: 750px) and (min-width: 761px) {
+  .quest-panel {
+    width: 255px;
+  }
+  #quest-list {
+    padding: 9px;
+  }
+  #quest-list > button {
+    padding: 6px 9px;
+    margin-bottom: 5px;
+  }
+}
+@media (max-width: 760px) {
+  .quest-panel {
+    top: 82px;
+    right: 15px;
+    width: 228px;
+  }
+  .quest-panel.collapsed {
+    width: 205px;
+  }
+  .quest-toggle {
+    padding: 9px 11px;
+    font-size: 17px;
+  }
+  #quest-list {
+    max-height: 26dvh;
+    overflow-y: auto;
+  }
+  #quest-list > button {
+    padding: 7px;
+  }
+  .travel-status {
+    top: auto;
+    bottom: 308px;
+    font-size: 18px;
+    width: max-content;
+    max-width: 90%;
+  }
+  .cinema-top {
+    padding: 14px 16px;
+    min-height: 80px;
+    font-size: 19px;
+  }
+  .cinema-top small {
+    font-size: 11px;
+    max-width: 150px;
+  }
+  .cinema-top > div {
+    gap: 5px;
+  }
+  .cinema-top button {
+    padding: 7px 9px;
+    font-size: 17px;
+  }
+  .cinema-dialogue {
+    padding: 20px;
+    min-height: 255px;
+  }
+  .cinema-dialogue p {
+    font-size: 17px;
+    min-height: 110px;
+  }
+  .cinema-speaker {
+    font-size: 14px;
+  }
+  .cinematic > canvas {
+    object-fit: contain;
+    background: #152536;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .walking-icon {
+    animation: none;
+  }
+  .quest-progress > span {
+    transition: none;
+  }
+}

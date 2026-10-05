@@ -12,9 +12,11 @@ export function drawCharacter(
   const { outfit = 0, skin = 0, gender = 'male' } = config;
   const r = (a, b, w, h, c) => {
     ctx.fillStyle = c;
-    ctx.fillRect(x + a, y + b, w, h);
+    ctx.fillRect(Math.round(x + a), Math.round(y + b), w, h);
   };
-  r(5, 28, 20, 4, '#233d3270');
+  const swing = Math.sin((frame * Math.PI) / 4);
+  r(5, 32, 20, 3, '#233d3230');
+  y -= Math.abs(swing) * 1.2;
   if (gender === 'female') {
     r(6, 3, 20, 18, '#49362f');
     r(5, 12, 4, 11, '#49362f');
@@ -23,19 +25,28 @@ export function drawCharacter(
   r(9, 5, 15, 12, SKINS[skin]);
   r(7, 2, 19, 6, '#49362f');
   r(6, 6, 5, 6, '#49362f');
-  if (direction !== 'up') {
-    r(direction === 'left' ? 10 : 14, 10, 2, 2, '#2c3435');
-    r(direction === 'right' ? 22 : 21, 10, 2, 2, '#2c3435');
+  if (direction === 'up') {
+    r(9, 5, 15, 12, '#49362f');
+    r(12, 7, 9, 2, '#60463a');
+  } else if (direction === 'left' || direction === 'right') {
+    const right = direction === 'right';
+    r(right ? 22 : 10, 10, 2, 2, '#2c3435');
+    r(right ? 24 : 7, 12, 3, 3, SKINS[skin]);
+    r(right ? 8 : 20, 7, 5, 7, '#49362f');
+    r(right ? 20 : 10, 15, 3, 1, '#b47459');
+  } else {
+    r(14, 10, 2, 2, '#2c3435');
+    r(21, 10, 2, 2, '#2c3435');
     r(16, 15, 5, 1, '#b47459');
   }
   r(9, 18, 15, 10, OUTFITS[outfit]);
-  r(7, 18, 3, 9, SKINS[skin]);
-  r(24, 18, 3, 9, SKINS[skin]);
-  r(14, 18, 4, 3, '#fff1cb');
+  r(7, 18 + swing * 2, 3, 9, SKINS[skin]);
+  r(24, 18 - swing * 2, 3, 9, SKINS[skin]);
+  if (direction !== 'up') r(14, 18, 4, 3, '#fff1cb');
   r(10, 28, 6, 4, '#35475a');
   r(19, 28, 5, 4, '#35475a');
-  r(9, 31 + (frame % 2), 7, 3, '#3c302c');
-  r(19, 31 - (frame % 2), 7, 3, '#3c302c');
+  r(9, 31 + swing * 2, 7, 3, '#3c302c');
+  r(19, 31 - swing * 2, 7, 3, '#3c302c');
 }
 export const WORLD_SIZE = { width: 1600, height: 1100 };
 export const LOCATIONS = [
@@ -80,11 +91,11 @@ export const LOCATIONS = [
     name: 'Memory museum',
     subtitle: 'Experience & certificates',
     x: 150,
-    y: 870,
+    y: 820,
     w: 330,
     h: 150,
     doorX: 315,
-    doorY: 1020,
+    doorY: 970,
     color: '#cec4b2',
   },
   {
@@ -92,22 +103,159 @@ export const LOCATIONS = [
     name: 'Post & coffee',
     subtitle: 'Let’s build together',
     x: 1080,
-    y: 840,
+    y: 790,
     w: 300,
     h: 180,
     doorX: 1230,
-    doorY: 1020,
+    doorY: 970,
     color: '#c7ad91',
   },
 ];
-export const OBSTACLES = [
-  ...LOCATIONS.map((l) => ({ x: l.x, y: l.y - 15, w: l.w, h: l.h + 15 })),
-  { x: 0, y: 0, w: 745, h: 170 },
-  { x: 855, y: 0, w: 745, h: 170 },
-  { x: 95, y: 490, w: 370, h: 290 },
-  { x: 680, y: 600, w: 130, h: 115 },
+// Every solid prop shares its visual placement and its foot-level collider.
+export const PROPS = [
+  ...[
+    [72, 315, 1],
+    [485, 280, 1.1],
+    [1020, 310, 1],
+    [1460, 350, 1.2],
+    [542, 545, 0.8],
+    [961, 545, 0.8],
+    [1140, 575, 0.9],
+    [1400, 650, 1],
+    [545, 740, 0.9],
+    [965, 740, 0.9],
+    [60, 950, 1],
+    [550, 1000, 1],
+    [1485, 1000, 1],
+    [1090, 730, 0.8],
+  ].map(([x, y, s]) => ({ type: 'tree', x, y, s })),
+  ...[60, 290, 520, 980, 1210, 1440].map((x) => ({ type: 'bench', x, y: 182 })),
+  ...[
+    [590, 520],
+    [825, 520],
+    [590, 755],
+    [825, 755],
+  ].map(([x, y]) => ({ type: 'bench', x, y })),
+  ...[
+    [145, 202],
+    [375, 202],
+    [605, 202],
+    [1065, 202],
+    [1295, 202],
+    [1525, 202],
+    [610, 575],
+    [845, 575],
+    [610, 810],
+    [845, 810],
+  ].map(([x, y]) => ({ type: 'lamp', x, y })),
+  ...[
+    [1170, 670],
+    [1340, 555],
+  ].map(([x, y]) => ({ type: 'table', x, y })),
+  ...[
+    [1050, 465],
+    [1050, 490],
+    [1400, 870],
+  ].map(([x, y]) => ({ type: 'crate', x, y })),
+  { type: 'board', x: 850, y: 445 },
 ];
-export function drawWorld(ctx) {
+export const propBounds = (p) => {
+  const { x, y, s = 1, type } = p;
+  if (type === 'tree')
+    return { x: x - 13 * s, y: y - 8 * s, w: 27 * s, h: 30 * s };
+  if (type === 'bench') return { x, y: y + 2, w: 72, h: 29 };
+  if (type === 'lamp') return { x: x + 5, y: y - 4, w: 16, h: 15 };
+  if (type === 'table') return { x: x - 25, y: y + 9, w: 53, h: 29 };
+  if (type === 'board') return { x, y: y + 20, w: 44, h: 25 };
+  return { x, y, w: 24, h: 20 };
+};
+export const OBSTACLES = [
+  ...LOCATIONS.map((l) => ({
+    x: l.x - 4,
+    y: l.y - 17,
+    w: l.w + 8,
+    h: l.h + 17,
+  })),
+  { x: 0, y: 0, w: 739, h: 171 },
+  { x: 862, y: 0, w: 738, h: 171 },
+  { x: 81, y: 476, w: 398, h: 133 },
+  { x: 180, y: 609, w: 299, h: 37 },
+  { x: 81, y: 646, w: 398, h: 146 },
+  { x: 666, y: 581, w: 154, h: 141 },
+  ...PROPS.map(propBounds),
+];
+export function drawProp(ctx, p) {
+  const { x, y, s = 1, type } = p;
+  const r = (a, b, w, h, c) => {
+    ctx.fillStyle = c;
+    ctx.fillRect(a, b, w, h);
+  };
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s, s);
+  if (type === 'tree') {
+    r(-27, 7, 58, 13, '#263e3430');
+    r(-4, -22, 11, 43, '#6f4d36');
+    r(-1, -18, 3, 35, '#a47c4f');
+    r(-33, -61, 64, 44, '#2d5736');
+    r(-26, -75, 48, 22, '#2d5736');
+    r(-40, -48, 75, 28, '#345f36');
+    r(-26, -68, 49, 42, '#427943');
+    r(-17, -77, 29, 15, '#4d8544');
+    r(-32, -48, 22, 23, '#4a8445');
+    r(3, -59, 26, 26, '#386b39');
+    for (let i = 0; i < 32; i++)
+      r(
+        -24 + ((i * 17) % 45),
+        -66 + ((i * 13) % 36),
+        5,
+        3,
+        i % 3 ? '#4b8040' : '#60964b',
+      );
+    r(-14, -65, 16, 4, '#73a157');
+  } else if (type === 'bench') {
+    r(2, 8, 72, 14, '#35434240');
+    r(0, 0, 72, 23, '#506166');
+    for (let i = 0; i < 3; i++)
+      r(5, 3 + i * 7, 62, 4, ['#c4a477', '#d2b484', '#b99566'][i]);
+    r(4, 21, 5, 9, '#424f50');
+    r(63, 21, 5, 9, '#424f50');
+  } else if (type === 'lamp') {
+    r(4, 4, 24, 7, '#39453e30');
+    r(10, -57, 5, 65, '#4a5655');
+    r(3, -64, 20, 5, '#39464a');
+    r(5, -83, 16, 20, '#3a474b');
+    r(8, -79, 10, 13, '#e9d9a8');
+    r(4, -86, 18, 4, '#3a474b');
+    r(8, -89, 10, 3, '#3a474b');
+    r(6, 7, 13, 3, '#37474a');
+  } else if (type === 'table') {
+    r(-15, 24, 34, 14, '#4d554b40');
+    r(-12, 15, 25, 17, '#b89965');
+    r(-20, 12, 7, 18, '#755d49');
+    r(18, 12, 7, 18, '#755d49');
+    r(0, -27, 3, 60, '#695b44');
+    r(-35, -34, 74, 15, '#e2d0a4');
+    r(-24, -44, 52, 10, '#e2d0a4');
+    r(-10, -51, 24, 7, '#d2b988');
+    r(-35, -23, 74, 5, '#b67457');
+    for (let xx = -30; xx < 35; xx += 18) r(xx, -34, 8, 15, '#b67457');
+  } else if (type === 'board') {
+    r(0, 0, 44, 30, '#644f3a');
+    r(4, 4, 36, 22, '#dabd83');
+    r(5, 30, 4, 15, '#765c40');
+    r(36, 30, 4, 15, '#765c40');
+    r(10, 9, 24, 2, '#7c7055');
+    r(10, 15, 20, 2, '#7c7055');
+  } else {
+    r(0, 0, 24, 20, '#99744e');
+    r(2, 2, 20, 16, '#b79769');
+    r(4, 3, 3, 15, '#8d6d4c');
+    r(17, 3, 3, 15, '#8d6d4c');
+  }
+  ctx.restore();
+}
+export function drawWorld(ctx, { baseOnly = false } = {}) {
   const r = (x, y, w, h, c) => {
     ctx.fillStyle = c;
     ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
@@ -200,80 +348,6 @@ export function drawWorld(ctx) {
     r(x + 4, y - 3, 8, 3, '#91b669');
     r(x + 7, y - 5, 3, 3, '#ddbf80');
   }
-  // Layered tree canopies use clusters rather than flat shapes.
-  function tree(x, y, s = 1) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(s, s);
-    r(-27, 7, 58, 13, '#263e3450');
-    r(-4, -22, 11, 43, '#6f4d36');
-    r(-1, -18, 3, 35, '#a47c4f');
-    r(-33, -61, 64, 44, '#2d5736');
-    r(-26, -75, 48, 22, '#2d5736');
-    r(-40, -48, 75, 28, '#345f36');
-    r(-26, -68, 49, 42, '#427943');
-    r(-17, -77, 29, 15, '#4d8544');
-    r(-32, -48, 22, 23, '#4a8445');
-    r(3, -59, 26, 26, '#386b39');
-    for (let i = 0; i < 40; i++) {
-      const xx = -24 + random() * 45,
-        yy = -66 + random() * 36;
-      r(xx, yy, 5, 3, random() > 0.6 ? '#60964b' : '#4b8040');
-    }
-    r(-14, -65, 16, 4, '#73a157');
-    ctx.restore();
-  }
-  for (const [x, y, s] of [
-    [72, 315, 1],
-    [485, 280, 1.2],
-    [1020, 310, 1.1],
-    [1460, 350, 1.3],
-    [542, 545, 0.8],
-    [961, 545, 0.8],
-    [1140, 575, 0.9],
-    [1400, 650, 1],
-    [545, 740, 0.9],
-    [965, 740, 0.9],
-    [60, 950, 1.1],
-    [550, 1000, 1],
-    [1485, 1000, 1],
-    [1090, 730, 0.8],
-    [1380, 190, 0.8],
-    [360, 210, 0.65],
-  ])
-    tree(x, y, s);
-  function bench(x, y) {
-    r(x + 2, y + 8, 72, 14, '#35434270');
-    r(x, y, 72, 23, '#506166');
-    r(x + 5, y + 3, 62, 4, '#c4a477');
-    r(x + 5, y + 10, 62, 4, '#d2b484');
-    r(x + 5, y + 17, 62, 4, '#b99566');
-    r(x + 4, y + 21, 5, 9, '#424f50');
-    r(x + 63, y + 21, 5, 9, '#424f50');
-  }
-  function lamp(x, y) {
-    r(x + 4, y + 4, 24, 7, '#39453e40');
-    r(x + 10, y - 57, 5, 65, '#4a5655');
-    r(x + 3, y - 64, 20, 5, '#39464a');
-    r(x + 5, y - 83, 16, 20, '#3a474b');
-    r(x + 8, y - 79, 10, 13, '#e9d9a8');
-    r(x + 4, y - 86, 18, 4, '#3a474b');
-    r(x + 8, y - 89, 10, 3, '#3a474b');
-    r(x + 6, y + 7, 13, 3, '#37474a');
-  }
-  for (let x = 60; x < 1550; x += 230) {
-    if (x > 720 && x < 870) continue;
-    bench(x, 192);
-    lamp(x + 85, 202);
-  }
-  bench(590, 520);
-  bench(825, 520);
-  bench(590, 755);
-  bench(825, 755);
-  lamp(610, 575);
-  lamp(845, 575);
-  lamp(610, 810);
-  lamp(845, 810);
   // A central fountain with stone steps and tiled water.
   r(668, 588, 154, 140, '#4c62616b');
   r(666, 581, 154, 141, '#929f96');
@@ -348,44 +422,12 @@ export function drawWorld(ctx) {
       }
     }
   }
-  // Cafe terrace with parasols, chairs, and tables.
-  for (const [x, y] of [
-    [1170, 670],
-    [1340, 555],
-  ]) {
-    r(x - 15, y + 24, 34, 14, '#4d554b55');
-    r(x - 12, y + 15, 25, 17, '#b89965');
-    r(x - 20, y + 12, 7, 18, '#755d49');
-    r(x + 18, y + 12, 7, 18, '#755d49');
-    r(x, y - 27, 3, 60, '#695b44');
-    r(x - 35, y - 34, 74, 15, '#e2d0a4');
-    r(x - 24, y - 44, 52, 10, '#e2d0a4');
-    r(x - 10, y - 51, 24, 7, '#d2b988');
-    r(x - 35, y - 23, 74, 5, '#b67457');
-    for (let xx = x - 30; xx < x + 35; xx += 18)
-      r(xx, y - 34, 8, 15, '#b67457');
-  }
-  // Crates, notice boards and pavement plaques.
-  r(850, 445, 44, 30, '#644f3a');
-  r(854, 449, 36, 22, '#dabd83');
-  r(855, 475, 4, 15, '#765c40');
-  r(886, 475, 4, 15, '#765c40');
-  r(860, 454, 24, 2, '#7c7055');
-  r(860, 460, 20, 2, '#7c7055');
-  for (const [x, y] of [
-    [1050, 465],
-    [1050, 480],
-    [1400, 870],
-  ]) {
-    r(x, y, 24, 20, '#99744e');
-    r(x + 2, y + 2, 20, 16, '#b79769');
-    r(x + 4, y + 3, 3, 15, '#8d6d4c');
-    r(x + 17, y + 3, 3, 15, '#8d6d4c');
-  }
-  r(1155, 798, 135, 25, '#52625c');
+  if (!baseOnly)
+    [...PROPS].sort((a, b) => a.y - b.y).forEach((p) => drawProp(ctx, p));
+  r(1155, 1030, 135, 25, '#52625c');
   ctx.fillStyle = '#e3d8b5';
   ctx.font = '12px monospace';
-  ctx.fillText('SEND A HELLO →', 1168, 815);
+  ctx.fillText('SEND A HELLO →', 1168, 1047);
   // Architectural floor mosaics add rhythm to the main boulevard.
   for (let y = 445; y < 1080; y += 40)
     for (const x of [590, 870]) {

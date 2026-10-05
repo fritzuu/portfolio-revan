@@ -7,14 +7,15 @@ import {
   useState,
 } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { motion, useReducedMotion } from 'framer-motion';
+import { useReducedMotion } from 'framer-motion';
 import { ArrowRight, Map, Settings, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import seed from './data/portfolio.json';
 import { LOCATIONS, OUTFITS, SKINS } from './game/art';
 import PixelCharacter from './components/PixelCharacter';
-import IntroArt from './components/IntroArt';
+import Cutscene from './components/Cutscene';
+import useMusic from './hooks/useMusic';
 import WorldMap from './components/WorldMap';
 import PortfolioContent, { api } from './components/PortfolioContent';
 import Admin from './components/Admin';
@@ -73,79 +74,14 @@ function Modal({ open, onOpenChange, title, children, className }) {
     </Dialog.Root>
   );
 }
-function useMusic(enabled) {
-  useEffect(() => {
-    if (!enabled) return;
-    const Audio = window.AudioContext || window.webkitAudioContext;
-    if (!Audio) return;
-    const ctx = new Audio();
-    const notes = [261.63, 329.63, 392, 523.25, 392, 329.63, 293.66, 392];
-    let i = 0;
-    const tick = () => {
-      if (document.hidden) return;
-      const o = ctx.createOscillator(),
-        g = ctx.createGain();
-      o.type = 'triangle';
-      o.frequency.value = notes[i++ % notes.length];
-      g.gain.setValueAtTime(0.025, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
-      o.connect(g);
-      g.connect(ctx.destination);
-      o.start();
-      o.stop(ctx.currentTime + 0.5);
-    };
-    tick();
-    const timer = setInterval(tick, 650);
-    return () => {
-      clearInterval(timer);
-      ctx.close();
-    };
-  }, [enabled]);
-}
-function Intro({ onDone, reduced }) {
-  const [step, setStep] = useState(0);
-  const lines = [
-    'Somewhere between an idea and a line of code…',
-    'A little world was waiting to be discovered.',
-    'Welcome, traveler. Your story starts here.',
-  ];
-  useEffect(() => {
-    if (reduced) return;
-    const t = setTimeout(() => {
-      if (step === 2) onDone();
-      else setStep((s) => s + 1);
-    }, 3200);
-    return () => clearTimeout(t);
-  }, [step, onDone, reduced]);
-  return (
-    <div className="intro-scene">
-      <div className="intro-stars">✦ · ✧ · ✦</div>
-      <motion.div
-        key={step}
-        initial={{ opacity: 0, y: reduced ? 0 : 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-      >
-        <IntroArt step={step} />
-        <h2>{lines[step]}</h2>
-      </motion.div>
-      <div className="intro-progress">
-        {lines.map((_, i) => (
-          <span key={i} className={i === step ? 'active' : ''} />
-        ))}
-      </div>
-      <button className="button" onClick={onDone}>
-        {reduced ? 'Lanjutkan' : 'Skip cutscene'} <ArrowRight size={16} />
-      </button>
-    </div>
-  );
-}
 export default function App() {
   const [saved] = useState(readSave),
     [character, setCharacter] = useState(saved?.character || DEFAULT),
     [visited, setVisited] = useState(saved?.visited || []);
   const [position, setPosition] = useState({ x: 770, y: 520 });
   const [destination, setDestination] = useState(null);
+  const [travel, setTravel] = useState(null);
+  const [questsOpen, setQuestsOpen] = useState(() => window.innerWidth > 760);
   const [phase, setPhase] = useState('landing'),
     [panel, setPanel] = useState(null),
     [near, setNear] = useState(null),
@@ -188,11 +124,24 @@ export default function App() {
   const visit = useCallback((id) => {
     setPanel(id);
     setControls({});
-    if (LOCATIONS.some((l) => l.id === id))
-      setVisited((v) => (v.includes(id) ? v : [...v, id]));
+    setDestination(null);
+    setTravel(null);
+    const locationId = id === 'guestbook' ? 'contact' : id;
+    if (LOCATIONS.some((l) => l.id === locationId))
+      setVisited((v) => (v.includes(locationId) ? v : [...v, locationId]));
+  }, []);
+  const tripSequence = useRef(0);
+  const walkTo = useCallback((panelId, open = true) => {
+    const id = panelId === 'guestbook' ? 'contact' : panelId;
+    setPanel(null);
+    setControls({});
+    setDestination({ id, panel: panelId, open, stamp: ++tripSequence.current });
+    setTimeout(() => stage.current?.focus(), 0);
   }, []);
   const doneIntro = useCallback(() => setPhase('create'), []);
   const enter = () => {
+    setDestination(null);
+    setTravel(null);
     setPhase('playing');
     setControls({});
     setTimeout(() => stage.current?.focus(), 0);
@@ -208,7 +157,10 @@ export default function App() {
       <main
         className="city-stage"
         ref={stage}
-        tabIndex={0}
+        data-player-x={position.x}
+        data-player-y={position.y}
+        tabIndex={phase === 'intro' ? -1 : 0}
+        aria-hidden={phase === 'intro' ? true : undefined}
         aria-label="Game world. Walk with arrow keys or WASD. Press E to interact."
         onBlur={() => setControls({})}
         onKeyDown={(e) => {
@@ -240,6 +192,7 @@ export default function App() {
             reducedMotion={reduced}
             onPosition={setPosition}
             destination={destination}
+            onTravel={setTravel}
           />
         </Suspense>
       </main>
@@ -264,7 +217,13 @@ export default function App() {
               PORTFOLIO
               <i />
             </div>
-            <button className="play-button" onClick={() => setPhase('intro')}>
+            <button
+              className="play-button"
+              onClick={() => {
+                setPhase('intro');
+                setMusic(true);
+              }}
+            >
               PLAY <ArrowRight size={24} />
             </button>
             {saved && (
@@ -290,7 +249,11 @@ export default function App() {
           <header className="city-header">
             <button
               className="game-logo"
-              onClick={() => setPhase('landing')}
+              onClick={() => {
+                setDestination(null);
+                setTravel(null);
+                setPhase('landing');
+              }}
               aria-label="Return to title screen"
             >
               REVAN<span>ZHAFRAN</span>
@@ -313,18 +276,63 @@ export default function App() {
               </button>
             </div>
           </header>
-          <div className="exploration-status">
-            <span className="status-dot" />{' '}
-            {visited.length === 5
-              ? 'CITY EXPLORER · COMPLETE'
-              : `${visited.length} / 5 PLACES DISCOVERED`}
-          </div>
+          <aside
+            className={cn('quest-panel', !questsOpen && 'collapsed')}
+            aria-label="City quests"
+          >
+            <button
+              className="quest-toggle"
+              aria-expanded={questsOpen}
+              aria-controls="quest-list"
+              onClick={() => setQuestsOpen((v) => !v)}
+            >
+              <span>
+                ✦ QUEST JOURNAL <small>{visited.length} / 5</small>
+              </span>
+              <span>{questsOpen ? '−' : '+'}</span>
+            </button>
+            {questsOpen && (
+              <div id="quest-list">
+                <p>Get to know the person behind the pixels.</p>
+                {LOCATIONS.map((l) => (
+                  <button
+                    key={l.id}
+                    className={visited.includes(l.id) ? 'complete' : ''}
+                    onClick={() => walkTo(l.id)}
+                  >
+                    <span className="quest-check">
+                      {visited.includes(l.id) ? '✓' : '◇'}
+                    </span>
+                    <span>
+                      {l.name}
+                      <small>{l.subtitle}</small>
+                    </span>
+                    <span>→</span>
+                  </button>
+                ))}
+                <div className="quest-progress">
+                  <span style={{ width: `${(visited.length / 5) * 100}%` }} />
+                </div>
+                <small>
+                  {visited.length === 5
+                    ? 'City explorer complete. Thanks for visiting!'
+                    : 'Enter each building to complete your journey.'}
+                </small>
+              </div>
+            )}
+          </aside>
+          {travel && (
+            <div className="travel-status" role="status">
+              <span className="walking-icon">↟</span> Walking to {travel.name}
+              <small>WASD / arrows / Esc to cancel</small>
+            </div>
+          )}
           <div className="city-help">
             <kbd>W A S D</kbd>
             <span>or arrows to walk</span>
             <kbd>E</kbd>
             <span>to interact</span>
-            <small>Click anywhere on a clear path to move.</small>
+            <small>Click a destination to find a safe route.</small>
           </div>
           <button
             className="minimap-button"
@@ -356,7 +364,15 @@ export default function App() {
               ['guestbook', 'Guestbook'],
               ['contact', 'Contact'],
             ].map(([id, label]) => (
-              <button key={id} onClick={() => visit(id)}>
+              <button
+                key={id}
+                onClick={() => walkTo(id)}
+                className={
+                  travel?.id === (id === 'guestbook' ? 'contact' : id)
+                    ? 'travelling'
+                    : ''
+                }
+              >
                 {label}
                 {visited.includes(id) && <span>✓</span>}
               </button>
@@ -381,16 +397,15 @@ export default function App() {
           </div>
         </>
       )}
-      <Modal
-        open={phase === 'intro'}
-        onOpenChange={(v) => {
-          if (!v) setPhase('landing');
-        }}
-        title="Every adventure starts somewhere."
-        className="intro-modal"
-      >
-        <Intro onDone={doneIntro} reduced={reduced} />
-      </Modal>
+      {phase === 'intro' && (
+        <Cutscene
+          onDone={doneIntro}
+          reduced={reduced}
+          character={character}
+          music={music}
+          onMusic={setMusic}
+        />
+      )}
       <Modal
         open={phase === 'create'}
         onOpenChange={(v) => {
@@ -489,20 +504,16 @@ export default function App() {
             large
             position={position}
             visited={visited}
-            onTravel={(id) => {
-              setDestination({ id, stamp: Date.now() });
-              setPanel(null);
-              setPhase('playing');
-              setControls({});
-              setTimeout(() => stage.current?.focus(), 0);
-            }}
+            onTravel={(id) => walkTo(id)}
           />
         ) : panel === 'settings' ? (
           <div className="settings-list">
             <label>
               <span>
                 <strong>City soundtrack</strong>
-                <small>A quiet, original melody. Off by default.</small>
+                <small>
+                  An upbeat original chiptune with drums, bass and melody.
+                </small>
               </span>
               <input
                 type="checkbox"
@@ -514,7 +525,7 @@ export default function App() {
               <span>
                 <strong>Reduce motion</strong>
                 <small>
-                  Skip automatic cutscene playback and walking animation.
+                  Manual story playback, steady camera and reduced animation.
                 </small>
               </span>
               <input
