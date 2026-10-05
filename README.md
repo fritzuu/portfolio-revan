@@ -23,24 +23,24 @@ To enable the admin dashboard, copy `.env.example` to `.env`, replace `ADMIN_TOK
 
 1. Enter the world and watch a three-scene pixel cutscene (skippable).
 2. Choose a masculine/feminine character, three skin tones, and four outfits.
-3. Explore a compact village using WASD/arrows, click-to-walk, or the mobile direction pad.
+3. Explore a compact, full-screen city using WASD/arrows, click-to-walk, or the mobile direction pad.
 4. Approach a doorway and press **E** or **Enter**, or use the interaction button.
-5. Visit all five locations to complete the exploration quest.
+5. Use the minimap to open the city atlas and fast travel to a destination. Visit all five locations to complete the exploration quest.
 
-| Location        | Portfolio content                                 |
-| --------------- | ------------------------------------------------- |
-| Revan’s home    | Profile, photograph, CV, GitHub                   |
-| The workshop    | Image Compression, Lyrictify, Cashflow Management |
-| The library     | Skills and six original service offerings         |
-| Memory hall     | UGM/AIESEC experience and certificates            |
-| The post office | Contact links and a private message form          |
+| Location       | Portfolio content                                 |
+| -------------- | ------------------------------------------------- |
+| About Revan    | Profile, photograph, CV, GitHub                   |
+| Project studio | Image Compression, Lyrictify, Cashflow Management |
+| Tech library   | Skills and six original service offerings         |
+| Memory museum  | UGM/AIESEC experience and certificates            |
+| Post & coffee  | Contact links and a private message form          |
 
-Every location is also reachable through keyboard-accessible buttons below the map. The gameplay canvas is decorative for assistive technology; the HTML panels contain the actual portfolio information. Dialogs use Radix focus management. OS reduced-motion preferences are respected; motion and the opt-in original synthesizer soundtrack can be configured in settings. Character appearance and discoveries are saved in localStorage on the current device. No visitor login is required.
+Every location is also reachable through keyboard-accessible navigation buttons in the game HUD. The gameplay canvas is decorative for assistive technology; the HTML panels contain the actual portfolio information. Dialogs use Radix focus management. OS reduced-motion preferences are respected; motion and the opt-in original synthesizer soundtrack can be configured in settings. Character appearance and discoveries are saved in localStorage on the current device. No visitor login is required.
 
 ## Stack and structure
 
 - **React 19 + Vite** for the website and HTML interface.
-- **Phaser**, loaded separately, for the map, player, input, and building collisions.
+- **Phaser**, loaded separately, for the full-screen city, camera follow, NPCs, player, input, and building collisions.
 - **Express 5 + Node SQLite** for real server-side persistence.
 - **Radix Dialog** for accessible panels, **Framer Motion** for small requested animations.
 - **Local Fontsource fonts** (VT323 and DM Sans); no runtime font requests.
@@ -51,6 +51,7 @@ src/App.jsx                       Website, cutscene/creation flow, progress
 src/game/World.jsx                Phaser scene and game lifecycle
 src/game/art.js                   Original pixel map and avatar drawing
 src/components/IntroArt.jsx       Three-scene pixel cutscene artwork
+src/components/WorldMap.jsx       Live minimap and fast-travel atlas
 src/components/PortfolioContent.jsx  Portfolio panels and message forms
 src/components/Admin.jsx          Protected content editor, moderation, inbox
 src/data/portfolio.json           Original template content; initial database seed

@@ -8,28 +8,21 @@ import {
 } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion, useReducedMotion } from 'framer-motion';
-import {
-  ArrowRight,
-  BookOpen,
-  Compass,
-  CodeXml,
-  Map,
-  MoveUpRight,
-  Settings,
-  X,
-} from 'lucide-react';
+import { ArrowRight, Map, Settings, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import seed from './data/portfolio.json';
 import { LOCATIONS, OUTFITS, SKINS } from './game/art';
 import PixelCharacter from './components/PixelCharacter';
 import IntroArt from './components/IntroArt';
+import WorldMap from './components/WorldMap';
 import PortfolioContent, { api } from './components/PortfolioContent';
 import Admin from './components/Admin';
 const World = lazy(() => import('./game/World'));
 const cn = (...inputs) => twMerge(clsx(inputs));
 const DEFAULT = { gender: 'male', outfit: 0, skin: 0 };
 const TITLES = {
+  map: 'Explore Revan’s city.',
   about: 'A little about me.',
   projects: 'Made with curiosity.',
   skills: 'My inventory.',
@@ -151,6 +144,8 @@ export default function App() {
   const [saved] = useState(readSave),
     [character, setCharacter] = useState(saved?.character || DEFAULT),
     [visited, setVisited] = useState(saved?.visited || []);
+  const [position, setPosition] = useState({ x: 770, y: 520 });
+  const [destination, setDestination] = useState(null);
   const [phase, setPhase] = useState('landing'),
     [panel, setPanel] = useState(null),
     [near, setNear] = useState(null),
@@ -204,290 +199,188 @@ export default function App() {
   };
   if (window.location.pathname === '/admin') return <Admin />;
   return (
-    <div className="app-shell">
-      <a className="skip-link" href="#destinations">
-        Langsung ke isi portfolio
-      </a>
-      <header className="site-header">
-        <a className="brand" href="/" aria-label="Revan’s World home">
-          <span className="brand-icon">
-            r<span>✦</span>
-          </span>
-          <span>
-            revan<span className="brand-world">’s world</span>
-            <small>A DEVELOPER’S LITTLE UNIVERSE</small>
-          </span>
+    <div className="city-app">
+      {phase === 'playing' && (
+        <a className="skip-link" href="#city-navigation">
+          Skip to portfolio navigation
         </a>
-        <div className="header-right">
-          <span className="availability">
-            <span /> Available for opportunities
-          </span>
-          <button className="button small" onClick={() => visit('about')}>
-            Portfolio <MoveUpRight size={14} />
-          </button>
-          <button
-            className="icon-button"
-            aria-label="Pengaturan"
-            onClick={() => setPanel('settings')}
-          >
-            <Settings size={18} />
-          </button>
-        </div>
-      </header>
-      <main>
-        <section className={cn('hero', phase === 'playing' && 'hero-playing')}>
-          <div className="hero-copy">
-            <div className="eyebrow">
-              <span className="tiny-diamond">◆</span>{' '}
-              {phase === 'playing'
-                ? 'YOUR ADVENTURE, YOUR PACE'
-                : 'NOT YOUR USUAL PORTFOLIO'}
+      )}
+      <main
+        className="city-stage"
+        ref={stage}
+        tabIndex={0}
+        aria-label="Game world. Walk with arrow keys or WASD. Press E to interact."
+        onBlur={() => setControls({})}
+        onKeyDown={(e) => {
+          if (
+            phase === 'playing' &&
+            !panel &&
+            ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(
+              e.key,
+            )
+          )
+            e.preventDefault();
+        }}
+      >
+        <Suspense
+          fallback={
+            <div className="city-loading">
+              <PixelCharacter character={character} />
+              <span>BUILDING YOUR WORLD…</span>
             </div>
-            <motion.h1
-              initial={{ opacity: 0, y: reduced ? 0 : 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {phase === 'playing' ? (
-                <>
-                  Make yourself <em>at home.</em>
-                </>
-              ) : (
-                <>
-                  A little world.
-                  <br />A lot of <em>possibilities.</em>
-                </>
-              )}
-            </motion.h1>
-            <p>
-              {phase === 'playing' ? (
-                'Follow the paths. Knock on a door. Get to know the person behind the pixels.'
-              ) : (
-                <>
-                  Hey, I’m Revan — a full stack developer.
-                  <br />
-                  Come explore the things I build, one pixel at a time.
-                </>
-              )}
-            </p>
-            {phase === 'landing' && (
-              <div className="hero-actions">
-                <button
-                  className="button primary large"
-                  onClick={() => setPhase('intro')}
-                >
-                  Enter the world <ArrowRight size={18} />
-                </button>
-                {saved ? (
-                  <button className="button text" onClick={enter}>
-                    Continue adventure ↗
-                  </button>
-                ) : (
-                  <button
-                    className="button text"
-                    onClick={() => visit('projects')}
-                  >
-                    Just here for the projects? ↗
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-          <div className="hero-aside">
-            <span className="decorative-star">✳</span>
-            <span>
-              BUILT WITH CARE.
-              <br />
-              EXPLORED WITH CURIOSITY.
-            </span>
-          </div>
-        </section>
-        <section
-          className={cn('game-section', phase === 'playing' && 'is-playing')}
-          aria-label="Interactive portfolio village"
+          }
         >
-          <div className="game-frame">
-            <div className="game-topbar">
-              <span>
-                <span className="live-dot" /> REVAN / VILLAGE
-              </span>
-              <span>
-                <Compass size={13} />{' '}
-                {phase === 'playing'
-                  ? 'EXPLORING'
-                  : 'A SMALL WORLD, A BIG HELLO'}
-              </span>
-              <span>01 : COZY AFTERNOON</span>
-            </div>
-            {phase === 'playing' && (
-              <div className="quest-summary">
-                <div>
-                  <span className="eyebrow">TODAY’S LITTLE QUEST</span>
-                  <strong>
-                    {visited.length === 5
-                      ? 'Adventure complete!'
-                      : 'Get to know Revan'}
-                  </strong>
-                </div>
-                <div className="quest-summary-progress">
-                  <div className="quest-dots">
-                    {LOCATIONS.map((l) => (
-                      <span
-                        key={l.id}
-                        className={visited.includes(l.id) ? 'done' : ''}
-                      />
-                    ))}
-                  </div>
-                  <small>{visited.length}/5 places discovered</small>
-                </div>
-              </div>
-            )}
-            <div
-              className="world-stage"
-              ref={stage}
-              tabIndex={0}
-              aria-label="Area game. Bergerak dengan WASD atau tombol panah. Tekan E dekat pintu."
-              onBlur={() => setControls({})}
-              onKeyDown={(e) => {
-                if (
-                  phase === 'playing' &&
-                  !panel &&
-                  [
-                    'ArrowUp',
-                    'ArrowDown',
-                    'ArrowLeft',
-                    'ArrowRight',
-                    ' ',
-                  ].includes(e.key)
-                )
-                  e.preventDefault();
-              }}
-            >
-              <Suspense
-                fallback={
-                  <div className="world-loading">
-                    Preparing your little adventure…
-                    <div className="loading-blocks">▪ ▪ ▪ ▪</div>
-                  </div>
-                }
-              >
-                <World
-                  character={character}
-                  playing={phase === 'playing'}
-                  paused={!!panel || phase !== 'playing'}
-                  controls={controls}
-                  onNear={setNear}
-                  onVisit={visit}
-                  reducedMotion={reduced}
-                />
-              </Suspense>
-              {phase === 'landing' && (
-                <div className="world-invite">
-                  <span>YOUR NEXT ADVENTURE</span>
-                  <strong>Five places. One story.</strong>
-                  <span>Choose a character & follow your curiosity.</span>
-                </div>
-              )}
-              {phase === 'playing' && (
-                <>
-                  <div className="interaction">
-                    <button
-                      className="button primary"
-                      disabled={!near}
-                      onClick={() => near && visit(near.id)}
-                    >
-                      {near ? (
-                        <>
-                          {' '}
-                          <kbd>E</kbd> Enter {near.name}
-                        </>
-                      ) : (
-                        'Follow a path to a doorway'
-                      )}
-                    </button>
-                  </div>
-                  <div className="dpad" aria-label="Kontrol gerak">
-                    {['up', 'left', 'down', 'right'].map((d, i) => (
-                      <button
-                        key={d}
-                        className={d}
-                        aria-label={`Move ${d}`}
-                        onPointerDown={(e) => {
-                          e.currentTarget.setPointerCapture(e.pointerId);
-                          setControls({ [d]: true });
-                        }}
-                        onPointerUp={() => setControls({})}
-                        onPointerCancel={() => setControls({})}
-                      >
-                        {['↑', '←', '↓', '→'][i]}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="game-bottom">
-              <span>
-                <kbd>W A S D</kbd> / <kbd>↑ ↓ ← →</kbd> move{' '}
-                <span className="desktop-hint">
-                  · <kbd>E</kbd> interact
-                </span>
-              </span>
-              <span>
-                Click or tap to walk <span className="tiny-diamond">◆</span>{' '}
-                Take your time.
-              </span>
-            </div>
+          <World
+            character={character}
+            playing={phase === 'playing'}
+            paused={!!panel || phase !== 'playing'}
+            controls={controls}
+            onNear={setNear}
+            onVisit={visit}
+            reducedMotion={reduced}
+            onPosition={setPosition}
+            destination={destination}
+          />
+        </Suspense>
+      </main>
+      {phase === 'landing' && (
+        <div className="title-screen">
+          <div className="title-kicker">
+            FULL STACK DEVELOPER
+            <br />
+            AN INTERACTIVE PORTFOLIO
           </div>
-        </section>
-        <section className="destinations" id="destinations">
-          <div className="destination-heading">
-            <span className="eyebrow">A FEW PLACES TO START</span>
-            <span>
-              Explore by foot. Or take a shortcut. <ArrowRight size={14} />
+          <div className="title-center">
+            <span className="title-edition">
+              WELCOME TO MY LITTLE CORNER OF THE INTERNET
             </span>
+            <h1>
+              REVAN
+              <br />
+              <span>ZHAFRAN</span>
+            </h1>
+            <div className="title-rule">
+              <i />
+              PORTFOLIO
+              <i />
+            </div>
+            <button className="play-button" onClick={() => setPhase('intro')}>
+              PLAY <ArrowRight size={24} />
+            </button>
+            {saved && (
+              <button className="continue-button" onClick={enter}>
+                CONTINUE YOUR ADVENTURE →
+              </button>
+            )}
           </div>
-          <nav className="destination-grid" aria-label="Portfolio locations">
-            {LOCATIONS.map((l, i) => (
-              <button key={l.id} onClick={() => visit(l.id)}>
-                <span className="destination-number">0{i + 1}</span>
-                <span>
-                  <strong>{l.name}</strong>
-                  <small>{l.subtitle}</small>
-                </span>
-                <span className="destination-arrow">
-                  {visited.includes(l.id) ? '✓' : '↗'}
-                </span>
+          <div className="title-bottom">
+            <span>No time to explore?</span>
+            <button onClick={() => visit('projects')}>View projects ↗</button>
+            <a href={data.profile.linkedin} target="_blank" rel="noreferrer">
+              LinkedIn ↗
+            </a>
+          </div>
+          <span className="world-credit">
+            AN ORIGINAL PIXEL WORLD / REVAN · 2026
+          </span>
+        </div>
+      )}
+      {phase === 'playing' && (
+        <>
+          <header className="city-header">
+            <button
+              className="game-logo"
+              onClick={() => setPhase('landing')}
+              aria-label="Return to title screen"
+            >
+              REVAN<span>ZHAFRAN</span>
+              <small>— PORTFOLIO —</small>
+            </button>
+            <div className="hud-tools">
+              <button
+                className="hud-icon"
+                aria-label="World map"
+                onClick={() => setPanel('map')}
+              >
+                <Map size={20} />
+              </button>
+              <button
+                className="hud-icon"
+                aria-label="Pengaturan"
+                onClick={() => setPanel('settings')}
+              >
+                <Settings size={20} />
+              </button>
+            </div>
+          </header>
+          <div className="exploration-status">
+            <span className="status-dot" />{' '}
+            {visited.length === 5
+              ? 'CITY EXPLORER · COMPLETE'
+              : `${visited.length} / 5 PLACES DISCOVERED`}
+          </div>
+          <div className="city-help">
+            <kbd>W A S D</kbd>
+            <span>or arrows to walk</span>
+            <kbd>E</kbd>
+            <span>to interact</span>
+            <small>Click anywhere on a clear path to move.</small>
+          </div>
+          <button
+            className="minimap-button"
+            aria-label="Open city map"
+            onClick={() => setPanel('map')}
+          >
+            <WorldMap position={position} visited={visited} />
+            <span>
+              <Map size={12} /> CITY MAP <span>↗</span>
+            </span>
+          </button>
+          {near && (
+            <div className="city-interaction">
+              <button onClick={() => visit(near.id)}>
+                <kbd>E</kbd> Explore {near.name} <ArrowRight size={15} />
+              </button>
+            </div>
+          )}
+          <nav
+            id="city-navigation"
+            className="city-navigation"
+            aria-label="Portfolio navigation"
+          >
+            {[
+              ['about', 'About me'],
+              ['experience', 'Resume'],
+              ['projects', 'Projects'],
+              ['skills', 'Technologies'],
+              ['guestbook', 'Guestbook'],
+              ['contact', 'Contact'],
+            ].map(([id, label]) => (
+              <button key={id} onClick={() => visit(id)}>
+                {label}
+                {visited.includes(id) && <span>✓</span>}
               </button>
             ))}
           </nav>
-        </section>
-        <section className="closing-note">
-          <span className="pixel-flower">✿</span>
-          <p>
-            A portfolio is a collection of work.
-            <br />
-            <strong>This one is a place you can visit.</strong>
-          </p>
-          <button className="button" onClick={() => visit('guestbook')}>
-            <BookOpen size={16} /> Sign the guestbook
-          </button>
-        </section>
-      </main>
-      <footer>
-        <span>
-          © {new Date().getFullYear()} {data.profile.name}
-        </span>
-        <span>Made with code, coffee & a little imagination.</span>
-        <a
-          href={data.profile.github}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Revan di GitHub"
-        >
-          <CodeXml size={18} />
-        </a>
-      </footer>
+          <div className="city-dpad" aria-label="Movement controls">
+            {['up', 'left', 'down', 'right'].map((d, i) => (
+              <button
+                key={d}
+                className={d}
+                aria-label={`Move ${d}`}
+                onPointerDown={(e) => {
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  setControls({ [d]: true });
+                }}
+                onPointerUp={() => setControls({})}
+                onPointerCancel={() => setControls({})}
+              >
+                {['↑', '←', '↓', '→'][i]}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
       <Modal
         open={phase === 'intro'}
         onOpenChange={(v) => {
@@ -591,11 +484,24 @@ export default function App() {
         }}
         title={TITLES[panel] || 'Field notes'}
       >
-        {panel === 'settings' ? (
+        {panel === 'map' ? (
+          <WorldMap
+            large
+            position={position}
+            visited={visited}
+            onTravel={(id) => {
+              setDestination({ id, stamp: Date.now() });
+              setPanel(null);
+              setPhase('playing');
+              setControls({});
+              setTimeout(() => stage.current?.focus(), 0);
+            }}
+          />
+        ) : panel === 'settings' ? (
           <div className="settings-list">
             <label>
               <span>
-                <strong>Village soundtrack</strong>
+                <strong>City soundtrack</strong>
                 <small>A quiet, original melody. Off by default.</small>
               </span>
               <input
@@ -629,8 +535,8 @@ export default function App() {
               Change character <ArrowRight size={16} />
             </button>
             <div className="note">
-              <Map size={18} /> Everything is also accessible from the five
-              location buttons below the world.
+              <Map size={18} /> Every section is also accessible from the
+              portfolio navigation at the bottom of the screen.
             </div>
           </div>
         ) : (
