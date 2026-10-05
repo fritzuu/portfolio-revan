@@ -1,0 +1,177 @@
+{
+  "profile": {
+    "name": "Revan Alifian Zhafran",
+    "role": "Full Stack Developer",
+    "bio": "A developer driven by curiosity and the pursuit of elegant solutions. I build intuitive user interfaces and robust backend systems.",
+    "email": "revanalifiandev@gmail.com",
+    "github": "https://github.com/fritzuu",
+    "linkedin": "https://www.linkedin.com/in/revanzhafran/",
+    "whatsapp": "https://wa.me/6285641631620",
+    "cv": "/CV_RevanZhafran_FullStackDev.pdf"
+  },
+  "projects": [
+    {
+      "title": "Image Compression",
+      "desc": "A fast and efficient image compression tool built with React JS and Vite. Hosted on Vercel.",
+      "tags": ["React JS", "Vite", "Vercel"],
+      "img": "/image.png",
+      "imgAlt": "Image Compression App",
+      "demoLink": "https://image-compressor-wheat.vercel.app/",
+      "codeLink": "https://github.com/fritzuu/svdproject-reactjs.git",
+      "demoLabel": "Live Demo"
+    },
+    {
+      "title": "Lyrictify",
+      "desc": "A macOS menu bar application built with Swift that fetches lyrics, shows your Spotify queue, and displays currently playing tracks directly in the top bar.",
+      "tags": ["Swift", "macOS", "Spotify API"],
+      "img": "/LYRICTIFY.png",
+      "imgAlt": "Lyrictify macOS App",
+      "demoLink": null,
+      "codeLink": "https://github.com/fritzuu/Lyrictify",
+      "demoLabel": "View"
+    },
+    {
+      "title": "Cashflow Management (UMKM)",
+      "desc": "A cashflow management application designed specifically for a Kue Bolu Kukus to help track income, monitor expenses, and manage financial health. also included with Gemini AI as personal assistant for user to ask any question related to finance or how to manage their business",
+      "tags": ["Next.js", "Tailwind", "PostgreSQL", "Supabase", "Gemini API"],
+      "img": "/legitbites.png",
+      "imgAlt": "Cashflow Management App",
+      "demoLink": "https://legitbites-cashflow-deployment-ej2y1as9d-fritzuus-projects.vercel.app/login",
+      "codeLink": "https://github.com/BufuMabufu/legitbites-cashflow-management",
+      "demoLabel": "Demo"
+    }
+  ],
+  "skills": [
+    {
+      "icon": "web",
+      "title": "Frontend",
+      "tags": [
+        "HTML/CSS",
+        "JavaScript",
+        "Tailwind CSS",
+        "React",
+        "Next.JS",
+        "Swift",
+        "Java Swing",
+        "Vue.JS"
+      ]
+    },
+    {
+      "icon": "dns",
+      "title": "Backend",
+      "tags": ["PHP", "Laravel", "Node.js"]
+    },
+    {
+      "icon": "storage",
+      "title": "Database",
+      "tags": ["MySQL", "PostgreSQL", "Supabase", "Firebase"]
+    },
+    {
+      "icon": "build",
+      "title": "Tools & AI",
+      "tags": [
+        "Git",
+        "Figma",
+        "Docker",
+        "VS Code",
+        "Python",
+        "Gemini API",
+        "Rest API"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "role": "Fullstack Developer",
+      "company": "UGM Vocational State School",
+      "period": "June 2023 – Jan 2024",
+      "icon": "code",
+      "points": [
+        "Optimized the responsive layout of the RumahEpsTopik website for seamless accessibility on mobile and desktop, enhancing user experience and ensuring a functional design across various screen sizes.",
+        "Worked as a Backend Developer managing land, forest, and soil data for the KPH website, focusing on backend development, database optimization, and integrating data management functionalities for efficient data handling."
+      ]
+    },
+    {
+      "role": "OC Financial Logistic IGV Summer",
+      "company": "AIESEC",
+      "period": "Jan 2025 – Aug 2025",
+      "icon": "account_balance",
+      "points": [
+        "Directed the overall financial planning and budget allocation for the Incoming Global Volunteer (iGV) project, ensuring all funds were utilized efficiently.",
+        "Coordinated end-to-end logistical requirements for international exchange participants, prioritizing safe and comfortable accommodations."
+      ]
+    },
+    {
+      "role": "OC President IGV Winter",
+      "company": "AIESEC",
+      "period": "Aug 2025 – Jan 2026",
+      "icon": "groups",
+      "points": [
+        "Directed and managed a cross-functional Organizing Committee to successfully execute the Incoming Global Volunteer (iGV) project.",
+        "Facilitated strategic partnerships and maintained strong communications with external stakeholders, including local NGOs, sponsors, and community partners.",
+        "Acted as the primary liaison and problem-solver during operational crises, ensuring the safety and satisfaction of international exchange participants."
+      ]
+    }
+  ],
+  "certificates": [
+    {
+      "icon": "verified_user",
+      "title": "BNSP Full Stack Developer",
+      "issuer": "LSP Teknologi Digital",
+      "issued": "May 2024",
+      "link": "/Sertif-bnsp-revan.pdf"
+    },
+    {
+      "icon": "school",
+      "title": "Full Stack Web Development",
+      "issuer": "Universitas Gadjah Mada",
+      "issued": "July 2023",
+      "link": "/Sertifikat-magang-ugm.pdf"
+    },
+    {
+      "icon": "workspace_premium",
+      "title": "Asisten Junior Web Developer",
+      "issuer": "PT Abad Jaya Senantiasa",
+      "issued": "May 2024",
+      "link": "/Sertifikat_kompetensi_asisten_junior_web_dev.pdf"
+    }
+  ],
+  "services": [
+    {
+      "icon": "web",
+      "title": "Frontend Development",
+      "desc": "Building responsive, modern, and pixel-perfect user interfaces using React, Next.js, Vue.js, and Tailwind CSS. Focused on performance, accessibility, and seamless UX across all devices.",
+      "tags": ["React", "Next.js", "Vue.js", "Tailwind CSS", "Swift"]
+    },
+    {
+      "icon": "dns",
+      "title": "Backend Development",
+      "desc": "Developing robust server-side applications and RESTful APIs with Laravel, Node.js, and PHP. Including authentication, role-based access control, and efficient data handling.",
+      "tags": ["Laravel", "Node.js", "PHP", "REST API"]
+    },
+    {
+      "icon": "storage",
+      "title": "Database & Cloud",
+      "desc": "Designing and managing scalable databases with MySQL, PostgreSQL, Supabase, and Firebase. Expertise in schema design, query optimization, and real-time data sync.",
+      "tags": ["MySQL", "PostgreSQL", "Supabase", "Firebase"]
+    },
+    {
+      "icon": "smart_toy",
+      "title": "AI Integration",
+      "desc": "Integrating AI-powered features into web applications using Gemini API and other AI services. Building intelligent assistants, content generation, and smart automation.",
+      "tags": ["Gemini API", "Python", "AI Chatbots"]
+    },
+    {
+      "icon": "devices",
+      "title": "Full Stack Solutions",
+      "desc": "End-to-end development from concept to deployment. Building complete web applications with modern architectures, deployed on platforms like Vercel for optimal performance.",
+      "tags": ["Full Stack", "Vercel", "Docker", "Git"]
+    },
+    {
+      "icon": "design_services",
+      "title": "UI/UX & Prototyping",
+      "desc": "Crafting intuitive and visually appealing interfaces with Figma. Translating wireframes and designs into production-ready code with attention to modern design trends.",
+      "tags": ["Figma", "Prototyping", "Responsive Design"]
+    }
+  ]
+}

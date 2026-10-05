@@ -1,10 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00D1FF" />
-      <stop offset="100%" stop-color="#004A5C" />
-    </linearGradient>
-  </defs>
-  <rect width="100" height="100" rx="24" fill="url(#grad)" />
-  <text x="50" y="54" font-family="system-ui, -apple-system, sans-serif" font-size="46" font-weight="800" fill="#ffffff" text-anchor="middle" dominant-baseline="middle" letter-spacing="-2">&lt;&gt;</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="4" fill="#355a43"/><path d="M8 24V10h5v3h3v-3h7v5h-7v3h-3v6z" fill="#ecd59b"/></svg>
