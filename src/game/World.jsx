@@ -169,17 +169,15 @@ export default function World({
           }
           move(actor, dx, dy, delta, speed) {
             const length = Math.hypot(dx, dy);
-            let moved = 0;
+            const before = { x: actor.image.x, y: actor.image.y };
             if (length) {
               const step = Math.min(delta, 40) * speed;
               const x = actor.image.x + (dx / length) * step,
                 y = actor.image.y + (dy / length) * step;
               if (!isBlocked(x, actor.image.y)) {
-                moved += Math.abs(x - actor.image.x);
                 actor.image.x = x;
               }
               if (!isBlocked(actor.image.x, y)) {
-                moved += Math.abs(y - actor.image.y);
                 actor.image.y = y;
               }
               actor.direction =
@@ -191,7 +189,7 @@ export default function World({
                     ? 'down'
                     : 'up';
             }
-            moved = Math.hypot(
+            const moved = Math.hypot(
               actor.image.x - before.x,
               actor.image.y - before.y,
             );
