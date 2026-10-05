@@ -50,16 +50,50 @@ Every location is also reachable through keyboard-accessible navigation buttons 
 src/App.jsx                       Website, cutscene/creation flow, progress
 src/game/World.jsx                Phaser scene and game lifecycle
 src/game/art.js                   Original pixel map and avatar drawing
+src/game/layout.js                Authored districts, scenery colliders, NPC circuits
 src/game/navigation.js           Collision geometry and A* route finding
 src/components/Cutscene.jsx       Fullscreen animated story and dialogue
 src/hooks/useMusic.js             Original layered chiptune soundtrack
 src/components/WorldMap.jsx       Live minimap and walking-route atlas
+src/components/FishingHub.jsx     Backpack, journal, sales and tackle shop
+src/components/FishingGame.jsx    Cast, bite and interactive reeling game
+src/fishing/catalog.js            20 original creatures and 3 rods
+src/fishing/sprites.js            Original pixel creature artwork
+src/fishing/engine.js             Local economy, rarity selection, save validation
+src/hooks/useFishing.js           Browser-only fishing persistence
 src/components/PortfolioContent.jsx  Portfolio panels and message forms
 src/components/Admin.jsx          Protected content editor, moderation, inbox
 src/data/portfolio.json           Original template content; initial database seed
 server/app.js                     API, validation, authentication, SQLite schema
 server/index.js                   Production/development server entry point
 ```
+
+## Moonwater fishing
+
+The hand-authored town has a northern portfolio district, central Curiosity Square, an eastern reading garden, and a western lake with a walkable wooden dock. Fifteen residents follow six long circuits, pause at destinations, yield to the traveler, and sometimes sit on benches. Mira keeps the tackle stall open.
+
+Use **Go fishing** to walk to Moonwater Dock. Cast a line, watch for the dipping float, then **Space / tap** to strike. During reeling, hold Space or the on-screen button to raise the net; release to lower it. Left/right arrow keys and tap buttons make small adjustments. Keep the creature marker inside the net until the catch meter fills. Rare creatures move faster and need more precise tracking. OS reduced-motion settings slow the tracking and widen the net. Switching tabs pauses the fishing timer.
+
+Catches enter the backpack. Select sale quantities and review the total before confirming, or review all unlocked catches together. Inspect individual catches to lock favorites. Selling never removes journal discoveries. Mira’s Tackle Shop sells rod upgrades and lets you equip owned rods.
+
+| Rod        |                 Price | Luck |
+| ---------- | --------------------: | ---: |
+| Twigline   | Free, owned initially |   0% |
+| Moonthread |              40 coins | +15% |
+| Astralhook |             150 coins | +40% |
+
+| Rarity    | Base weight |  Sale value |
+| --------- | ----------: | ----------: |
+| Common    |         60% |   1–3 coins |
+| Uncommon  |         25% |   4–7 coins |
+| Rare      |         10% | 10–15 coins |
+| Epic      |          4% | 25–40 coins |
+| Legendary |       0.99% |    75 coins |
+| Mythic    |       0.01% |   200 coins |
+
+There are 20 individually drawn fantasy creatures. Discover 12 species to unlock **Astral Crossing**, the only spot where The Unwritten can appear. An eligible crossing cast with Twigline has a 0.01% Mythic selection chance; a successful minigame is still required. Luck multiplies Rare-and-above weights by 1.15 or 1.4, then normalizes all weights. The regular dock excludes Mythic and normalizes the remaining weights. There is no guaranteed catch or pity counter.
+
+All fishing progress is stored **only in this browser** under localStorage key `revan-fishing-v1`: coins, individual catches, favorite locks, journal records, rods and equipped rod. No fishing API, database migration, login, or server setup is needed. Corrupt saves reset safely. If storage is blocked or full, the interface explains that progress is temporary. The backpack is capped at 3,000 catches. Settings offers an explicitly confirmed fishing reset; portfolio progress remains separate. Clearing browser storage removes fishing progress. Closing a fishing panel ends its unfinished cast.
 
 ## Backend
 
@@ -88,7 +122,7 @@ npm run build
 npm run format:check
 ```
 
-API integration tests use isolated databases and verify moderation, private contact persistence, validation, rate limiting, protected content edits, and persistence after restart. Navigation tests check every solid prop, all building-to-building routes, and recovery when clicking blocked scenery. Browser checks cover the story/creator flow, automatic walking and arrival panels, quest collapse, and responsive layout.
+API integration tests use isolated databases and verify moderation, private contact persistence, validation, rate limiting, protected content edits, and persistence after restart. Navigation tests check every solid prop, all portfolio/fishing routes, and every NPC circuit. Fishing tests check economy transactions, favorite locks, duplicate catches, rod ownership, corruption recovery, probability weighting, Mythic eligibility and successful/failed tracking. Browser checks cover the story/creator flow, automatic walking and arrival panels, quest collapse, and responsive layout.
 
 ## Production
 

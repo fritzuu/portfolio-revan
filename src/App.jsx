@@ -8,7 +8,17 @@ import {
 } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useReducedMotion } from 'framer-motion';
-import { ArrowRight, Map, Settings, X } from 'lucide-react';
+import {
+  ArrowRight,
+  Map,
+  Settings,
+  X,
+  Fish,
+  Backpack,
+  BookOpen,
+  ShoppingBag,
+  Coins,
+} from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import seed from './data/portfolio.json';
@@ -16,14 +26,22 @@ import { LOCATIONS, OUTFITS, SKINS } from './game/art';
 import PixelCharacter from './components/PixelCharacter';
 import Cutscene from './components/Cutscene';
 import useMusic from './hooks/useMusic';
+import useFishing from './hooks/useFishing';
 import WorldMap from './components/WorldMap';
 import PortfolioContent, { api } from './components/PortfolioContent';
 import Admin from './components/Admin';
+const FishingHub = lazy(() => import('./components/FishingHub'));
+const FISHING_PANELS = ['fishing', 'rift', 'backpack', 'journal', 'shop'];
 const World = lazy(() => import('./game/World'));
 const cn = (...inputs) => twMerge(clsx(inputs));
 const DEFAULT = { gender: 'male', outfit: 0, skin: 0 };
 const TITLES = {
   map: 'Explore Revan’s city.',
+  fishing: 'Moonwater Angler’s Club.',
+  rift: 'The other side of the water.',
+  backpack: 'Your little collection.',
+  journal: 'A field guide to wonder.',
+  shop: 'Mira’s Tackle Shop.',
   about: 'A little about me.',
   projects: 'Made with curiosity.',
   skills: 'My inventory.',
@@ -78,10 +96,14 @@ export default function App() {
   const [saved] = useState(readSave),
     [character, setCharacter] = useState(saved?.character || DEFAULT),
     [visited, setVisited] = useState(saved?.visited || []);
-  const [position, setPosition] = useState({ x: 770, y: 520 });
+  const fishing = useFishing();
+  const [resetFishing, setResetFishing] = useState(false);
+  const [position, setPosition] = useState({ x: 800, y: 545 });
   const [destination, setDestination] = useState(null);
   const [travel, setTravel] = useState(null);
-  const [questsOpen, setQuestsOpen] = useState(() => window.innerWidth > 760);
+  const [questsOpen, setQuestsOpen] = useState(
+    () => window.innerWidth > 760 && window.innerHeight > 650,
+  );
   const [phase, setPhase] = useState('landing'),
     [panel, setPanel] = useState(null),
     [near, setNear] = useState(null),
@@ -260,6 +282,13 @@ export default function App() {
               <small>— PORTFOLIO —</small>
             </button>
             <div className="hud-tools">
+              <span
+                className="hud-coins"
+                aria-label={`${fishing.state.coins} fishing coins`}
+              >
+                <Coins size={16} />
+                {fishing.state.coins}
+              </span>
               <button
                 className="hud-icon"
                 aria-label="World map"
@@ -276,6 +305,27 @@ export default function App() {
               </button>
             </div>
           </header>
+          <nav className="angler-tools" aria-label="Angler tools">
+            {[
+              ['fishing', 'Go fishing', Fish],
+              ['backpack', 'Backpack', Backpack],
+              ['journal', 'Fish journal', BookOpen],
+              ['shop', 'Tackle shop', ShoppingBag],
+            ].map(([id, label, Icon]) => (
+              <button
+                key={id}
+                onClick={() =>
+                  ['fishing', 'shop'].includes(id) ? walkTo(id) : visit(id)
+                }
+              >
+                <Icon size={17} />
+                {label}
+                {id === 'backpack' && fishing.state.items.length > 0 && (
+                  <span>{fishing.state.items.length}</span>
+                )}
+              </button>
+            ))}
+          </nav>
           <aside
             className={cn('quest-panel', !questsOpen && 'collapsed')}
             aria-label="City quests"
@@ -498,8 +548,24 @@ export default function App() {
           if (!v) setPanel(null);
         }}
         title={TITLES[panel] || 'Field notes'}
+        className={FISHING_PANELS.includes(panel) ? 'fishing-modal' : undefined}
       >
-        {panel === 'map' ? (
+        {FISHING_PANELS.includes(panel) ? (
+          <Suspense
+            fallback={
+              <p className="fishing-loading">Opening your little adventure…</p>
+            }
+          >
+            <FishingHub
+              view={panel}
+              fishing={fishing}
+              character={character}
+              reduced={reduced}
+              onView={setPanel}
+              onGoFishing={walkTo}
+            />
+          </Suspense>
+        ) : panel === 'map' ? (
           <WorldMap
             large
             position={position}
@@ -545,6 +611,43 @@ export default function App() {
             >
               Change character <ArrowRight size={16} />
             </button>
+            <div className="fishing-reset">
+              <strong>Fishing progress</strong>
+              <p>
+                Backpack, coins and rods are saved in this browser. Clearing
+                browser storage removes them.
+              </p>
+              {!resetFishing ? (
+                <button
+                  className="button"
+                  onClick={() => setResetFishing(true)}
+                >
+                  Reset fishing progress
+                </button>
+              ) : (
+                <div className="reset-confirm">
+                  <p>
+                    Reset your coins, catches, journal and rod upgrades?
+                    Portfolio discoveries stay intact.
+                  </p>
+                  <button
+                    className="button"
+                    onClick={() => setResetFishing(false)}
+                  >
+                    Keep my progress
+                  </button>
+                  <button
+                    className="button"
+                    onClick={() => {
+                      fishing.dispatch({ type: 'reset' });
+                      setResetFishing(false);
+                    }}
+                  >
+                    Confirm fishing reset
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="note">
               <Map size={18} /> Every section is also accessible from the
               portfolio navigation at the bottom of the screen.

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { drawWorld, LOCATIONS, WORLD_SIZE } from '../game/art';
+import { drawWorld, DESTINATIONS, WORLD_SIZE } from '../game/art';
 export default function WorldMap({
   position,
   visited,
@@ -21,7 +21,7 @@ export default function WorldMap({
     const c = canvas.current.getContext('2d');
     c.clearRect(0, 0, 400, 275);
     if (base.current) c.drawImage(base.current, 0, 0);
-    for (const l of LOCATIONS) {
+    for (const l of DESTINATIONS) {
       c.fillStyle = visited.includes(l.id) ? '#bdf199' : '#fff0be';
       c.fillRect(l.doorX / 4 - 4, l.doorY / 4 - 4, 8, 8);
     }
@@ -46,13 +46,13 @@ export default function WorldMap({
         width={400}
         height={275}
         role="img"
-        aria-label="City map with your position and five portfolio destinations"
+        aria-label="City map with your position and portfolio and fishing destinations"
       />
       {large && (
         <>
           <p className="map-legend">● You are here · ◆ Portfolio locations</p>
           <div className="atlas-locations">
-            {LOCATIONS.map((l) => (
+            {DESTINATIONS.map((l) => (
               <button
                 key={l.id}
                 className="button"

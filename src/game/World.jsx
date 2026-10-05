@@ -3,10 +3,11 @@ import {
   drawWorld,
   drawCharacter,
   drawProp,
-  LOCATIONS,
+  DESTINATIONS,
   PROPS,
   WORLD_SIZE,
 } from './art';
+import { NPC_COUNT, NPC_ROUTES } from './layout';
 import { findPath, isBlocked } from './navigation';
 
 export default function World({
@@ -67,39 +68,58 @@ export default function World({
                 .setOrigin(0)
                 .setDepth(p.y + 12);
             });
-            this.player = this.makeActor('visitor', 770, 520, character, 1.25);
-            this.npcs = LOCATIONS.map((l, i) => {
+            this.player = this.makeActor('visitor', 800, 545, character, 1.25);
+            this.npcs = Array.from({ length: NPC_COUNT }, (_, i) => {
+              const route = NPC_ROUTES[i % NPC_ROUTES.length],
+                stop = Math.floor(i / NPC_ROUTES.length) % route.length,
+                point = route[stop];
               const actor = this.makeActor(
                 `npc-${i}`,
-                l.doorX + 50,
-                Math.min(l.doorY + 65, WORLD_SIZE.height - 50),
+                point.x,
+                point.y,
                 {
-                  outfit: (i + 1) % 4,
+                  outfit: i % 4,
                   skin: i % 3,
                   gender: i % 2 ? 'female' : 'male',
                 },
-                1.15,
+                1.1,
               );
-              actor.home = { x: actor.image.x, y: actor.image.y };
-              actor.nextMove = i * 650 + 900;
-              actor.patrol = 0;
-              actor.label = this.add
-                .text(
-                  actor.image.x,
-                  actor.image.y - 52,
-                  i === 0 ? 'Revan' : '…',
-                  {
+              actor.route = route;
+              actor.patrol = stop + 1;
+              actor.nextMove = 600 + i * 220;
+              actor.resident = true;
+              actor.speed = 0.07 + (i % 4) * 0.008;
+              actor.index = i;
+              if (i === 0)
+                actor.label = this.add
+                  .text(point.x, point.y - 48, 'Revan', {
                     fontFamily: 'monospace',
                     fontSize: '10px',
                     color: '#fff5d7',
                     backgroundColor: '#384a43',
                     padding: { x: 5, y: 3 },
-                  },
-                )
-                .setOrigin(0.5);
+                  })
+                  .setOrigin(0.5);
               return actor;
             });
-            LOCATIONS.forEach((l) => {
+            this.merchant = this.makeActor(
+              'merchant',
+              565,
+              915,
+              { outfit: 0, skin: 1, gender: 'female' },
+              1.15,
+            );
+            this.merchant.label = this.add
+              .text(565, 866, 'Mira · Tackle', {
+                fontFamily: 'monospace',
+                fontSize: '9px',
+                color: '#fff5d7',
+                backgroundColor: '#384a43',
+                padding: { x: 4, y: 3 },
+              })
+              .setOrigin(0.5)
+              .setDepth(916);
+            DESTINATIONS.forEach((l) => {
               const marker = this.add
                 .rectangle(l.doorX, l.doorY + 27, 9, 9, 0xf0d49b, 0.8)
                 .setAngle(45)
@@ -235,7 +255,21 @@ export default function World({
               actor.path.shift();
               return;
             }
-            this.move(actor, dx, dy, Math.min(delta, d / speed), speed);
+            let sx = dx / d,
+              sy = dy / d;
+            if (actor.resident) {
+              for (const other of this.npcs) {
+                if (other === actor) continue;
+                const ox = actor.image.x - other.image.x,
+                  oy = actor.image.y - other.image.y,
+                  dist = Math.hypot(ox, oy);
+                if (dist > 0 && dist < 27) {
+                  sx += ((ox / dist) * (27 - dist)) / 27;
+                  sy += ((oy / dist) * (27 - dist)) / 27;
+                }
+              }
+            }
+            this.move(actor, sx, sy, Math.min(delta, d / speed), speed);
           }
           update(time, delta) {
             const dest = live.current.destination;
@@ -245,7 +279,7 @@ export default function World({
             }
             if (dest && dest.stamp !== this.lastDestination) {
               this.lastDestination = dest.stamp;
-              const l = LOCATIONS.find((l) => l.id === dest.id);
+              const l = DESTINATIONS.find((l) => l.id === dest.id);
               if (l) {
                 this.player.path = findPath(this.player.image, {
                   x: l.doorX,
@@ -257,36 +291,79 @@ export default function World({
             }
             if (live.current.paused) return;
             this.npcs.forEach((npc, i) => {
-              if (!npc.path.length && time > npc.nextMove) {
-                const offsets = [
-                    [55, 0],
-                    [35, 45],
-                    [-65, 38],
-                    [0, 0],
-                  ],
-                  offset = offsets[npc.patrol++ % 4];
-                npc.path = findPath(npc.image, {
-                  x: npc.home.x + offset[0],
-                  y: npc.home.y + offset[1],
-                });
-                npc.nextMove = time + 3500 + i * 200;
+              if (npc.sittingUntil) {
+                if (time < npc.sittingUntil) return;
+                npc.image.setPosition(
+                  npc.resumePosition.x,
+                  npc.resumePosition.y,
+                );
+                npc.sittingUntil = null;
+                npc.frame = -1;
+                npc.nextMove = time + 400;
               }
-              // Residents politely stop when the traveler is in front of them.
+              if (!npc.path.length && npc.pendingSeat) {
+                const bench = npc.pendingSeat;
+                npc.pendingSeat = null;
+                npc.resumePosition = { x: npc.image.x, y: npc.image.y };
+                npc.sittingUntil = time + 3200 + (i % 3) * 600;
+                npc.image
+                  .setPosition(bench.x + 36, bench.y + 28)
+                  .setDepth(bench.y + 30);
+                npc.texture.context.clearRect(0, 0, 32, 36);
+                drawCharacter(npc.texture.context, 0, 0, npc.config, 0, 'down');
+                npc.texture.context.clearRect(0, 29, 32, 7);
+                npc.texture.refresh();
+                return;
+              }
+              if (!npc.path.length && time > npc.nextMove) {
+                let target = npc.route[npc.patrol++ % npc.route.length];
+                const bench =
+                  i % 3 === 0
+                    ? PROPS.find(
+                        (p) =>
+                          p.type === 'bench' &&
+                          Math.hypot(p.x + 36 - target.x, p.y + 44 - target.y) <
+                            75,
+                      )
+                    : null;
+                if (bench) {
+                  target = { x: bench.x + 36, y: bench.y + 44 };
+                  npc.pendingSeat = bench;
+                }
+                npc.path = findPath(npc.image, target);
+                npc.nextMove = time + 900 + (i % 4) * 450;
+              }
               if (
                 Math.hypot(
                   npc.image.x - this.player.image.x,
                   npc.image.y - this.player.image.y,
-                ) > 38
-              )
-                this.followPath(npc, delta, 0.055);
-              else this.move(npc, 0, 0, delta, 0);
+                ) < 35
+              ) {
+                const choices = [
+                  { x: npc.image.x + 28, y: npc.image.y + 12 },
+                  { x: npc.image.x - 28, y: npc.image.y - 12 },
+                ];
+                const side = choices.find(
+                  (p) =>
+                    !isBlocked(p.x, p.y) &&
+                    Math.hypot(
+                      p.x - this.player.image.x,
+                      p.y - this.player.image.y,
+                    ) > 42,
+                );
+                if (side && time > (npc.yieldUntil || 0)) {
+                  npc.path.unshift(side);
+                  npc.yieldUntil = time + 1100;
+                }
+              }
+              this.followPath(npc, delta, npc.speed);
             });
             if (!reducedMotion) {
               this.water.clear();
               this.water.fillStyle(0xb3e4de, 0.65);
               for (let i = 0; i < 8; i++) {
-                const y = 606 + ((time * 0.025 + i * 11) % 85);
-                this.water.fillRect(690 + i * 13, y, 5, 1);
+                const y = 614 + ((time * 0.025 + i * 11) % 73);
+                this.water.fillRect(749 + i * 13, y, 5, 1);
               }
             }
             if (!playing) return;
@@ -302,7 +379,7 @@ export default function World({
               this.cancelTravel();
               this.move(this.player, dx, dy, delta, 0.185);
             } else this.followPath(this.player, delta, 0.185);
-            const near = LOCATIONS.find(
+            const near = DESTINATIONS.find(
               (l) =>
                 Math.hypot(
                   this.player.image.x - l.doorX,

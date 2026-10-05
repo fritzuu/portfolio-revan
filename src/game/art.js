@@ -48,142 +48,17 @@ export function drawCharacter(
   r(9, 31 + swing * 2, 7, 3, '#3c302c');
   r(19, 31 - swing * 2, 7, 3, '#3c302c');
 }
-export const WORLD_SIZE = { width: 1600, height: 1100 };
-export const LOCATIONS = [
-  {
-    id: 'about',
-    name: 'About Revan',
-    subtitle: 'Meet the developer',
-    x: 150,
-    y: 230,
-    w: 260,
-    h: 180,
-    doorX: 280,
-    doorY: 410,
-    color: '#b3c9c3',
-  },
-  {
-    id: 'projects',
-    name: 'Project studio',
-    subtitle: 'Things I’ve built',
-    x: 610,
-    y: 230,
-    w: 320,
-    h: 170,
-    doorX: 770,
-    doorY: 400,
-    color: '#ceb78e',
-  },
-  {
-    id: 'skills',
-    name: 'Tech library',
-    subtitle: 'Tools & services',
-    x: 1110,
-    y: 230,
-    w: 280,
-    h: 190,
-    doorX: 1250,
-    doorY: 420,
-    color: '#b4c7bd',
-  },
-  {
-    id: 'experience',
-    name: 'Memory museum',
-    subtitle: 'Experience & certificates',
-    x: 150,
-    y: 820,
-    w: 330,
-    h: 150,
-    doorX: 315,
-    doorY: 970,
-    color: '#cec4b2',
-  },
-  {
-    id: 'contact',
-    name: 'Post & coffee',
-    subtitle: 'Let’s build together',
-    x: 1080,
-    y: 790,
-    w: 300,
-    h: 180,
-    doorX: 1230,
-    doorY: 970,
-    color: '#c7ad91',
-  },
-];
-// Every solid prop shares its visual placement and its foot-level collider.
-export const PROPS = [
-  ...[
-    [72, 315, 1],
-    [485, 280, 1.1],
-    [1020, 310, 1],
-    [1460, 350, 1.2],
-    [542, 545, 0.8],
-    [961, 545, 0.8],
-    [1140, 575, 0.9],
-    [1400, 650, 1],
-    [545, 740, 0.9],
-    [965, 740, 0.9],
-    [60, 950, 1],
-    [550, 1000, 1],
-    [1485, 1000, 1],
-    [1090, 730, 0.8],
-  ].map(([x, y, s]) => ({ type: 'tree', x, y, s })),
-  ...[60, 290, 520, 980, 1210, 1440].map((x) => ({ type: 'bench', x, y: 182 })),
-  ...[
-    [590, 520],
-    [825, 520],
-    [590, 755],
-    [825, 755],
-  ].map(([x, y]) => ({ type: 'bench', x, y })),
-  ...[
-    [145, 202],
-    [375, 202],
-    [605, 202],
-    [1065, 202],
-    [1295, 202],
-    [1525, 202],
-    [610, 575],
-    [845, 575],
-    [610, 810],
-    [845, 810],
-  ].map(([x, y]) => ({ type: 'lamp', x, y })),
-  ...[
-    [1170, 670],
-    [1340, 555],
-  ].map(([x, y]) => ({ type: 'table', x, y })),
-  ...[
-    [1050, 465],
-    [1050, 490],
-    [1400, 870],
-  ].map(([x, y]) => ({ type: 'crate', x, y })),
-  { type: 'board', x: 850, y: 445 },
-];
-export const propBounds = (p) => {
-  const { x, y, s = 1, type } = p;
-  if (type === 'tree')
-    return { x: x - 13 * s, y: y - 8 * s, w: 27 * s, h: 30 * s };
-  if (type === 'bench') return { x, y: y + 2, w: 72, h: 29 };
-  if (type === 'lamp') return { x: x + 5, y: y - 4, w: 16, h: 15 };
-  if (type === 'table') return { x: x - 25, y: y + 9, w: 53, h: 29 };
-  if (type === 'board') return { x, y: y + 20, w: 44, h: 25 };
-  return { x, y, w: 24, h: 20 };
-};
-export const OBSTACLES = [
-  ...LOCATIONS.map((l) => ({
-    x: l.x - 4,
-    y: l.y - 17,
-    w: l.w + 8,
-    h: l.h + 17,
-  })),
-  { x: 0, y: 0, w: 739, h: 171 },
-  { x: 862, y: 0, w: 738, h: 171 },
-  { x: 81, y: 476, w: 398, h: 133 },
-  { x: 180, y: 609, w: 299, h: 37 },
-  { x: 81, y: 646, w: 398, h: 146 },
-  { x: 666, y: 581, w: 154, h: 141 },
-  ...PROPS.map(propBounds),
-];
+export {
+  WORLD_SIZE,
+  LOCATIONS,
+  ACTIVITIES,
+  DESTINATIONS,
+  GARDENS,
+  PROPS,
+  OBSTACLES,
+  propBounds,
+} from './layout.js';
+import { WORLD_SIZE, LOCATIONS, GARDENS, PROPS } from './layout.js';
 export function drawProp(ctx, p) {
   const { x, y, s = 1, type } = p;
   const r = (a, b, w, h, c) => {
@@ -247,6 +122,26 @@ export function drawProp(ctx, p) {
     r(36, 30, 4, 15, '#765c40');
     r(10, 9, 24, 2, '#7c7055');
     r(10, 15, 20, 2, '#7c7055');
+  } else if (type === 'flowers') {
+    r(-15, 0, 30, 13, '#94745a');
+    r(-17, -3, 34, 6, '#bd9973');
+    for (let i = 0; i < 5; i++) {
+      r(-12 + i * 6, -12, 4, 12, '#65804b');
+      r(-14 + i * 6, -15, 7, 6, i % 2 ? '#e6bd69' : '#dc937d');
+      r(-12 + i * 6, -13, 3, 2, '#f7e2aa');
+    }
+  } else if (type === 'stall') {
+    r(-40, -10, 80, 35, '#957048');
+    r(-37, -7, 74, 28, '#bf9860');
+    r(-42, -48, 84, 15, '#e7d8ad');
+    r(-35, -59, 70, 11, '#759b91');
+    for (let i = 0; i < 6; i++) r(-40 + i * 14, -48, 7, 15, '#73958b');
+    r(-38, -33, 4, 25, '#5d675b');
+    r(34, -33, 4, 25, '#5d675b');
+    r(-25, -17, 18, 8, '#648da1');
+    r(8, -18, 14, 9, '#d6bd79');
+    r(-36, 26, 7, 9, '#57645c');
+    r(28, 26, 7, 9, '#57645c');
   } else {
     r(0, 0, 24, 20, '#99744e');
     r(2, 2, 20, 16, '#b79769');
@@ -258,182 +153,169 @@ export function drawProp(ctx, p) {
 export function drawWorld(ctx, { baseOnly = false } = {}) {
   const r = (x, y, w, h, c) => {
     ctx.fillStyle = c;
-    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+    ctx.fillRect(Math.round(x), Math.round(y), w, h);
   };
-  let seed = 176;
-  const random = () => {
-    seed = (seed * 16807) % 2147483647;
-    return seed / 2147483647;
+  const label = (text, x, y, size = 12, color = '#6d766e') => {
+    ctx.fillStyle = color;
+    ctx.font = `bold ${size}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(text, x, y);
+    ctx.textAlign = 'left';
   };
-  r(0, 0, 1600, 1100, '#c0bbaa');
-  // Individually shaded paving stones form a walkable city plaza.
-  for (let y = 170; y < 1100; y += 22)
-    for (let x = -12; x < 1600; x += 32) {
-      const offset = (Math.floor(y / 22) % 2) * 16;
-      const color = ['#c6c1b1', '#bdb8a8', '#c0bbaa', '#cbc5b3'][
-        Math.floor(random() * 4)
-      ];
-      r(x + offset, y, 30, 20, color);
-      r(x + offset, y, 30, 1, '#dad4c0');
-      r(x + offset + 29, y, 1, 20, '#aaa593');
+  r(0, 0, WORLD_SIZE.width, WORLD_SIZE.height, '#d8d0b7');
+  // Quiet pavement: an ordered surface rather than noisy random tiles.
+  for (let y = 174; y < 1100; y += 24)
+    for (let x = -24; x < 1600; x += 48) {
+      const xx = x + ((y / 24) % 2 ? 24 : 0);
+      r(
+        xx,
+        y,
+        46,
+        22,
+        (Math.floor(x / 48) + Math.floor(y / 24)) % 4 ? '#d3ccb6' : '#d9d2bd',
+      );
+      r(xx, y, 46, 1, '#e5ddc8');
     }
-  // A blue river runs along the northern promenade.
+  // Consistent street borders define the main circulation loop.
+  for (const [x, y, w, h] of [
+    [55, 435, 1490, 85],
+    [505, 510, 80, 490],
+    [1015, 510, 80, 490],
+    [55, 995, 1490, 55],
+  ]) {
+    r(x - 3, y - 3, w + 6, h + 6, '#a9b1a3');
+    r(x, y, w, h, '#e8dfc4');
+    for (let yy = y + 8; yy < y + h; yy += 20)
+      r(x + 6, yy, w - 12, 1, '#d9ceb3');
+  }
   function water(x, y, w, h) {
-    r(x, y, w, h, '#348b9c');
-    for (let yy = y; yy < y + h; yy += 8)
-      for (let xx = x; xx < x + w; xx += 12) {
-        r(
-          xx,
-          yy,
-          11,
-          6,
-          ['#348b9c', '#3b94a4', '#2d8396', '#409bac'][
-            Math.floor(random() * 4)
-          ],
-        );
-        if (random() > 0.87) r(xx + 2, yy + 2, 7, 1, '#74b9c2');
+    r(x, y, w, h, '#337f91');
+    for (let yy = y + 4; yy < y + h - 4; yy += 12)
+      for (let xx = x + 4; xx < x + w - 4; xx += 24) {
+        r(xx, yy, 16, 2, (xx + yy) % 3 ? '#4f9dad' : '#428f9f');
+        r(xx + 5, yy + 4, 7, 1, '#6bafba');
       }
   }
   water(0, 0, 1600, 155);
-  r(0, 155, 1600, 9, '#e0dcca');
-  r(0, 164, 1600, 7, '#7d8f8e');
-  r(741, 0, 118, 190, '#546363');
-  r(750, 0, 100, 190, '#d5c8aa');
-  for (let y = 0; y < 190; y += 14) {
-    r(750, y, 100, 2, '#b9aa89');
-    r(752, y + 2, 96, 1, '#e7d9ba');
+  r(0, 155, 1600, 9, '#e6dfc7');
+  r(0, 164, 1600, 7, '#7f9b94');
+  r(740, 0, 120, 191, '#53756c');
+  r(750, 0, 100, 191, '#c6ac80');
+  for (let y = 0; y < 191; y += 14) {
+    r(752, y, 96, 2, '#a78f66');
+    r(752, y + 3, 96, 1, '#dbc393');
   }
-  r(739, 0, 9, 190, '#677f78');
-  r(853, 0, 9, 190, '#677f78');
-  for (let x = 20; x < 1600; x += 18) {
-    if (x > 735 && x < 867) continue;
-    r(x, 141, 3, 22, '#455e5d');
-    r(x, 143, 18, 3, '#516d68');
+  r(740, 0, 8, 191, '#5f7b70');
+  r(852, 0, 8, 191, '#5f7b70');
+  // The rare-fish crossing has a rune circle rather than scattered decorations.
+  r(774, 85, 52, 4, '#7dabb6');
+  r(769, 90, 62, 33, '#558f9e');
+  r(776, 96, 48, 21, '#b8d8cf');
+  r(790, 100, 20, 14, '#709faf');
+  label('ASTRAL CROSSING', 800, 60, 9, '#f0e2bd');
+  for (let x = 22; x < 1600; x += 32) {
+    if (x > 725 && x < 875) continue;
+    r(x, 140, 3, 22, '#526f68');
+    r(x, 143, 32, 3, '#6a8777');
   }
-  // Lawn islands, borders, daisies and small patches of grass.
-  function lawn(x, y, w, h) {
-    r(x + 3, y + 4, w, h, '#858a72');
-    r(x, y, w, h, '#467944');
-    r(x + 5, y + 5, w - 10, h - 10, '#598b4b');
-    for (let i = 0; i < (w * h) / 100; i++) {
-      const xx = x + 7 + random() * (w - 14),
-        yy = y + 7 + random() * (h - 14);
-      r(xx, yy, 2, 3, random() > 0.5 ? '#6b9b56' : '#427b41');
-      if (random() > 0.97) {
-        r(xx - 1, yy, 4, 3, '#efdab5');
-        r(xx, yy + 1, 2, 1, '#d4af57');
+  for (const g of GARDENS) {
+    r(g.x - 4, g.y - 4, g.w + 8, g.h + 8, '#aaa992');
+    r(g.x, g.y, g.w, g.h, '#779968');
+    r(g.x + 4, g.y + 4, g.w - 8, g.h - 8, '#83a476');
+    for (let yy = g.y + 10; yy < g.y + g.h - 5; yy += 17)
+      for (let xx = g.x + 9; xx < g.x + g.w - 5; xx += 19) {
+        r(xx, yy, 2, 3, '#719361');
       }
+  }
+  // West garden lake, with a wide, navigable dock coming from the southern shore.
+  r(85, 530, 400, 335, '#90a69a');
+  r(91, 536, 388, 323, '#eee3c6');
+  water(100, 545, 370, 305);
+  r(238, 727, 124, 156, '#826a4c');
+  r(245, 732, 110, 151, '#c3a574');
+  for (let y = 735; y < 883; y += 13) {
+    r(246, y, 108, 2, '#927856');
+    r(247, y + 3, 106, 1, '#e0c18c');
+  }
+  for (const x of [238, 356])
+    for (const y of [744, 794, 844]) {
+      r(x, y, 7, 30, '#6f6049');
+      r(x - 2, y - 3, 11, 6, '#e8cf95');
     }
-  }
-  lawn(510, 465, 60, 300);
-  lawn(925, 465, 70, 300);
-  lawn(1090, 500, 390, 250);
-  lawn(60, 195, 60, 250);
-  // Rectangular garden lake; tiled banks and a small jetty.
-  r(81, 476, 398, 316, '#6e7f79');
-  r(86, 481, 388, 306, '#e4e0ce');
-  water(95, 490, 370, 290);
-  r(95, 773, 370, 7, '#2b6579');
-  r(60, 609, 120, 37, '#665741');
-  for (let x = 60; x < 180; x += 10) {
-    r(x, 610, 8, 34, '#b99a65');
-    r(x + 1, 613, 2, 28, '#c6aa78');
-  }
+  r(251, 758, 98, 3, '#e7d3a4');
   for (const [x, y] of [
-    [155, 530],
-    [390, 715],
-    [265, 620],
+    [150, 585],
+    [405, 625],
+    [180, 775],
+    [425, 805],
   ]) {
-    r(x, y, 17, 5, '#669b57');
-    r(x + 4, y - 3, 8, 3, '#91b669');
-    r(x + 7, y - 5, 3, 3, '#ddbf80');
+    r(x, y, 24, 6, '#7a9d68');
+    r(x + 7, y - 4, 10, 5, '#aec781');
+    r(x + 11, y - 6, 3, 3, '#edcf87');
   }
-  // A central fountain with stone steps and tiled water.
-  r(668, 588, 154, 140, '#4c62616b');
-  r(666, 581, 154, 141, '#929f96');
-  r(674, 589, 138, 125, '#d2d5bc');
-  water(683, 600, 120, 105);
-  r(702, 632, 82, 24, '#a3b8ad');
-  r(709, 625, 68, 24, '#d5d6bd');
-  r(735, 600, 15, 44, '#a6c0b8');
-  r(727, 597, 32, 7, '#e3dfc6');
-  r(733, 591, 20, 6, '#bacfc4');
-  r(717, 653, 53, 3, '#6d979a');
-  // Shop buildings, roof trim, floor-to-ceiling windows and striped awnings.
+  label('MOONWATER DOCK', 300, 919, 13);
+  label('FISH • SELL • DISCOVER', 300, 938, 9);
+  // A framed plaza; benches share two aligned rows around the fountain.
+  r(680, 560, 240, 173, '#bfbea9');
+  r(687, 567, 226, 159, '#e9dfc1');
+  r(727, 593, 146, 119, '#829d98');
+  r(732, 598, 136, 109, '#e1ddbd');
+  water(741, 607, 118, 91);
+  r(780, 633, 40, 28, '#a4beb7');
+  r(790, 612, 20, 33, '#ced9c0');
+  r(777, 608, 46, 7, '#e4e5c7');
+  r(788, 601, 24, 7, '#afcbc2');
+  label('CURIOSITY SQUARE', 800, 775, 13);
+  label('A LITTLE CITY OF IDEAS', 800, 793, 9);
+  label('THE READING GARDEN', 1260, 770, 12);
   for (const l of LOCATIONS) {
     const { x, y, w, h } = l;
-    r(x + 12, y + 12, w + 5, h + 5, '#35443b55');
+    r(x + 8, y + 8, w, h, '#53645540');
     r(x, y, w, h, l.color);
-    r(x, y - 17, w, 22, '#52615c');
-    r(x + 7, y - 12, w - 14, 7, '#88978a');
-    r(x, y + h - 15, w, 15, '#908e7c');
-    for (let yy = y + 8; yy < y + h - 20; yy += 14)
-      for (let xx = x + 4; xx < x + w; xx += 28) {
-        r(xx + (Math.floor(yy / 14) % 2) * 12, yy, 24, 1, '#ffffff20');
-      }
-    const doorW = 38;
-    r(l.doorX - doorW / 2, y + h - 80, doorW, 80, '#42545a');
-    r(l.doorX - 15, y + h - 75, 30, 68, '#548092');
-    r(l.doorX - 12, y + h - 70, 6, 50, '#78a1ae');
-    r(l.doorX + 8, y + h - 44, 3, 3, '#e1c380');
-    for (let xx = x + 18; xx < x + w - 35; xx += 55) {
-      if (Math.abs(xx - l.doorX) < 40) continue;
-      r(xx, y + 48, 42, h - 78, '#596b70');
-      r(xx + 4, y + 52, 34, h - 87, '#648b9b');
-      r(xx + 8, y + 56, 6, h - 97, '#83a5b0');
-      r(xx + 3, y + h - 48, 36, 4, '#b9c2b5');
-      r(xx + 19, y + 51, 3, h - 85, '#bec6b9');
-      r(xx, y + h - 28, 42, 5, '#d5d5c1');
+    r(x, y - 17, w, 22, '#52665f');
+    r(x + 6, y - 12, w - 12, 6, '#889c87');
+    r(x, y + h - 14, w, 14, '#9e9d87');
+    for (let yy = y + 55; yy < y + h - 17; yy += 16)
+      r(x + 5, yy, w - 10, 1, '#ffffff25');
+    r(l.doorX - 20, y + h - 85, 40, 85, '#486773');
+    r(l.doorX - 16, y + h - 80, 32, 72, '#6f9ca8');
+    r(l.doorX - 12, y + h - 74, 6, 53, '#a1c1c1');
+    r(l.doorX + 9, y + h - 40, 3, 3, '#f6d991');
+    for (const xx of [x + 22, x + 78, x + w - 120, x + w - 64]) {
+      if (Math.abs(xx + 22 - l.doorX) < 45) continue;
+      r(xx, y + 56, 42, h - 85, '#608392');
+      r(xx + 4, y + 60, 34, h - 94, '#83a8b3');
+      r(xx + 8, y + 64, 5, h - 104, '#b7d0ce');
+      r(xx + 20, y + 59, 3, h - 92, '#cad1bd');
+      r(xx - 2, y + h - 28, 46, 5, '#ece1c3');
     }
-    r(x - 4, y + 27, w + 8, 19, '#e6d3ac');
-    for (let xx = x - 4; xx < x + w + 4; xx += 22) {
+    r(x - 4, y + 31, w + 8, 19, '#f1dfb4');
+    for (let xx = x - 4; xx < x + w + 4; xx += 24)
       r(
         xx,
-        y + 27,
-        11,
+        y + 31,
+        12,
         19,
         l.id === 'projects'
-          ? '#c77654'
+          ? '#c98560'
           : l.id === 'contact'
-            ? '#ae6660'
-            : '#62897c',
+            ? '#b77d73'
+            : '#779889',
       );
-    }
-    r(x - 4, y + 45, w + 8, 5, '#425651');
-    r(x + 24, y + 4, w - 48, 21, '#354c48');
-    ctx.fillStyle = '#f5e5bc';
-    ctx.font = 'bold 13px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(l.name.toUpperCase(), x + w / 2, y + 19);
-    ctx.textAlign = 'left';
-    r(l.doorX - 26, l.doorY, 52, 8, '#e2dac0');
-    r(l.doorX - 30, l.doorY + 8, 60, 5, '#aaa48c');
-    for (const xx of [x + 7, x + w - 27]) {
-      r(xx, y + h - 14, 21, 14, '#8d6650');
-      r(xx - 2, y + h - 21, 25, 12, '#476e3c');
-      for (let i = 0; i < 5; i++) {
-        r(
-          xx + i * 4,
-          y + h - 23 + random() * 5,
-          4,
-          4,
-          i % 2 ? '#ddac67' : '#d28577',
-        );
-      }
+    r(x - 4, y + 49, w + 8, 4, '#526b62');
+    r(x + 20, y + 5, w - 40, 23, '#364e48');
+    label(l.name.toUpperCase(), x + w / 2, y + 22, 13, '#f4e5bf');
+    r(l.doorX - 29, l.doorY, 58, 8, '#eee4c7');
+    r(l.doorX - 33, l.doorY + 8, 66, 5, '#b9ae8f');
+    for (const xx of [x + 9, x + w - 28]) {
+      r(xx, y + h - 12, 20, 12, '#ab8060');
+      r(xx - 2, y + h - 20, 24, 10, '#71894e');
+      r(xx + 1, y + h - 23, 5, 5, '#d89b80');
+      r(xx + 11, y + h - 24, 5, 5, '#e8c17f');
     }
   }
+  label('MIRA’S TACKLE', 550, 958, 12);
+  label('A GOOD CATCH HAS A GOOD STORY', 550, 973, 8);
   if (!baseOnly)
     [...PROPS].sort((a, b) => a.y - b.y).forEach((p) => drawProp(ctx, p));
-  r(1155, 1030, 135, 25, '#52625c');
-  ctx.fillStyle = '#e3d8b5';
-  ctx.font = '12px monospace';
-  ctx.fillText('SEND A HELLO →', 1168, 1047);
-  // Architectural floor mosaics add rhythm to the main boulevard.
-  for (let y = 445; y < 1080; y += 40)
-    for (const x of [590, 870]) {
-      r(x, y, 28, 28, '#768f8f');
-      r(x + 3, y + 3, 22, 22, '#8ba3a0');
-      r(x + 7, y + 7, 14, 14, '#7b9696');
-      r(x + 10, y + 10, 8, 8, '#98ada5');
-    }
 }
