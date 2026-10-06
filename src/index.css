@@ -2684,9 +2684,9 @@ textarea::placeholder {
   position: fixed;
   z-index: 25;
   left: 50%;
-  transform: translate(-50%, -50%);
-  top: 50%;
-  bottom: auto;
+  transform: translateX(-50%);
+  top: auto;
+  bottom: 34px;
   width: min(560px, calc(100vw - 32px));
   max-height: 58dvh;
   overflow-y: auto;
@@ -2752,8 +2752,9 @@ textarea::placeholder {
   color: #243d46;
 }
 .world-fishing-controls .strike-button {
-  width: auto;
-  margin: auto;
+  display: flex;
+  width: fit-content;
+  margin: 12px auto 0;
 }
 .world-fishing-controls .reeling-track {
   height: 42px;
@@ -2820,8 +2821,8 @@ textarea::placeholder {
 }
 @media (max-width: 760px) {
   .world-fishing-controls {
-    top: 50%;
-    bottom: auto;
+    top: auto;
+    bottom: 24px;
     width: calc(100vw - 24px);
     padding: 10px 18px;
     max-height: 58dvh;
