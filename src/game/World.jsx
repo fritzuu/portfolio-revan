@@ -86,6 +86,10 @@ export default function World({
       .then(({ default: Phaser }) => {
         if (cancelled) return;
         class City extends Phaser.Scene {
+          preload() {
+            this.load.image('jekek-source', '/sprites/jekek.png');
+            this.load.image('darkrai-source', '/sprites/darkrai.png');
+          }
           create() {
             const map = this.textures.createCanvas(
               'city',
@@ -291,7 +295,8 @@ export default function World({
                 : 0;
             if (
               frame !== actor.frame ||
-              actor.drawDirection !== actor.direction
+              actor.drawDirection !== actor.direction ||
+              actor.drawPose !== actor.poseKey
             ) {
               actor.texture.context.clearRect(0, 0, 32, 36);
               drawCharacter(
@@ -305,6 +310,7 @@ export default function World({
               actor.texture.refresh();
               actor.frame = frame;
               actor.drawDirection = actor.direction;
+              actor.drawPose = actor.poseKey;
             }
             actor.image.setDepth(actor.image.y);
             if (actor.label)

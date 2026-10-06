@@ -1,4 +1,4 @@
-// Original procedural pixel art. No third-party sprites or runtime image requests.
+// Procedural town/avatar art. Reference creature sprites are bundled locally.
 export const OUTFITS = ['#e7a54b', '#789ac4', '#c87972', '#87a875'];
 export const SKINS = ['#f2c99f', '#c99066', '#8d5e46'];
 export function drawCharacter(
@@ -83,6 +83,32 @@ export function drawCharacter(
       r(direction === 'right' ? 19 : 7, 9, 8, 6, '#202735');
       r(direction === 'right' ? 21 : 9, 11, 4, 2, '#b4ccdc');
     }
+  }
+  const action = config.footballAction;
+  if (action?.type === 'kick' || action?.type === 'control') {
+    ctx.clearRect(x + 5, y + 28, 23, 8);
+    const left = direction === 'left';
+    const reach = Math.round(
+      Math.sin(action.progress * Math.PI * (action.type === 'kick' ? 0.5 : 1)) *
+        (action.type === 'kick' ? 6 : 3),
+    );
+    r(10, 28, 6, 4, '#35475a');
+    r(19, 28, 5, 4, '#35475a');
+    r(left ? 19 : 9, 32, 7, 3, '#3c302c');
+    r(
+      left ? 9 - reach : Math.min(25, 19 + reach),
+      31 - Math.round(reach * 0.3),
+      7,
+      3,
+      '#3c302c',
+    );
+  } else if (action?.type === 'celebrate') {
+    ctx.clearRect(x + 5, y + 17, 4, 11);
+    ctx.clearRect(x + 24, y + 17, 5, 11);
+    r(5, 15, 4, 9, SKINS[skin]);
+    r(25, 15, 4, 9, SKINS[skin]);
+    r(5, 12, 4, 4, SKINS[skin]);
+    r(25, 12, 4, 4, SKINS[skin]);
   }
 }
 export {
