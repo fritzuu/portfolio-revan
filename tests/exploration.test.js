@@ -20,43 +20,43 @@ test('the football goal accepts only a valid shot inside the golden timing zone'
 });
 
 import { createMatch, updateMatch } from '../src/game/football.js';
-test('football possession changes only after control; passes follow fixed endpoints and ball stays continuous', () => {
-  const match = createMatch(),
-    phases = new Set();
-  let previous = { ...match.ball },
-    goals = 0;
-  for (let i = 0; i < 60 * 80; i++) {
-    const phase = match.phase,
-      owner = match.owner,
-      target = match.target && { ...match.target };
+test('two teams contest both goals with continuous ball motion, saves and turnovers', () => {
+  const match = createMatch(8);
+  let previous = { ...match.ball };
+  const phases = new Set();
+  for (let i = 0; i < 60 * 600; i++) {
     updateMatch(match, 1 / 60);
     phases.add(match.phase);
     assert.ok(
-      Math.hypot(match.ball.x - previous.x, match.ball.y - previous.y) < 12,
-      `ball jumped during ${phase}`,
+      Math.hypot(match.ball.x - previous.x, match.ball.y - previous.y) < 9,
+      `ball jumped in ${match.phase}`,
     );
-    if (match.owner !== owner)
-      assert.ok(
-        phase === 'control' || phase === 'reset',
-        `unexpected owner transfer: ${phase}`,
-      );
-    if (phase === 'pass' && match.phase === 'pass')
-      assert.deepEqual(match.target, target);
-    if (!match.goal && phase === 'celebrate') goals++;
     for (const p of match.players)
-      assert.ok(p.x >= 155 && p.x <= 1320 && p.y >= 1175 && p.y <= 1490);
+      assert.ok(p.x >= 138 && p.x <= 1300 && p.y >= 1190 && p.y <= 1475);
     previous = { ...match.ball };
   }
-  assert.ok(goals >= 2);
-  for (const phase of [
-    'kick',
-    'pass',
-    'control',
-    'shoot',
-    'celebrate',
-    'retrieve',
-    'returnKick',
-    'reset',
-  ])
+  assert.equal(match.players.length, 8);
+  assert.ok(match.score.every((n) => n > 0));
+  for (const stat of ['passes', 'shots', 'saves', 'tackles', 'posts'])
+    assert.ok(match.stats[stat] > 0, stat);
+  assert.ok(match.stats.shots > match.score.reduce((a, b) => a + b, 0));
+  for (const phase of ['kick', 'pass', 'shoot', 'celebrate', 'retrieve'])
     assert.ok(phases.has(phase), phase);
+});
+test('match simulation is independent of render rate and preserves quick user actions', () => {
+  const a = createMatch(21),
+    b = createMatch(21);
+  for (let i = 0; i < 30 * 60; i++) updateMatch(a, 1 / 30);
+  for (let i = 0; i < 120 * 60; i++) updateMatch(b, 1 / 120);
+  assert.deepEqual(a.score, b.score);
+  assert.deepEqual(a.stats, b.stats);
+  assert.ok(Math.hypot(a.ball.x - b.ball.x, a.ball.y - b.ball.y) < 0.001);
+  const controlled = createMatch();
+  controlled.controlled = controlled.owner;
+  updateMatch(controlled, 0.001, { action: 'shoot' });
+  updateMatch(controlled, 1 / 60);
+  assert.equal(controlled.phase, 'kick');
+  for (let i = 0; i < 20; i++) updateMatch(controlled, 1 / 60);
+  assert.equal(controlled.stats.shots, 1);
+  assert.equal(controlled.owner, null);
 });

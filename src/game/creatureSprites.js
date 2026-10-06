@@ -13,23 +13,14 @@ function creature(scene, key, x, y, size) {
     128,
   );
   texture.refresh();
-  const strips = [];
-  for (let row = 0; row < 16; row++) {
-    texture.add(`row-${row}`, 0, 0, row * 8, 128, 8);
-    strips.push(
-      scene.add
-        .image(0, -64 + row * 8, `${key}-pixels`, `row-${row}`)
-        .setOrigin(0.5, 0),
-    );
-  }
-  const body = scene.add.container(x, y, strips).setScale(size / 128);
-  return { body, strips };
+  const body = scene.add.image(x, y, `${key}-pixels`).setScale(size / 128);
+  return { body };
 }
 export function createCreatures(scene) {
   const snakeTexture = scene.textures.createCanvas('jekek-moving', 192, 192);
   snakeTexture.context.imageSmoothingEnabled = false;
   const jekek = scene.add.image(1810, 395, 'jekek-moving').setOrigin(0);
-  const darkrai = creature(scene, 'darkrai', 2050, 843, 168);
+  const darkrai = creature(scene, 'darkrai', 2050, 843, 112);
   const shadows = scene.add.graphics();
   const label = scene.add
     .text(2260, 330, 'Jekek', {
@@ -57,15 +48,29 @@ export function updateCreatures(scene, state, delta, darkness, reduced) {
   state.elapsed += dt;
   const t = state.elapsed / 1000;
   const { jekek, darkrai, label, shadows } = state;
+  if (
+    !reduced &&
+    Math.hypot(
+      scene.player.image.x - state.snake.head.x,
+      scene.player.image.y - state.snake.head.y,
+    ) < 65 &&
+    state.elapsed > (state.watchAgain || 0)
+  ) {
+    state.snake.rest = 1.5;
+    state.watchAgain = state.elapsed + 12000;
+  }
   const snake = updateSnake(state.snake, delta, reduced),
     { x, y } = snake.head;
-  const origin = drawSnake(
-    state.snakeTexture.context,
-    snake,
-    reduced ? 500 : state.elapsed,
-    state.headImage,
-  );
-  state.snakeTexture.refresh();
+  const visible = scene.cameras.main.worldView.contains(x, y);
+  const origin = visible
+    ? drawSnake(
+        state.snakeTexture.context,
+        snake,
+        reduced ? 500 : state.elapsed,
+        state.headImage,
+      )
+    : { x: Math.round(x) - 96, y: Math.round(y) - 96 };
+  if (visible) state.snakeTexture.refresh();
   jekek
     .setPosition(origin.x, origin.y)
     .setDepth(Math.max(...snake.joints.map((p) => p.y)) + 8);
@@ -82,15 +87,6 @@ export function updateCreatures(scene, state, delta, darkness, reduced) {
     .setDepth(908)
     .setAlpha(state.nightAlpha)
     .setVisible(state.nightAlpha > 0.01);
-  darkrai.strips.forEach((strip, row) =>
-    strip.setX(
-      reduced
-        ? 0
-        : Math.round(
-            Math.sin(t * 1.7 + row * 0.6) * (row < 6 || row > 11 ? 2 : 1),
-          ),
-    ),
-  );
   shadows.clear();
   shadows.setDepth(1);
   shadows.fillStyle(0x2d493c, 0.2);

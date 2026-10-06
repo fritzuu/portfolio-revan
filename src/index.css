@@ -3453,62 +3453,150 @@ textarea::placeholder {
   gap: 12px;
   flex-wrap: wrap;
 }
+
+/* Football uses a top scoreboard and peripheral controls, leaving the pitch visible. */
 .football-challenge {
   position: fixed;
+  inset: 0;
   z-index: 35;
+  pointer-events: none;
+  color: #fff0cf;
+  font-family: 'VT323', monospace;
+}
+.football-challenge button,
+.football-challenge input {
+  pointer-events: auto;
+}
+.football-score {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
-  bottom: 170px;
-  width: min(410px, calc(100vw - 32px));
-  padding: 20px 26px;
-  text-align: center;
-  color: #ffedc2;
-  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 18px;
   background: #284b43ed;
-  box-shadow: 0 8px 30px #172e3333;
-}
-.football-challenge h2 {
-  font-family: 'VT323', monospace;
-  font-size: 38px;
-  margin: 8px 0;
-}
-.football-challenge p {
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 8px 0 14px;
-}
-.football-challenge .eyebrow {
-  color: #c9dba9;
-}
-.football-challenge .button {
-  margin: 14px auto 0;
-  font-family: 'VT323', monospace;
+  border: 1px solid #d7c29466;
+  border-radius: 12px;
   font-size: 25px;
-  background: #dfad66;
-  color: #263f3b;
-  border-color: #ffde99;
-  min-height: 48px;
+  white-space: nowrap;
 }
-.football-challenge .button:hover {
-  background: #f1c47b;
+.football-score span {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.football-score b {
+  font-size: 32px;
+  color: #ffda83;
+}
+.football-score time {
+  font-size: 19px;
+  color: #c8d8c7;
+}
+.football-status {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 19px;
+  text-align: center;
+  background: #284b43c9;
+  border-radius: 8px;
+  padding: 5px 12px;
+  max-width: calc(100vw - 28px);
+  white-space: nowrap;
 }
 .football-close {
+  z-index: 2;
   position: absolute;
-  right: 4px;
-  top: 2px;
-  background: transparent;
-  color: #ffe8b7;
-  border: 0;
-  font-size: 30px;
+  right: max(14px, env(safe-area-inset-right));
+  top: 16px;
   width: 44px;
   height: 44px;
+  border: 1px solid #e1d1a980;
+  border-radius: 12px;
+  background: #284b43ec;
+  color: #fff0cf;
+  font-size: 30px;
   cursor: pointer;
+}
+.football-selection,
+.football-practice {
+  position: absolute;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  flex-wrap: wrap;
+}
+.football-challenge button:not(.football-close) {
+  font:
+    24px 'VT323',
+    monospace;
+  min-height: 48px;
+  padding: 10px 18px;
+  border: 2px solid #f4d39a;
+  border-radius: 12px;
+  background: #d3ac70;
+  color: #203f3b;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #685742;
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+.football-challenge button:hover {
+  background: #f2cb86;
+  transform: translateY(-1px);
+}
+.football-challenge button:active {
+  transform: translateY(2px);
+}
+.football-challenge button:focus-visible {
+  outline: 3px solid #f6efe0;
+  outline-offset: 3px;
+}
+.football-challenge button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+  transform: none;
+}
+.football-actions {
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.football-actions small {
+  display: block;
+  font:
+    11px 'DM Sans',
+    sans-serif;
+  margin-top: 3px;
+}
+.football-challenge .football-watch {
+  background: #284b43ed;
+  color: #fff0cf;
+  border: 1px solid #d7c29480;
+  box-shadow: none;
+  font-size: 19px;
 }
 .football-aim {
   position: relative;
-  height: 16px;
-  border-radius: 8px;
-  background: #729c8c;
+  width: 180px;
+  height: 14px;
+  border: 2px solid #fff0cf;
+  border-radius: 7px;
+  background: #527869;
   overflow: hidden;
 }
 .football-aim span {
@@ -3521,22 +3609,71 @@ textarea::placeholder {
 .football-aim i {
   position: absolute;
   top: 0;
-  width: 5px;
+  width: 4px;
   height: 100%;
   background: #fff7de;
   transform: translateX(-50%);
 }
 .football-results {
   display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 10px;
-  font-family: 'VT323', monospace;
+  gap: 5px;
   font-size: 22px;
+  text-shadow: 1px 2px #284b43;
 }
-.football-challenge label {
+.is-football .city-navigation,
+.is-football .city-interaction,
+.is-football .city-help,
+.is-football .minimap-button,
+.is-football .angler-tools,
+.is-football .quest-panel,
+.is-football .city-header,
+.is-football .city-dpad {
+  display: none;
+}
+.is-match .city-dpad {
   display: grid;
-  margin-top: 12px;
+  position: fixed;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  left: max(18px, env(safe-area-inset-left));
+  right: auto;
+  z-index: 36;
+  grid-template-columns: repeat(3, 46px);
+  grid-template-rows: repeat(2, 46px);
+  gap: 4px;
+}
+.is-match .city-dpad button {
+  width: 46px;
+  height: 46px;
+  font-size: 23px;
+  touch-action: none;
+}
+.world-notice {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  top: 110px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  max-width: calc(100vw - 30px);
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: #284b43de;
+  color: #fff0cf;
+  font:
+    24px 'VT323',
+    monospace;
+  text-align: center;
+  animation: notice-in 0.3s ease-out;
+}
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
 }
 @media (max-width: 760px) {
   .discovery-grid {
@@ -3545,24 +3682,78 @@ textarea::placeholder {
   .discovery {
     padding: 16px;
   }
-  .football-challenge {
-    bottom: 140px;
-    padding: 14px 20px;
+  .football-score {
+    top: 12px;
+    gap: 12px;
+    padding: 6px 12px;
+    font-size: 20px;
   }
-  .football-challenge h2 {
-    font-size: 29px;
+  .football-score span {
+    gap: 8px;
   }
-  .football-challenge p {
-    font-size: 12px;
+  .football-score b {
+    font-size: 26px;
   }
-  .football-challenge .button {
+  .football-score time {
+    font-size: 17px;
+  }
+  .football-status {
+    top: 65px;
+    font-size: 17px;
+  }
+  .football-close {
+    top: 12px;
+    right: 8px;
+    width: 44px;
+    height: 44px;
+  }
+  .football-actions {
+    gap: 6px;
+    right: 12px;
+    bottom: 22px;
+    flex-wrap: wrap;
+    max-width: 190px;
+    justify-content: flex-end;
+  }
+  .football-challenge button:not(.football-close) {
     font-size: 21px;
+    padding: 8px 12px;
+    min-height: 46px;
+  }
+  .football-actions .football-watch {
+    width: 100%;
     min-height: 44px;
   }
+  .football-selection,
+  .football-practice {
+    gap: 8px;
+    bottom: 20px;
+  }
+  .football-aim {
+    width: 140px;
+  }
+  .world-notice {
+    top: 90px;
+    font-size: 20px;
+  }
 }
-.is-football .city-dpad,
-.is-football .city-interaction,
-.is-football .city-help,
-.is-football .minimap-button {
-  display: none;
+@media (max-height: 450px) {
+  .football-actions .football-watch {
+    width: auto;
+  }
+  .football-status {
+    top: 60px;
+  }
+  .football-practice,
+  .football-selection {
+    bottom: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .world-notice {
+    animation: none;
+  }
+  .football-challenge button {
+    transition: none;
+  }
 }

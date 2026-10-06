@@ -60,6 +60,17 @@ const TITLES = {
   contact: 'A letter to Revan.',
   settings: 'Make yourself at home.',
 };
+function getDistrict(p) {
+  return p.x > 1700 && p.y > 720 && p.y < 1120
+    ? 'grove'
+    : p.x > 1690 && p.y < 650
+      ? 'garden'
+      : p.y > 1130 && p.x < 1330
+        ? 'football'
+        : p.x > 1500 && p.y > 1230
+          ? 'shore'
+          : 'town';
+}
 function readSave() {
   try {
     const v = JSON.parse(localStorage.getItem('revan-world') || 'null');
@@ -109,6 +120,12 @@ export default function App() {
   const fishing = useFishing();
   const { discoveries, discover } = useExploration();
   const [night, setNight] = useState(false);
+  const [footballMode, setFootballMode] = useState('watch');
+  const [matchState, setMatchState] = useState({
+    score: [0, 0],
+    clock: 0,
+    event: 'Kick off',
+  });
   const [kick, setKick] = useState(null);
   const [shots, setShots] = useState([]);
   const [shotBusy, setShotBusy] = useState(false);
@@ -139,7 +156,52 @@ export default function App() {
   const preferredReduced = useReducedMotion(),
     reduced = manualReduced || preferredReduced,
     stage = useRef(null);
-  useMusic(music);
+  const district = getDistrict(position);
+  const playSound = useMusic(music, district);
+  const [notice, setNotice] = useState(null);
+  const noticeTimer = useRef(null),
+    lastDistrict = useRef(null);
+  const noticePriority = useRef(0);
+  const notify = useCallback((message, priority = false) => {
+    if (!priority && Date.now() < noticePriority.current) return;
+    if (priority) noticePriority.current = Date.now() + 2600;
+    setNotice(message);
+    clearTimeout(noticeTimer.current);
+    noticeTimer.current = setTimeout(() => setNotice(null), 2600);
+  }, []);
+  useEffect(() => () => clearTimeout(noticeTimer.current), []);
+  const reportPosition = useCallback(
+    (p) => {
+      setPosition(p);
+      const area = getDistrict(p);
+      if (phase === 'playing' && area !== lastDistrict.current) {
+        lastDistrict.current = area;
+        notify(
+          {
+            garden: 'Jekek’s Garden',
+            grove: 'Dream Grove',
+            football: 'Football Park',
+            shore: 'Angler’s Shore',
+            town: 'Revan’s Town',
+          }[area],
+        );
+      }
+    },
+    [phase, notify],
+  );
+  const reportDiscovery = useCallback(
+    (id) => {
+      if (!discoveries.includes(id)) {
+        notify(
+          `NEW FIELD NOTE · ${id === 'dream' ? 'Darkrai' : id === 'jekek' ? 'Jekek' : id}`,
+          true,
+        );
+        playSound('discover');
+      }
+      discover(id);
+    },
+    [discoveries, discover, notify, playSound],
+  );
   useEffect(() => {
     let active = true;
     api('/api/portfolio')
@@ -218,6 +280,9 @@ export default function App() {
         'city-app',
         inWorldFishing && 'is-fishing',
         panel === 'football' && 'is-football',
+        panel === 'football' &&
+          ['messi', 'yamal'].includes(footballMode) &&
+          'is-match',
       )}
     >
       {phase === 'playing' && (
@@ -235,9 +300,15 @@ export default function App() {
         aria-label="Game world. Walk with arrow keys or WASD. Press E to interact."
         onBlur={() => setControls({})}
         onKeyDown={(e) => {
+          if (e.key === 'Escape' && panel === 'football') {
+            setPanel(null);
+            setFootballMode('watch');
+            setControls({});
+          }
+
           if (
             phase === 'playing' &&
-            !panel &&
+            (!panel || panel === 'football') &&
             ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(
               e.key,
             )
@@ -266,17 +337,26 @@ export default function App() {
             onNear={setNear}
             onVisit={visit}
             reducedMotion={reduced}
-            onPosition={setPosition}
+            onPosition={reportPosition}
             destination={destination}
             onTravel={setTravel}
-            onDiscover={discover}
+            onDiscover={reportDiscovery}
             onNight={setNight}
             kick={kick}
             onShot={onShot}
+            footballMode={footballMode}
+            onMatchState={setMatchState}
+            onSound={playSound}
+            discoveries={discoveries}
             footballActive={panel === 'football'}
           />
         </Suspense>
       </main>
+      {phase === 'playing' && notice && panel !== 'football' && (
+        <div className="world-notice" role="status">
+          {notice}
+        </div>
+      )}
       {phase === 'landing' && (
         <div className="title-screen">
           <div className="title-kicker">
@@ -456,7 +536,10 @@ export default function App() {
             aria-label="Open city map"
             onClick={() => setPanel('map')}
           >
-            <WorldMap position={position} visited={visited} />
+            <WorldMap
+              position={position}
+              visited={[...visited, ...discoveries]}
+            />
             <span>
               <Map size={12} /> CITY MAP <span>↗</span>
             </span>
@@ -510,11 +593,16 @@ export default function App() {
                 className={d}
                 aria-label={`Move ${d}`}
                 onPointerDown={(e) => {
+                  e.preventDefault();
                   e.currentTarget.setPointerCapture(e.pointerId);
-                  setControls({ [d]: true });
+                  setControls((previous) => ({ ...previous, [d]: true }));
                 }}
-                onPointerUp={() => setControls({})}
-                onPointerCancel={() => setControls({})}
+                onPointerUp={() =>
+                  setControls((previous) => ({ ...previous, [d]: false }))
+                }
+                onPointerCancel={() =>
+                  setControls((previous) => ({ ...previous, [d]: false }))
+                }
               >
                 {['↑', '←', '↓', '→'][i]}
               </button>
@@ -649,10 +737,28 @@ export default function App() {
       </Modal>
       {phase === 'playing' && panel === 'football' && (
         <FootballChallenge
+          mode={footballMode}
+          match={matchState}
+          onMode={(mode) => {
+            setFootballMode(mode);
+            setShots([]);
+            setShotBusy(false);
+            setControls({});
+            setTimeout(() => stage.current?.focus(), 0);
+          }}
+          onAction={(type) => {
+            setKick({ type, stamp: ++tripSequence.current });
+            setTimeout(() => stage.current?.focus(), 0);
+          }}
           results={shots}
           busy={shotBusy}
           reduced={reduced}
-          onClose={() => setPanel(null)}
+          onClose={() => {
+            setPanel(null);
+            setFootballMode('watch');
+            setControls({});
+            setTimeout(() => stage.current?.focus(), 0);
+          }}
           onReset={() => {
             setShots([]);
             setShotBusy(false);
@@ -691,7 +797,7 @@ export default function App() {
           <WorldMap
             large
             position={position}
-            visited={visited}
+            visited={[...visited, ...discoveries]}
             onTravel={(id) => walkTo(id)}
           />
         ) : [
@@ -704,6 +810,7 @@ export default function App() {
           ].includes(panel) ? (
           <ExplorationPanel
             view={panel}
+            onSound={playSound}
             discoveries={discoveries}
             night={night}
             onTravel={walkTo}

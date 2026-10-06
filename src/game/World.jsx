@@ -31,6 +31,10 @@ export default function World({
   kick,
   onShot,
   footballActive,
+  footballMode,
+  onMatchState,
+  onSound,
+  discoveries,
 }) {
   const root = useRef(null),
     live = useRef({
@@ -47,6 +51,11 @@ export default function World({
       kick,
       onShot,
       footballActive,
+      footballMode,
+      onMatchState,
+      onSound,
+      discoveries,
+      reducedMotion,
     });
   useEffect(() => {
     live.current = {
@@ -63,6 +72,11 @@ export default function World({
       kick,
       onShot,
       footballActive,
+      footballMode,
+      onMatchState,
+      onSound,
+      discoveries,
+      reducedMotion,
     };
   }, [
     paused,
@@ -78,6 +92,11 @@ export default function World({
     kick,
     onShot,
     footballActive,
+    footballMode,
+    onMatchState,
+    onSound,
+    discoveries,
+    reducedMotion,
   ]);
   useEffect(() => {
     let game,
@@ -87,6 +106,7 @@ export default function World({
         if (cancelled) return;
         class City extends Phaser.Scene {
           preload() {
+            this.load.image('town-atlas', '/assets/tiny-town/tiles.png');
             this.load.image('jekek-source', '/sprites/jekek.png');
             this.load.image('darkrai-source', '/sprites/darkrai.png');
           }
@@ -96,12 +116,15 @@ export default function World({
               WORLD_SIZE.width,
               WORLD_SIZE.height,
             );
-            drawWorld(map.context, { baseOnly: true });
+            this.artAssets = {
+              town: this.textures.get('town-atlas').getSourceImage(),
+            };
+            drawWorld(map.context, { baseOnly: true, assets: this.artAssets });
             map.refresh();
             this.add.image(0, 0, 'city').setOrigin(0);
             PROPS.forEach((p, i) => {
               const t = this.textures.createCanvas(`prop-${i}`, 160, 160);
-              drawProp(t.context, { ...p, x: 60, y: 110 });
+              drawProp(t.context, { ...p, x: 60, y: 110 }, this.artAssets);
               t.refresh();
               this.add
                 .image(p.x - 60, p.y - 110, `prop-${i}`)
@@ -165,7 +188,7 @@ export default function World({
                 .rectangle(l.doorX, l.doorY + 27, 9, 9, 0xf0d49b, 0.8)
                 .setAngle(45)
                 .setDepth(1);
-              if (!reducedMotion)
+              if (!live.current.reducedMotion)
                 this.tweens.add({
                   targets: marker,
                   y: l.doorY + 32,
@@ -217,12 +240,12 @@ export default function World({
               cam.startFollow(
                 this.player.image,
                 false,
-                reducedMotion ? 1 : 0.09,
-                reducedMotion ? 1 : 0.09,
+                live.current.reducedMotion ? 1 : 0.09,
+                live.current.reducedMotion ? 1 : 0.09,
               );
             else cam.centerOn(650, 410);
             this.keys = this.input.keyboard.addKeys(
-              'W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER,ESC',
+              'W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER,ESC,SPACE,Q',
             );
             this.input.keyboard.disableGlobalCapture();
             this.input.on('pointerdown', (p) => {
@@ -244,6 +267,7 @@ export default function World({
             texture.refresh();
             return {
               texture,
+              frameCache: new Map(),
               config,
               image: this.add
                 .image(x, y, name)
@@ -257,6 +281,9 @@ export default function World({
               stride: name === 'visitor' ? 11 : 4,
             };
           }
+          routeTo(start, target) {
+            return findPath(start, target);
+          }
           cancelTravel() {
             this.trip = null;
             live.current.onTravel?.(null);
@@ -265,7 +292,7 @@ export default function World({
           move(actor, dx, dy, delta, speed) {
             const length = Math.hypot(dx, dy);
             const before = { x: actor.image.x, y: actor.image.y };
-            if (length) {
+            if (length > 0.1) {
               const step = Math.min(delta, 40) * speed;
               const x = actor.image.x + (dx / length) * step,
                 y = actor.image.y + (dy / length) * step;
@@ -275,22 +302,40 @@ export default function World({
               if (!isBlocked(actor.image.x, y)) {
                 actor.image.y = y;
               }
-              actor.direction =
-                Math.abs(dx) > Math.abs(dy)
-                  ? dx > 0
-                    ? 'right'
-                    : 'left'
-                  : dy > 0
-                    ? 'down'
-                    : 'up';
+              if (!actor.lockFacing && length > 0.5)
+                actor.direction =
+                  Math.abs(dx) > Math.abs(dy)
+                    ? dx > 0
+                      ? 'right'
+                      : 'left'
+                    : dy > 0
+                      ? 'down'
+                      : 'up';
             }
             const moved = Math.hypot(
               actor.image.x - before.x,
               actor.image.y - before.y,
             );
             actor.distance += moved;
+            if (
+              actor === this.player &&
+              moved > 0.1 &&
+              actor.distance - (actor.lastStep || 0) > 24
+            ) {
+              actor.lastStep = actor.distance;
+              const x = actor.image.x,
+                y = actor.image.y;
+              const surface =
+                (x < 360 && y > 730 && y < 865) ||
+                (x > 1620 && x < 1660 && y > 1280)
+                  ? 'wood'
+                  : x > 1690 || y > 1150
+                    ? 'grass'
+                    : 'stone';
+              live.current.onSound?.('step', surface);
+            }
             const frame =
-              moved && !reducedMotion
+              moved && !live.current.reducedMotion
                 ? Math.floor(actor.distance / actor.stride) % 8
                 : 0;
             if (
@@ -298,15 +343,26 @@ export default function World({
               actor.drawDirection !== actor.direction ||
               actor.drawPose !== actor.poseKey
             ) {
-              actor.texture.context.clearRect(0, 0, 32, 36);
-              drawCharacter(
-                actor.texture.context,
-                0,
-                0,
-                actor.config,
-                frame,
-                actor.direction,
-              );
+              const cacheKey = `${frame}:${actor.direction}:${actor.poseKey || 'idle'}`;
+              const cached = actor.frameCache.get(cacheKey);
+              if (cached) actor.texture.context.putImageData(cached, 0, 0);
+              else {
+                actor.texture.context.clearRect(0, 0, 32, 36);
+                drawCharacter(
+                  actor.texture.context,
+                  0,
+                  0,
+                  actor.config,
+                  frame,
+                  actor.direction,
+                );
+                if (actor.frameCache.size >= 96)
+                  actor.frameCache.delete(actor.frameCache.keys().next().value);
+                actor.frameCache.set(
+                  cacheKey,
+                  actor.texture.context.getImageData(0, 0, 32, 36),
+                );
+              }
               actor.texture.refresh();
               actor.frame = frame;
               actor.drawDirection = actor.direction;
@@ -358,7 +414,7 @@ export default function World({
               delta,
               darkness,
               live.current,
-              reducedMotion,
+              live.current.reducedMotion,
             );
             this.night.setAlpha(darkness * 0.42);
             this.lamps.forEach(({ halo, bulb }) => {
@@ -441,7 +497,12 @@ export default function World({
               if (l && dest.teleport) {
                 this.cancelTravel();
                 this.player.image.setPosition(l.doorX, l.doorY + 45);
-                this.cameras.main.fadeIn(reducedMotion ? 0 : 350, 24, 49, 44);
+                this.cameras.main.fadeIn(
+                  live.current.reducedMotion ? 0 : 350,
+                  24,
+                  49,
+                  44,
+                );
               } else if (l) {
                 this.player.path = findPath(this.player.image, {
                   x: l.doorX,
@@ -519,7 +580,7 @@ export default function World({
               }
               this.followPath(npc, delta, npc.speed);
             });
-            if (!reducedMotion) {
+            if (!live.current.reducedMotion) {
               this.water.clear();
               this.water.fillStyle(0xb3e4de, 0.65);
               for (let i = 0; i < 8; i++) {
@@ -527,7 +588,20 @@ export default function World({
                 this.water.fillRect(749 + i * 13, y, 5, 1);
               }
             }
-            if (!playing || f || live.current.paused) return;
+            if (time - this.lastPositionTime > 100) {
+              live.current.onPosition?.({
+                x: this.player.image.x,
+                y: this.player.image.y,
+              });
+              this.lastPositionTime = time;
+            }
+            if (
+              !playing ||
+              f ||
+              live.current.paused ||
+              live.current.footballActive
+            )
+              return;
             const k = this.keys,
               c = live.current.controls || {};
             const dx =
@@ -603,6 +677,6 @@ export default function World({
       cancelled = true;
       game?.destroy(true);
     };
-  }, [character, playing, reducedMotion]);
+  }, [character, playing]);
   return <div className="world-canvas" ref={root} />;
 }

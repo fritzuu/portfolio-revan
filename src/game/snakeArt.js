@@ -2,7 +2,7 @@
 // Draw into a small nearest-neighbor canvas so the changing silhouette stays pixel art.
 export function drawSnake(c, s, time, headImage) {
   c.clearRect(0, 0, 192, 192);
-  const origin = { x: s.head.x - 96, y: s.head.y - 96 };
+  const origin = { x: Math.round(s.head.x) - 96, y: Math.round(s.head.y) - 96 };
   const points = s.joints.map((p) => ({
     x: p.x - origin.x,
     y: p.y - origin.y,
@@ -68,9 +68,15 @@ export function drawSnake(c, s, time, headImage) {
     points[0].y - points[2].y,
     points[0].x - points[2].x,
   );
+  const angleDelta = Math.atan2(
+    Math.sin(noseAngle - (s.drawAngle ?? noseAngle)),
+    Math.cos(noseAngle - (s.drawAngle ?? noseAngle)),
+  );
+  if (s.drawAngle === undefined || Math.abs(angleDelta) > (Math.PI / 8) * 0.65)
+    s.drawAngle = Math.round(noseAngle / (Math.PI / 8)) * (Math.PI / 8);
   c.save();
-  c.translate(96, 96);
-  c.rotate(noseAngle - Math.PI / 2);
+  c.translate(Math.round(points[0].x), Math.round(points[0].y));
+  c.rotate(s.drawAngle - Math.PI / 2);
   const r = (x, y, w, h, color) => {
     c.fillStyle = color;
     c.fillRect(x, y, w, h);

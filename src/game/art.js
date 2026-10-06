@@ -1,3 +1,4 @@
+import { drawTownProp, tile } from './townAssets.js';
 // Procedural town/avatar art. Reference creature sprites are bundled locally.
 export const OUTFITS = ['#e7a54b', '#789ac4', '#c87972', '#87a875'];
 export const SKINS = ['#f2c99f', '#c99066', '#8d5e46'];
@@ -57,7 +58,11 @@ export function drawCharacter(
     if (direction === 'up') {
       ctx.fillStyle = '#fff2bd';
       ctx.font = 'bold 7px monospace';
-      ctx.fillText(argentina ? '10' : '19', x + 12, y + 26);
+      ctx.fillText(
+        config.jerseyNumber || (argentina ? '10' : '19'),
+        x + 12,
+        y + 26,
+      );
     }
   }
   if (config.revan) {
@@ -102,6 +107,13 @@ export function drawCharacter(
       3,
       '#3c302c',
     );
+  } else if (action?.type === 'save') {
+    ctx.clearRect(x + 5, y + 17, 4, 11);
+    ctx.clearRect(x + 24, y + 17, 5, 11);
+    r(3, 19, 8, 4, SKINS[skin]);
+    r(23, 19, 8, 4, SKINS[skin]);
+    r(1, 18, 3, 5, '#e8efcd');
+    r(29, 18, 3, 5, '#e8efcd');
   } else if (action?.type === 'celebrate') {
     ctx.clearRect(x + 5, y + 17, 4, 11);
     ctx.clearRect(x + 24, y + 17, 5, 11);
@@ -123,7 +135,16 @@ export {
 } from './layout.js';
 import { drawExtension } from './explorationArt.js';
 import { WORLD_SIZE, LOCATIONS, GARDENS, PROPS } from './layout.js';
-export function drawProp(ctx, p) {
+export function drawProp(ctx, p, assets = {}) {
+  if (p.type.startsWith('asset')) {
+    drawTownProp(ctx, p, assets.town);
+    return;
+  }
+  if (p.type === 'gatePillar') {
+    tile(ctx, assets.town, 102, p.x - 16, p.y - 56, 2);
+    tile(ctx, assets.town, 126, p.x - 16, p.y - 24, 2);
+    return;
+  }
   const { x, y, s = 1, type } = p;
   const leaves =
     p.variant === 'blossom'
@@ -264,7 +285,7 @@ export function drawProp(ctx, p) {
   }
   ctx.restore();
 }
-export function drawWorld(ctx, { baseOnly = false } = {}) {
+export function drawWorld(ctx, { baseOnly = false, assets = {} } = {}) {
   const r = (x, y, w, h, c) => {
     ctx.fillStyle = c;
     ctx.fillRect(Math.round(x), Math.round(y), w, h);
@@ -583,7 +604,9 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
   }
   label('MIRA’S TACKLE', 550, 958, 12);
   label('A GOOD CATCH HAS A GOOD STORY', 550, 973, 8);
-  drawExtension(ctx);
+  drawExtension(ctx, assets);
   if (!baseOnly)
-    [...PROPS].sort((a, b) => a.y - b.y).forEach((p) => drawProp(ctx, p));
+    [...PROPS]
+      .sort((a, b) => a.y - b.y)
+      .forEach((p) => drawProp(ctx, p, assets));
 }

@@ -1,7 +1,7 @@
 # Creature reference sprites
 
 Workspace assets: `public/sprites/jekek.png` and `public/sprites/darkrai.png`.
-Prepared with the built-in **imagegen** tool, transparent background enabled. Source designs supplied by Revan in this chat. Phaser keeps Darkrai as a local sprite with row offsets for ghost wisps. Jekek uses the accepted head as an atlas frame and a separate articulated ribbon body: 29 fixed-length joints, traveling waves and arc-length history. Its reference pose is not used for locomotion. Source PNGs remain untouched during gameplay.
+Prepared with the built-in **imagegen** tool, transparent background enabled. Source designs supplied by Revan in this chat. Phaser keeps Darkrai as one intact local sprite with gentle floating motion and separate ambient wisps, avoiding strip seams. Jekek uses the accepted head as an atlas frame and a separate articulated ribbon body: 29 fixed-length joints, traveling waves and arc-length history. Its reference pose is not used for locomotion. Source PNGs remain untouched during gameplay.
 
 ## Jekek prompt
 

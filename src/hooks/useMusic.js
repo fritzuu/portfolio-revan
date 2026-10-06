@@ -1,6 +1,15 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 // Original 8-bar chiptune: melody, arpeggios, bass, kick, snare and hi-hat.
-export default function useMusic(enabled) {
+export default function useMusic(enabled, district = 'town') {
+  const sound = useRef(null),
+    area = useRef(district);
+  useEffect(() => {
+    area.current = district;
+  }, [district]);
+  const play = useCallback(
+    (event, surface) => sound.current?.(event, surface),
+    [],
+  );
   useEffect(() => {
     if (!enabled) return;
     const Audio = window.AudioContext || window.webkitAudioContext;
@@ -54,6 +63,27 @@ export default function useMusic(enabled) {
         o.stop(time + 0.16);
       }
     }
+    sound.current = (event, surface) => {
+      if (ctx.state !== 'running' || document.hidden) return;
+      const now = ctx.currentTime;
+      if (event === 'step')
+        tone(
+          surface === 'wood' ? 48 : surface === 'grass' ? 40 : 54,
+          now,
+          0.035,
+          0.045,
+          'triangle',
+        );
+      if (event === 'kick') tone(40, now, 0.07, 0.24, 'triangle');
+      if (event === 'goal')
+        [72, 76, 79, 84].forEach((n, i) =>
+          tone(n, now + i * 0.08, 0.18, 0.17, 'triangle'),
+        );
+      if (event === 'discover')
+        [76, 79, 88].forEach((n, i) =>
+          tone(n, now + i * 0.09, 0.22, 0.12, 'sine'),
+        );
+    };
     const chords = [
       [60, 64, 67],
       [57, 60, 64],
@@ -83,6 +113,12 @@ export default function useMusic(enabled) {
         return;
       }
       while (next < ctx.currentTime + 0.18) {
+        const quiet = area.current === 'grove';
+        master.gain.setTargetAtTime(quiet ? 0.09 : 0.16, ctx.currentTime, 0.5);
+        if (step % 16 === 0 && ['garden', 'grove'].includes(area.current)) {
+          tone(quiet ? 81 : 93, next, 0.15, 0.045, 'sine');
+          tone(quiet ? 86 : 96, next + 0.18, 0.13, 0.035, 'sine');
+        }
         const bar = Math.floor(step / 8) % 8,
           i = step % 8,
           chord = chords[bar];
@@ -120,8 +156,10 @@ export default function useMusic(enabled) {
     const timer = setInterval(schedule, 80);
     schedule();
     return () => {
+      sound.current = null;
       clearInterval(timer);
       ctx.close();
     };
   }, [enabled]);
+  return play;
 }

@@ -5,6 +5,7 @@ import { clearSegment, findPath, isBlocked } from '../src/game/navigation.js';
 test('every solid prop blocks its physical footprint', () => {
   for (const p of PROPS) {
     const b = propBounds(p);
+    if (!b) continue;
     assert.ok(isBlocked(b.x + b.w / 2, b.y + b.h / 2), p.type);
   }
 });
@@ -47,4 +48,11 @@ test('residents can travel every leg of their district circuits', () => {
         Math.hypot(path.at(-1).x - target.x, path.at(-1).y - target.y) < 1,
       );
     }
+});
+
+test('flower beds are decorative ground rather than invisible obstacles', () => {
+  for (const p of PROPS.filter(
+    (p) => p.type === 'flowers' || p.solid === false,
+  ))
+    assert.equal(propBounds(p), null);
 });

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { cleanDiscoveries } from '../game/exploration';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { cleanDiscoveries, DISCOVERIES } from '../game/exploration';
 export default function useExploration() {
   const [discoveries, setDiscoveries] = useState(() => {
     try {
@@ -10,14 +10,14 @@ export default function useExploration() {
       return [];
     }
   });
-  const discover = useCallback(
-    (id) =>
-      setDiscoveries((previous) => {
-        const next = cleanDiscoveries([...previous, id]);
-        return next.length === previous.length ? previous : next;
-      }),
-    [],
-  );
+  const known = useRef(new Set(discoveries));
+  const [latest, setLatest] = useState(null);
+  const discover = useCallback((id) => {
+    if (known.current.has(id) || !DISCOVERIES.some((d) => d.id === id)) return;
+    known.current.add(id);
+    setLatest(id);
+    setDiscoveries((previous) => cleanDiscoveries([...previous, id]));
+  }, []);
   useEffect(() => {
     try {
       localStorage.setItem('revan-field-notes', JSON.stringify(discoveries));
@@ -25,5 +25,5 @@ export default function useExploration() {
       /* Still playable without storage. */
     }
   }, [discoveries]);
-  return { discoveries, discover };
+  return { discoveries, discover, latest };
 }

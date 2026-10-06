@@ -1,3 +1,4 @@
+import { DISTRICT_PROPS } from './townAssets.js';
 // Hand-authored districts: broad connecting streets and decorations anchored to gardens.
 export const WORLD_SIZE = { width: 2600, height: 1600 };
 export const LOCATIONS = [
@@ -140,6 +141,7 @@ export const GARDENS = [
   { x: 1110, y: 535, w: 310, h: 200 },
 ];
 export const PROPS = [
+  ...DISTRICT_PROPS,
   ...[
     [107, 335, 0.7],
     [515, 335, 0.8],
@@ -192,20 +194,6 @@ export const PROPS = [
   ].map(([x, y]) => ({ type: 'crate', x, y })),
   { type: 'stall', x: 560, y: 870 },
   ...[
-    [1740, 240],
-    [1880, 220],
-    [2300, 220],
-    [2430, 320],
-    [2420, 550],
-    [1730, 550],
-    [1770, 800],
-    [1810, 940],
-    [2380, 940],
-    [1870, 1045],
-    [2300, 1045],
-    [2350, 800],
-    [1760, 1070],
-    [2360, 1070],
     [80, 1180],
     [1360, 1450],
   ].map(([x, y], i) => ({
@@ -216,6 +204,7 @@ export const PROPS = [
     variant: i % 3 === 0 ? 'blossom' : 'green',
   })),
   { type: 'bench', x: 1480, y: 730 },
+  { type: 'bench', x: 2115, y: 410 },
   ...[
     [200, 500],
     [380, 500],
@@ -225,6 +214,10 @@ export const PROPS = [
 ];
 export const propBounds = (p) => {
   const { x, y, s = 1, type } = p;
+  if (p.solid === false || type === 'flowers') return null;
+  if (type === 'gatePillar') return { x: x - 12, y: y - 6, w: 24, h: 18 };
+  if (type === 'assetTree' || type === 'assetPine')
+    return { x: x - 5 * s, y: y - 3 * s, w: 10 * s, h: 10 * s };
   if (type === 'tree')
     return { x: x - 13 * s, y: y - 8 * s, w: 27 * s, h: 30 * s };
   if (type === 'bench') return { x, y: y + 2, w: 72, h: 29 };
@@ -232,7 +225,6 @@ export const propBounds = (p) => {
   if (type === 'table') return { x: x - 25, y: y + 9, w: 53, h: 29 };
   if (type === 'board') return { x, y: y + 20, w: 44, h: 25 };
   if (type === 'stall') return { x: x - 40, y: y - 10, w: 80, h: 38 };
-  if (type === 'flowers') return { x: x - 15, y: y - 5, w: 30, h: 18 };
   return { x, y, w: 24, h: 20 };
 };
 export const OBSTACLES = [
@@ -251,7 +243,7 @@ export const OBSTACLES = [
   { x: 735, y: 600, w: 130, h: 105 },
   { x: 1660, y: 1250, w: 860, h: 245 },
   { x: 2000, y: 390, w: 62, h: 28 },
-  ...PROPS.map(propBounds),
+  ...PROPS.map(propBounds).filter(Boolean),
 ];
 // Large circuits connect districts, with occasional bench/garden stops.
 export const NPC_ROUTES = [

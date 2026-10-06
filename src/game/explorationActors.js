@@ -1,4 +1,4 @@
-import { shotScores } from './exploration.js';
+import { gateUnlocked } from './exploration.js';
 import { createCreatures, updateCreatures } from './creatureSprites.js';
 import { FOOTBALL_HOMES, createMatch, updateMatch } from './football.js';
 
@@ -22,11 +22,13 @@ export function createExploration(scene) {
       {
         skin: i % 3,
         outfit: i % 4,
-        jersey: i === 0 ? 'messi' : i === 1 ? 'yamal' : undefined,
+        jersey: i < 4 ? 'messi' : 'yamal',
+        jerseyNumber:
+          i === 0 ? '10' : i === 4 ? '19' : i % 4 === 3 ? '1' : String(i + 2),
       },
       1.15,
     );
-    if (i < 2)
+    if (i === 0 || i === 4)
       actor.label = scene.add
         .text(x, y - 52, i === 0 ? 'Messi · 10' : 'Lamine Yamal · 19', {
           fontFamily: 'monospace',
@@ -38,6 +40,30 @@ export function createExploration(scene) {
         .setOrigin(0.5);
     return actor;
   });
+  const gardener = scene.makeActor(
+    'gardener',
+    2310,
+    575,
+    { skin: 1, outfit: 2, gender: 'female' },
+    1.15,
+  );
+  gardener.path = [];
+  gardener.stop = 0;
+  gardener.route = [
+    { x: 2310, y: 575 },
+    { x: 1950, y: 580 },
+    { x: 1820, y: 550 },
+    { x: 1810, y: 640 },
+  ];
+  const spectators = [400, 475, 550, 900, 975, 1050].map((x, i) =>
+    scene.makeActor(
+      `fan-${i}`,
+      x,
+      1140,
+      { skin: i % 3, outfit: i % 4, gender: i % 2 ? 'female' : 'male' },
+      1.1,
+    ),
+  );
   const cheer = scene.add
     .text(720, 1250, 'GOAL!', {
       fontFamily: 'monospace',
@@ -52,11 +78,16 @@ export function createExploration(scene) {
   const water = scene.add.graphics().setDepth(1499);
   return {
     creatures,
+    gardener,
+    spectators,
     anglers,
     players,
     homes,
     cheer,
     water,
+    ambiance: scene.add.graphics().setDepth(1105),
+    gate: scene.add.graphics().setDepth(514),
+    gateOpen: 0,
     ball: { x: 570, y: 1295 },
     lastKick: 0,
     seen: new Set(),
@@ -74,13 +105,50 @@ export function updateExploration(
   reduced,
 ) {
   const dt = Math.min(delta, 100);
-  if (live.footballActive !== state.footballActive) {
+  const mode = live.footballActive ? live.footballMode || 'watch' : null;
+  if (mode !== state.mode) {
     const cam = scene.cameras.main;
-    state.footballActive = live.footballActive;
-    if (live.footballActive) {
+    if (!state.mode && mode)
+      state.returnPosition = {
+        x: scene.player.image.x,
+        y: scene.player.image.y,
+      };
+    state.mode = mode;
+    state.match.controlled = mode === 'messi' ? 2 : mode === 'yamal' ? 6 : null;
+    state.players.forEach((a, i) => {
+      a.image.setVisible(i !== state.match.controlled);
+      a.label?.setVisible(i !== state.match.controlled);
+    });
+    scene.player.path = [];
+    scene.cancelTravel();
+    scene.player.config.footballAction = null;
+    scene.player.poseKey = 'idle';
+    scene.player.image.setAngle(0);
+    scene.move(scene.player, 0, 0, delta, 0);
+    if (mode === 'training') {
+      scene.player.image.setPosition(1410, 1332);
+      state.practice = { x: 1422, y: 1330 };
+      state.shot = null;
+      state.shotResultUntil = 0;
+      delete state.practiceResult;
+    } else if (state.match.controlled !== null) {
+      const p = state.match.players[state.match.controlled];
+      scene.player.image.setPosition(p.x, p.y);
+    } else if (!mode && state.returnPosition)
+      scene.player.image.setPosition(
+        state.returnPosition.x,
+        state.returnPosition.y,
+      );
+    if (mode) {
       cam.stopFollow();
-      cam.setZoom(Math.min(1.2, cam.width / 1250, cam.height / 660));
-      cam.centerOn(720, 1332);
+      cam.setZoom(
+        mode === 'watch'
+          ? Math.min(1.2, cam.width / 1250, cam.height / 540)
+          : window.innerWidth < 760
+            ? 1.65
+            : 2,
+      );
+      cam.centerOn(mode === 'training' ? 1440 : 720, 1332);
     } else {
       cam.setZoom(window.innerWidth < 760 ? 1.8 : 2);
       cam.startFollow(
@@ -91,12 +159,98 @@ export function updateExploration(
       );
     }
   }
+  const opened = gateUnlocked(live.discoveries || []);
+  state.gateOpen +=
+    ((opened ? 1 : 0) - state.gateOpen) * Math.min(1, dt / (reduced ? 1 : 350));
+  state.gate.clear();
+  state.gate.lineStyle(4, 0x79593b);
+  state.gate.fillStyle(opened ? 0xc4d399 : 0xbe9462);
+  const leafWidth = 36 * (1 - state.gateOpen) + 4;
+  for (const x of [1553, 1629 - leafWidth]) {
+    state.gate.fillRect(x, 483, leafWidth, 22);
+    for (let i = 0; i < leafWidth; i += 8)
+      state.gate.lineBetween(x + i, 483, x + i, 505);
+  }
+  // Gate leaves swing into the pillars. The unlocked shortcut is a destination action,
+  // not an invisible wall across the only district street.
+  state.ambiance.clear();
+  if (!reduced) {
+    for (let i = 0; i < 7; i++) {
+      const x = 1780 + i * 78 + Math.sin(time * 0.0007 + i) * 18,
+        y = 340 + (i % 3) * 75 + Math.cos(time * 0.001 + i) * 12;
+      state.ambiance.fillStyle(i % 2 ? 0xf5bf7b : 0xe3d5f4, 0.75);
+      state.ambiance.fillEllipse(
+        x,
+        y,
+        3 + Math.abs(Math.sin(time * 0.01 + i)) * 5,
+        3,
+      );
+    }
+    for (let i = 0; i < 2; i++) {
+      const bx = 1880 + ((time * 0.012 + i * 190) % 390),
+        by = 735 + Math.sin(time * 0.001 + i) * 8;
+      state.ambiance.lineStyle(2, 0x496860, 0.75);
+      state.ambiance.lineBetween(
+        bx - 4,
+        by - Math.abs(Math.sin(time * 0.007 + i)) * 4,
+        bx,
+        by,
+      );
+      state.ambiance.lineBetween(
+        bx,
+        by,
+        bx + 4,
+        by - Math.abs(Math.sin(time * 0.007 + i)) * 4,
+      );
+    }
+    for (let i = 0; i < 10; i++) {
+      const x = 1820 + i * 49 + Math.sin(time * 0.0005 + i) * 8,
+        y = 830 + (i % 4) * 52 + Math.cos(time * 0.0008 + i) * 6;
+      state.ambiance.fillStyle(
+        0xd1d6a0,
+        darkness * 0.6 * (0.5 + 0.5 * Math.sin(time * 0.002 + i)),
+      );
+      state.ambiance.fillCircle(x, y, 1.5);
+    }
+    if (darkness > 0.5) {
+      state.ambiance.lineStyle(2, 0xb3a4d2, darkness * 0.35);
+      for (let i = 0; i < 3; i++) {
+        const phase = time * 0.001 + i * 2;
+        state.ambiance.strokeEllipse(
+          2050 + Math.sin(phase) * 45,
+          890 + Math.cos(phase) * 12,
+          9,
+          3,
+        );
+      }
+    }
+  }
   const discover = (id) => {
     if (!state.seen.has(id)) {
       state.seen.add(id);
       live.onDiscover?.(id);
     }
   };
+  if (!state.gardener.path.length && time > (state.gardener.pauseUntil || 0)) {
+    const target =
+      state.gardener.route[state.gardener.stop++ % state.gardener.route.length];
+    state.gardener.path = scene.routeTo(state.gardener.image, target);
+    state.gardener.pauseUntil = time + 3500;
+  }
+  scene.followPath(state.gardener, delta, 0.055);
+  state.spectators.forEach((actor, i) => {
+    actor.direction = 'down';
+    actor.config.footballAction = state.match.goal
+      ? { type: 'celebrate', progress: reduced ? 1 : (time % 1200) / 1200 }
+      : null;
+    actor.poseKey = actor.config.footballAction
+      ? `celebrate:${Math.floor(time / 100) % 12}`
+      : 'idle';
+    scene.move(actor, 0, 0, delta, 0);
+    if (!reduced && state.match.goal)
+      actor.image.y = 1140 - Math.abs(Math.sin(time * 0.006 + i)) * 2;
+    else actor.image.y = 1140;
+  });
   const creature = updateCreatures(
     scene,
     state.creatures,
@@ -122,6 +276,22 @@ export function updateExploration(
   )
     discover('dream');
   state.water.clear();
+  if (!state.gardener.path.length && time < state.gardener.pauseUntil) {
+    const g = state.gardener.image;
+    state.gardener.direction = 'up';
+    state.water.fillStyle(0x96b9c3);
+    state.water.fillRect(g.x + 12, g.y - 26, 8, 6);
+    if (!reduced)
+      for (let i = 0; i < 3; i++) {
+        state.water.fillStyle(0x81d8e7, 0.65);
+        state.water.fillRect(
+          g.x + 18 + i * 3,
+          g.y - 19 + ((time * 0.015 + i * 5) % 14),
+          2,
+          3,
+        );
+      }
+  }
   state.anglers.forEach((actor, i) => {
     const t = ((time + i * 3200) % 13000) / 1000;
     actor.direction = 'right';
@@ -169,84 +339,161 @@ export function updateExploration(
     visitor.y < 1490
   )
     discover('football');
+  const keys = scene.keys,
+    c = live.controls || {};
+  const dx =
+    Number(!!(keys.D.isDown || keys.RIGHT.isDown || c.right)) -
+    Number(!!(keys.A.isDown || keys.LEFT.isDown || c.left));
+  const dy =
+    Number(!!(keys.S.isDown || keys.DOWN.isDown || c.down)) -
+    Number(!!(keys.W.isDown || keys.UP.isDown || c.up));
+  let action = null;
+  if (keys.SPACE.isDown && !state.spaceDown) action = 'shoot';
+  if (keys.Q.isDown && !state.qDown) action = 'pass';
+  state.spaceDown = keys.SPACE.isDown;
+  state.qDown = keys.Q.isDown;
   const kick = live.kick;
   if (kick && kick.stamp !== state.lastKick) {
     state.lastKick = kick.stamp;
-    state.shot = {
-      t: 0,
-      start: { x: 740, y: 1332 },
-      goal: shotScores(kick.aim),
-    };
+    if (mode === 'training' && !state.shot) {
+      const aim = kick.aim ?? 50;
+      state.shot = {
+        t: 0,
+        x: 1422,
+        y: 1330,
+        vx: 190,
+        vy: (aim - 50) * 3,
+        keeperY: 1332,
+      };
+    } else action = kick.type;
   }
-  if (!state.shot && !live.footballActive && !reduced)
-    updateMatch(state.match, dt / 1000);
-  state.players.forEach((actor, i) => {
-    const p = state.match.players[i],
-      dx = p.x - actor.image.x,
-      dy = p.y - actor.image.y;
+  updateMatch(state.match, dt / 1000, {
+    dx: mode === 'messi' || mode === 'yamal' ? dx : 0,
+    dy: mode === 'messi' || mode === 'yamal' ? dy : 0,
+    action,
+  });
+  if (
+    state.match.stats.shots + state.match.stats.passes !==
+    state.lastBallKick
+  ) {
+    if (state.lastBallKick !== undefined) live.onSound?.('kick');
+    state.lastBallKick = state.match.stats.shots + state.match.stats.passes;
+  }
+  const totalGoals = state.match.score[0] + state.match.score[1];
+  if (totalGoals !== (state.lastGoal || 0)) {
+    live.onSound?.('goal');
+    state.lastGoal = totalGoals;
+  }
+  const sync = (actor, p) => {
     actor.config.footballAction = p.action;
     actor.poseKey = p.action
       ? `${p.action.type}:${Math.floor(p.action.progress * 12)}`
       : 'idle';
     actor.direction = p.facing;
+    actor.lockFacing = true;
     scene.move(
       actor,
-      dx,
-      dy,
+      p.x - actor.image.x,
+      p.y - actor.image.y,
       delta,
-      Math.hypot(dx, dy) / Math.max(Math.min(delta, 40), 1),
+      Math.hypot(p.x - actor.image.x, p.y - actor.image.y) /
+        Math.max(Math.min(delta, 40), 1),
     );
-  });
-  if (!state.shot)
-    state.ball = live.footballActive
-      ? time < (state.shotResultUntil || 0)
-        ? state.ball
-        : { x: 752, y: 1330 }
-      : state.match.ball;
-  state.cheer.setVisible(state.match.goal);
-  if (state.shot) {
-    state.shot.t += dt / 1000;
-    const progress = Math.min(Math.max(state.shot.t - 0.3, 0) / 0.9, 1);
-    const p = scene.player;
-    p.config.footballAction =
-      state.shot.t < 0.3
-        ? { type: 'kick', progress: state.shot.t / 0.3 }
-        : null;
-    p.poseKey = p.config.footballAction
-      ? `kick:${Math.floor(p.config.footballAction.progress * 12)}`
-      : 'idle';
-    p.direction = 'right';
-    scene.move(p, 0, 0, delta, 0);
-    state.ball = {
-      x: 752 + (1292 - 752) * progress,
-      y: 1330 + (state.shot.goal ? 0 : 75) * progress,
-      height: Math.sin(progress * Math.PI) * 18,
-      spin: state.shot.t * 15,
-    };
-    if (progress === 1) {
-      live.onShot?.(state.shot.goal);
-      state.cheer
-        .setText(state.shot.goal ? 'GOAL!' : 'JUST WIDE!')
-        .setVisible(true);
-      state.shot = null;
-      state.shotResultUntil = time + 1600;
-      p.config.footballAction = null;
-      p.poseKey = 'idle';
-      scene.move(p, 0, 0, delta, 0);
+    actor.lockFacing = false;
+    if (p.action?.type === 'save' && !reduced)
+      actor.image.setAngle(
+        (p.facing === 'left' ? -1 : 1) *
+          Math.sin(p.action.progress * Math.PI) *
+          18,
+      );
+    else actor.image.setAngle(0);
+  };
+  state.players.forEach((actor, i) => sync(actor, state.match.players[i]));
+  if (state.match.controlled !== null) {
+    const p = state.match.players[state.match.controlled];
+    sync(scene.player, p);
+    const cam = scene.cameras.main;
+    const targetX = p.x * 0.8 + state.match.ball.x * 0.2;
+    cam.centerOn(
+      cam.midPoint.x + (targetX - cam.midPoint.x) * (reduced ? 1 : 0.06),
+      p.y * 0.8 + state.match.ball.y * 0.2 + 24,
+    );
+    state.water.lineStyle(2, p.team === 0 ? 0x81c6ff : 0xffb5a1);
+    state.water.strokeEllipse(p.x, p.y + 5, 24, 7);
+  }
+  state.cheer.setText(state.match.event).setVisible(state.match.goal);
+  if (mode && time > (state.nextReport || 0)) {
+    state.nextReport = time + 200;
+    live.onMatchState?.({
+      score: [...state.match.score],
+      clock: Math.floor(state.match.clock),
+      event: state.match.event,
+      hasBall: state.match.owner === state.match.controlled,
+    });
+  }
+  const drawBall = (b) => {
+    state.water.fillStyle(0x233e43, 0.25);
+    state.water.fillEllipse(b.x, b.y + 4, 11, 4);
+    state.water.fillStyle(0xf2f0d4);
+    state.water.fillCircle(b.x, b.y - (b.height || 0), 5);
+    state.water.fillStyle(0x2b4345);
+    state.water.fillRect(
+      b.x - 2 + Math.round(Math.sin(b.spin || 0)),
+      b.y - 2 - (b.height || 0),
+      3,
+      3,
+    );
+  };
+  drawBall(state.match.ball);
+  if (mode === 'training') {
+    let b = state.practice;
+    if (state.shot) {
+      const shot = state.shot;
+      shot.t += dt / 1000;
+      scene.player.direction = 'right';
+      scene.player.config.footballAction =
+        shot.t < 0.24 ? { type: 'kick', progress: shot.t / 0.24 } : null;
+      scene.player.poseKey = scene.player.config.footballAction
+        ? `kick:${Math.floor(shot.t * 40)}`
+        : 'idle';
+      scene.move(scene.player, 0, 0, delta, 0);
+      if (shot.t > 0.24) {
+        shot.x += (shot.vx * dt) / 1000;
+        shot.y += (shot.vy * dt) / 1000;
+      }
+      b = shot;
+      if (shot.x >= 1500) {
+        const goal = shot.y > 1295 && shot.y < 1370;
+        state.practiceResult = goal;
+        state.practice = { x: shot.x, y: shot.y };
+        state.shot = null;
+        state.shotResultUntil = time + 600;
+        scene.player.config.footballAction = null;
+        scene.player.poseKey = 'idle';
+        scene.move(scene.player, 0, 0, delta, 0);
+      }
+    } else if (time > state.shotResultUntil) {
+      // Visible ball return rather than a jump back to the foot.
+      const d = Math.hypot(state.practice.x - 1422, state.practice.y - 1330),
+        f = Math.min(1, (dt * 0.2) / Math.max(1, d));
+      state.practice.x += (1422 - state.practice.x) * f;
+      state.practice.y += (1330 - state.practice.y) * f;
+      if (d < 0.5 && state.practiceResult !== undefined) {
+        live.onShot?.(state.practiceResult);
+        delete state.practiceResult;
+      }
     }
-  } else if (time < (state.shotResultUntil || 0)) state.cheer.setVisible(true);
-  else state.cheer.setText('GOAL!');
-  const b = state.ball;
-  state.water.fillStyle(0x233e43, 0.25);
-  state.water.fillEllipse(b.x, b.y + 4, 11, 4);
-  const ballY = b.y - (b.height || 0);
-  state.water.fillStyle(0xf2f0d4);
-  state.water.fillCircle(b.x, ballY, 5);
-  state.water.fillStyle(0x2b4345);
-  state.water.fillRect(
-    b.x - 2 + Math.round(Math.sin(b.spin || 0)),
-    ballY - 2,
-    3,
-    3,
-  );
+    drawBall(b);
+  }
+  // A handful of residents watch from outside the touchline and react to either team.
+  if (state.match.goal) {
+    state.ambiance.fillStyle(0xffd486, 0.8);
+    for (let i = 0; i < 6; i++)
+      state.ambiance.fillRect(
+        450 + i * 75,
+        1138 - (reduced ? 0 : Math.sin(time * 0.008 + i) * 4),
+        3,
+        6,
+      );
+  }
 }
