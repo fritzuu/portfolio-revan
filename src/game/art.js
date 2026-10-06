@@ -85,8 +85,58 @@ export {
 import { WORLD_SIZE, LOCATIONS, GARDENS, PROPS } from './layout.js';
 export function drawProp(ctx, p) {
   const { x, y, s = 1, type } = p;
+  const leaves =
+    p.variant === 'blossom'
+      ? [
+          '#b55281',
+          '#c85d8a',
+          '#e87fa9',
+          '#ef96b5',
+          '#f4aac5',
+          '#d96c99',
+          '#ee9cb8',
+          '#ffd3dc',
+          '#ffe7eb',
+        ]
+      : p.variant === 'lilac'
+        ? [
+            '#6852a4',
+            '#7e63b5',
+            '#9c81d0',
+            '#b499e0',
+            '#baa8e8',
+            '#8d74c4',
+            '#b29adc',
+            '#cfbeef',
+            '#e3d8fa',
+          ]
+        : [
+            '#26745a',
+            '#318a62',
+            '#4dac70',
+            '#65be78',
+            '#78ce8b',
+            '#389b6c',
+            '#79c97d',
+            '#9bd985',
+            '#b5e995',
+          ];
+  const originalLeaves = [
+    '#2d5736',
+    '#345f36',
+    '#427943',
+    '#4d8544',
+    '#4a8445',
+    '#386b39',
+    '#4b8040',
+    '#60964b',
+    '#73a157',
+  ];
   const r = (a, b, w, h, c) => {
-    ctx.fillStyle = c;
+    ctx.fillStyle =
+      type === 'tree' && originalLeaves.includes(c)
+        ? leaves[originalLeaves.indexOf(c)]
+        : c;
     ctx.fillRect(a, b, w, h);
   };
   ctx.save();
@@ -116,7 +166,7 @@ export function drawProp(ctx, p) {
     r(2, 8, 72, 14, '#35434240');
     r(0, 0, 72, 23, '#506166');
     for (let i = 0; i < 3; i++)
-      r(5, 3 + i * 7, 62, 4, ['#c4a477', '#d2b484', '#b99566'][i]);
+      r(5, 3 + i * 7, 62, 4, ['#e99a74', '#ffc395', '#dc805e'][i]);
     r(4, 21, 5, 9, '#424f50');
     r(63, 21, 5, 9, '#424f50');
   } else if (type === 'lamp') {
@@ -151,15 +201,15 @@ export function drawProp(ctx, p) {
     r(-17, -3, 34, 6, '#bd9973');
     for (let i = 0; i < 5; i++) {
       r(-12 + i * 6, -12, 4, 12, '#65804b');
-      r(-14 + i * 6, -15, 7, 6, i % 2 ? '#e6bd69' : '#dc937d');
+      r(-14 + i * 6, -15, 7, 6, i % 2 ? '#ffc95b' : '#ff7ca8');
       r(-12 + i * 6, -13, 3, 2, '#f7e2aa');
     }
   } else if (type === 'stall') {
     r(-40, -10, 80, 35, '#957048');
     r(-37, -7, 74, 28, '#bf9860');
-    r(-42, -48, 84, 15, '#e7d8ad');
-    r(-35, -59, 70, 11, '#759b91');
-    for (let i = 0; i < 6; i++) r(-40 + i * 14, -48, 7, 15, '#73958b');
+    r(-42, -48, 84, 15, '#ffebc8');
+    r(-35, -59, 70, 11, '#e87d6b');
+    for (let i = 0; i < 6; i++) r(-40 + i * 14, -48, 7, 15, '#f68b78');
     r(-38, -33, 4, 25, '#5d675b');
     r(34, -33, 4, 25, '#5d675b');
     r(-25, -17, 18, 8, '#648da1');
@@ -186,8 +236,8 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
     ctx.fillText(text, x, y);
     ctx.textAlign = 'left';
   };
-  r(0, 0, WORLD_SIZE.width, WORLD_SIZE.height, '#d8d0b7');
-  // Quiet pavement: an ordered surface rather than noisy random tiles.
+  r(0, 0, WORLD_SIZE.width, WORLD_SIZE.height, '#9bd7a0');
+  // Soft grass texture gives the districts breathing room between the warm streets.
   for (let y = 174; y < 1100; y += 24)
     for (let x = -24; x < 1600; x += 48) {
       const xx = x + ((y / 24) % 2 ? 24 : 0);
@@ -196,10 +246,23 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
         y,
         46,
         22,
-        (Math.floor(x / 48) + Math.floor(y / 24)) % 4 ? '#d3ccb6' : '#d9d2bd',
+        (Math.floor(x / 48) + Math.floor(y / 24)) % 4 ? '#a7dca8' : '#a0d5a0',
       );
-      r(xx, y, 46, 1, '#e5ddc8');
+      r(xx, y, 46, 1, '#b6e2b1');
     }
+  // Civic paving is confined to shopfronts and the plaza, leaving visible green spaces.
+  for (const [x, y, w, h] of [
+    [55, 185, 1490, 245],
+    [585, 515, 430, 475],
+    [1100, 790, 350, 200],
+  ]) {
+    r(x, y, w, h, '#efd9c1');
+    for (let yy = y + 8; yy < y + h; yy += 24)
+      for (let xx = x + 8; xx < x + w; xx += 48) {
+        r(xx, yy, 38, 1, '#fff0d9');
+        r(xx, yy, 1, 17, '#d9bca3');
+      }
+  }
   // Consistent street borders define the main circulation loop.
   for (const [x, y, w, h] of [
     [55, 435, 1490, 85],
@@ -207,17 +270,17 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
     [1015, 510, 80, 490],
     [55, 995, 1490, 55],
   ]) {
-    r(x - 3, y - 3, w + 6, h + 6, '#a9b1a3');
-    r(x, y, w, h, '#e8dfc4');
+    r(x - 3, y - 3, w + 6, h + 6, '#bb987a');
+    r(x, y, w, h, '#ffe0af');
     for (let yy = y + 8; yy < y + h; yy += 20)
-      r(x + 6, yy, w - 12, 1, '#d9ceb3');
+      r(x + 6, yy, w - 12, 1, '#edc490');
   }
   function water(x, y, w, h) {
-    r(x, y, w, h, '#337f91');
+    r(x, y, w, h, '#218eac');
     for (let yy = y + 4; yy < y + h - 4; yy += 12)
       for (let xx = x + 4; xx < x + w - 4; xx += 24) {
-        r(xx, yy, 16, 2, (xx + yy) % 3 ? '#4f9dad' : '#428f9f');
-        r(xx + 5, yy + 4, 7, 1, '#6bafba');
+        r(xx, yy, 16, 2, (xx + yy) % 3 ? '#4dbdd0' : '#36aac4');
+        r(xx + 5, yy + 4, 7, 1, '#8ddce2');
       }
   }
   water(0, 0, 1600, 155);
@@ -243,23 +306,31 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
     r(x, 143, 32, 3, '#6a8777');
   }
   for (const g of GARDENS) {
-    r(g.x - 4, g.y - 4, g.w + 8, g.h + 8, '#aaa992');
-    r(g.x, g.y, g.w, g.h, '#779968');
-    r(g.x + 4, g.y + 4, g.w - 8, g.h - 8, '#83a476');
+    r(g.x - 4, g.y - 4, g.w + 8, g.h + 8, '#639b79');
+    r(g.x, g.y, g.w, g.h, '#64b982');
+    r(g.x + 4, g.y + 4, g.w - 8, g.h - 8, '#79cc92');
     for (let yy = g.y + 10; yy < g.y + g.h - 5; yy += 17)
       for (let xx = g.x + 9; xx < g.x + g.w - 5; xx += 19) {
-        r(xx, yy, 2, 3, '#719361');
+        r(xx, yy, 2, 3, '#4b9f70');
+        if ((Math.floor(xx / 19) + Math.floor(yy / 17)) % 3 === 0) {
+          const petal = ['#ffe071', '#ff87b0', '#a99ce9'][
+            Math.floor(xx / 19) % 3
+          ];
+          r(xx - 3, yy - 3, 7, 3, petal);
+          r(xx - 1, yy - 5, 3, 7, petal);
+          r(xx, yy - 2, 2, 2, '#fff5bc');
+        }
       }
   }
   // West garden lake, with a wide, navigable dock coming from the southern shore.
-  r(85, 530, 400, 335, '#90a69a');
+  r(85, 530, 400, 335, '#52a88c');
   r(91, 536, 388, 323, '#eee3c6');
   water(100, 545, 370, 305);
   r(238, 727, 124, 156, '#826a4c');
-  r(245, 732, 110, 151, '#c3a574');
+  r(245, 732, 110, 151, '#dfad79');
   for (let y = 735; y < 883; y += 13) {
-    r(246, y, 108, 2, '#927856');
-    r(247, y + 3, 106, 1, '#e0c18c');
+    r(246, y, 108, 2, '#b68257');
+    r(247, y + 3, 106, 1, '#ffd49b');
   }
   for (const x of [238, 356])
     for (const y of [744, 794, 844]) {
@@ -280,25 +351,68 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
   label('MOONWATER DOCK', 300, 919, 13);
   label('FISH • SELL • DISCOVER', 300, 938, 9);
   // A framed plaza; benches share two aligned rows around the fountain.
-  r(680, 560, 240, 173, '#bfbea9');
-  r(687, 567, 226, 159, '#e9dfc1');
-  r(727, 593, 146, 119, '#829d98');
-  r(732, 598, 136, 109, '#e1ddbd');
+  r(680, 560, 240, 173, '#c68dc0');
+  r(687, 567, 226, 159, '#ffe6b7');
+  for (let x = 696; x < 910; x += 18) {
+    r(x, 571, 9, 7, '#eea3bd');
+    r(x, 721, 9, 7, '#eea3bd');
+  }
+  for (let y = 583; y < 720; y += 18) {
+    r(691, y, 7, 9, '#80bdc7');
+    r(902, y, 7, 9, '#80bdc7');
+  }
+  r(727, 593, 146, 119, '#568dac');
+  r(732, 598, 136, 109, '#9bd0da');
   water(741, 607, 118, 91);
-  r(780, 633, 40, 28, '#a4beb7');
-  r(790, 612, 20, 33, '#ced9c0');
-  r(777, 608, 46, 7, '#e4e5c7');
-  r(788, 601, 24, 7, '#afcbc2');
+  r(780, 633, 40, 28, '#72bbcb');
+  r(790, 612, 20, 33, '#bee4de');
+  r(777, 608, 46, 7, '#edf8de');
+  r(788, 601, 24, 7, '#96d7d9');
   label('CURIOSITY SQUARE', 800, 775, 13);
   label('A LITTLE CITY OF IDEAS', 800, 793, 9);
   label('THE READING GARDEN', 1260, 770, 12);
+  const themes = {
+    about: {
+      roof: '#328c78',
+      trim: '#67c4a3',
+      accent: '#ed8c9a',
+      sign: '#23665e',
+    },
+    projects: {
+      roof: '#db7652',
+      trim: '#f4a56d',
+      accent: '#e78453',
+      sign: '#a94e3f',
+    },
+    skills: {
+      roof: '#7763b8',
+      trim: '#b4a0e5',
+      accent: '#8b75ca',
+      sign: '#564886',
+    },
+    experience: {
+      roof: '#338aa6',
+      trim: '#74c8d5',
+      accent: '#4ba5bc',
+      sign: '#286b83',
+    },
+    contact: {
+      roof: '#bc5889',
+      trim: '#eb9ab7',
+      accent: '#d96699',
+      sign: '#8d416d',
+    },
+  };
   for (const l of LOCATIONS) {
+    const theme = themes[l.id];
     const { x, y, w, h } = l;
     r(x + 8, y + 8, w, h, '#53645540');
     r(x, y, w, h, l.color);
-    r(x, y - 17, w, 22, '#52665f');
-    r(x + 6, y - 12, w - 12, 6, '#889c87');
-    r(x, y + h - 14, w, 14, '#9e9d87');
+    r(x, y - 17, w, 22, theme.roof);
+    r(x + 6, y - 12, w - 12, 6, theme.trim);
+    for (let xx = x + 12; xx < x + w - 8; xx += 18)
+      r(xx, y - 7, 12, 4, theme.trim);
+    r(x, y + h - 14, w, 14, theme.trim);
     for (let yy = y + 55; yy < y + h - 17; yy += 16)
       r(x + 5, yy, w - 10, 1, '#ffffff25');
     r(l.doorX - 20, y + h - 85, 40, 85, '#486773');
@@ -307,27 +421,22 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
     r(l.doorX + 9, y + h - 40, 3, 3, '#f6d991');
     for (const xx of [x + 22, x + 78, x + w - 120, x + w - 64]) {
       if (Math.abs(xx + 22 - l.doorX) < 45) continue;
-      r(xx, y + 56, 42, h - 85, '#608392');
-      r(xx + 4, y + 60, 34, h - 94, '#83a8b3');
-      r(xx + 8, y + 64, 5, h - 104, '#b7d0ce');
+      r(xx, y + 56, 42, h - 85, theme.roof);
+      r(xx + 4, y + 60, 34, h - 94, '#8adce3');
+      r(xx + 8, y + 64, 5, h - 104, '#e0ffff');
       r(xx + 20, y + 59, 3, h - 92, '#cad1bd');
-      r(xx - 2, y + h - 28, 46, 5, '#ece1c3');
+      r(xx - 2, y + h - 28, 46, 5, '#fff1ce');
+      r(xx + 3, y + h - 25, 36, 8, theme.accent);
+      for (let fx = xx + 5; fx < xx + 36; fx += 8) {
+        r(fx, y + h - 32, 3, 9, '#3b9b68');
+        r(fx - 2, y + h - 35, 7, 5, fx % 3 ? '#ffe57c' : '#ff82aa');
+      }
     }
     r(x - 4, y + 31, w + 8, 19, '#f1dfb4');
     for (let xx = x - 4; xx < x + w + 4; xx += 24)
-      r(
-        xx,
-        y + 31,
-        12,
-        19,
-        l.id === 'projects'
-          ? '#c98560'
-          : l.id === 'contact'
-            ? '#b77d73'
-            : '#779889',
-      );
+      r(xx, y + 31, 12, 19, theme.accent);
     r(x - 4, y + 49, w + 8, 4, '#526b62');
-    r(x + 20, y + 5, w - 40, 23, '#364e48');
+    r(x + 20, y + 5, w - 40, 23, theme.sign);
     label(l.name.toUpperCase(), x + w / 2, y + 22, 13, '#f4e5bf');
     r(l.doorX - 29, l.doorY, 58, 8, '#eee4c7');
     r(l.doorX - 33, l.doorY + 8, 66, 5, '#b9ae8f');
@@ -337,6 +446,34 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
       r(xx + 1, y + h - 23, 5, 5, '#d89b80');
       r(xx + 11, y + h - 24, 5, 5, '#e8c17f');
     }
+  }
+  // Festival bunting connects the storefronts above the broad main street.
+  ctx.strokeStyle = '#668678';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(440, 426);
+  ctx.quadraticCurveTo(800, 460, 1120, 426);
+  ctx.stroke();
+  for (let x = 450; x < 1120; x += 25) {
+    const y = 426 + Math.sin(((x - 440) / 680) * Math.PI) * 16;
+    ctx.fillStyle = ['#f5788f', '#f6c756', '#60bbc0', '#a188d3'][
+      Math.floor(x / 25) % 4
+    ];
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 13, y);
+    ctx.lineTo(x + 6, y + 14);
+    ctx.fill();
+  }
+  // Painted compass tiles and petal accents are flat ground details, not new obstacles.
+  for (const [x, y] of [
+    [605, 480],
+    [1055, 480],
+    [800, 985],
+  ]) {
+    r(x - 16, y - 16, 32, 32, '#fff1cf');
+    r(x - 11, y - 11, 22, 22, '#e891aa');
+    r(x - 6, y - 6, 12, 12, '#ffe2a0');
   }
   label('MIRA’S TACKLE', 550, 958, 12);
   label('A GOOD CATCH HAS A GOOD STORY', 550, 973, 8);

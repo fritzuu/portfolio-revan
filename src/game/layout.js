@@ -11,7 +11,7 @@ export const LOCATIONS = [
     h: 190,
     doorX: 300,
     doorY: 410,
-    color: '#b9cabe',
+    color: '#85d5b0',
   },
   {
     id: 'projects',
@@ -23,7 +23,7 @@ export const LOCATIONS = [
     h: 190,
     doorX: 800,
     doorY: 410,
-    color: '#dcc394',
+    color: '#ffd184',
   },
   {
     id: 'skills',
@@ -35,7 +35,7 @@ export const LOCATIONS = [
     h: 190,
     doorX: 1260,
     doorY: 410,
-    color: '#abc4c8',
+    color: '#afa9e9',
   },
   {
     id: 'experience',
@@ -47,7 +47,7 @@ export const LOCATIONS = [
     h: 150,
     doorX: 800,
     doorY: 960,
-    color: '#cac2b8',
+    color: '#8acddd',
   },
   {
     id: 'contact',
@@ -59,7 +59,7 @@ export const LOCATIONS = [
     h: 150,
     doorX: 1260,
     doorY: 960,
-    color: '#d0ada0',
+    color: '#f5a5b1',
   },
 ];
 export const ACTIVITIES = [
@@ -109,7 +109,13 @@ export const PROPS = [
     [1380, 610, 0.8],
     [120, 950, 0.9],
     [1480, 950, 0.9],
-  ].map(([x, y, s]) => ({ type: 'tree', x, y, s })),
+  ].map(([x, y, s], i) => ({
+    type: 'tree',
+    x,
+    y,
+    s,
+    variant: i % 4 === 1 ? 'blossom' : i % 4 === 3 ? 'lilac' : 'green',
+  })),
   ...[
     [700, 530],
     [830, 530],
