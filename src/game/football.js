@@ -81,6 +81,7 @@ function homes(m, i) {
   return { x: m.half === 1 ? x : 1440 - x, y };
 }
 function kickoff(m, team, input = {}) {
+  m.kickoffNumber = (m.kickoffNumber || 0) + 1;
   m.players.forEach((p, i) => {
     Object.assign(p, homes(m, i), {
       running: false,
@@ -465,24 +466,12 @@ function step(m, dt, input) {
         };
     });
     if (m.elapsed > 1.6) {
-      m.goal = false;
-      m.owner = null;
-      m.restart = m.scoringTeam === 0 ? 7 : 3;
-      m.phase = 'retrieve';
-      m.elapsed = 0;
+      const concedingTeam = 1 - m.scoringTeam;
+      kickoff(m, concedingTeam, input);
+      m.event =
+        concedingTeam === 0 ? 'Messi team · kick off' : 'Yamal team · kick off';
     }
     return;
-  }
-  if (m.restart !== null) {
-    const p = m.players[m.restart];
-    move(p, b, dt, 170);
-    if (distance(p, b) < 16) {
-      m.owner = m.restart;
-      m.restart = null;
-      m.phase = 'dribble';
-      p.cooldown = 0.7;
-      m.event = 'Goalkeeper restart';
-    }
   }
   if (m.controlled !== m.owner && m.charge) {
     m.charge = null;

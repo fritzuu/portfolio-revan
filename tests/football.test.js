@@ -246,11 +246,11 @@ test('30/120 Hz render rates produce the same match; hidden tab freezes play and
 test('autonomous games include goals at both ends, saves, rebounds, tackles and misses without ball jumps during live play', () => {
   const m = createMatch(8);
   let previous = { ...m.ball },
-    oldRound = '1:1';
+    oldRound = '1:1:1';
   const phases = new Set();
   for (let i = 0; i < 60 * 600; i++) {
     updateMatch(m, 1 / 60);
-    const round = `${m.matchNumber}:${m.half}`;
+    const round = `${m.matchNumber}:${m.half}:${m.kickoffNumber}`;
     if (round === oldRound)
       assert.ok(
         Math.hypot(m.ball.x - previous.x, m.ball.y - previous.y) < 13,
@@ -370,4 +370,37 @@ test('Santai gives a visitor 1.6 seconds of tackle protection after receiving th
   assert.ok(p.immune > 0.59);
   ticks(m, 37);
   assert.equal(p.immune, 0);
+});
+
+test('a goal restarts at centre with the conceding team, preserving score, clock, visitor and statistics in either half', () => {
+  for (const half of [1, 2]) {
+    const m = controlled();
+    m.half = half;
+    m.players.forEach((p) => (p.cooldown = 99));
+    m.owner = null;
+    m.lastTouch = half === 1 ? 1 : 5;
+    Object.assign(m.ball, { x: 1282, y: 1332, vx: 450, vy: 0, shot: true });
+    ticks(m, 1);
+    const score = [...m.score];
+    const visitor = m.controlled;
+    const clock = m.clock;
+    const number = m.kickoffNumber;
+    assert.equal(m.goal, true);
+    assert.equal(m.totals.goals, 1);
+    ticks(m, 97, { shootHeld: true });
+    assert.equal(m.goal, false);
+    assert.equal(m.phase, 'kickoff');
+    assert.equal(m.kickoffNumber, number + 1);
+    assert.equal(m.owner, half === 1 ? 5 : 1);
+    assert.equal(m.ball.x, 720);
+    assert.equal(m.ball.y, 1330);
+    assert.equal(m.ball.vx, 0);
+    assert.deepEqual(m.score, score);
+    assert.ok(m.clock > clock);
+    assert.equal(m.half, half);
+    assert.equal(m.controlled, visitor);
+    assert.equal(m.totals.goals, 1);
+    assert.equal(m.mustReleaseShoot, true);
+    assert.equal(m.windup, null);
+  }
 });

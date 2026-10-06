@@ -402,7 +402,7 @@ export function updateExploration(
       participating && !!((keyboardAllowed && keys.SHIFT.isDown) || c.sprint),
     hidden: document.hidden,
   });
-  const roundKey = `${state.match.matchNumber}:${state.match.half}:${state.match.status}`;
+  const roundKey = `${state.match.matchNumber}:${state.match.half}:${state.match.status}:${state.match.kickoffNumber}`;
   if (roundKey !== state.roundKey) {
     if (state.roundKey) {
       live.onSound?.('whistle');
