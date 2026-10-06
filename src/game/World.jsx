@@ -174,37 +174,12 @@ export default function World({
             this.lamps = PROPS.filter((p) => p.type === 'lamp').map((p) => ({
               halo: this.add
                 .image(p.x + 13, p.y - 72, 'lamp-glow')
+                .setScale(0.8)
                 .setDepth(2001)
                 .setBlendMode(Phaser.BlendModes.ADD),
               bulb: this.add
                 .rectangle(p.x + 13, p.y - 72, 10, 13, 0xffecb0)
                 .setDepth(2002),
-            }));
-            // Additional pools of light belong to existing dock posts, shop and windows.
-            const accentLights = [
-              [238, 744, 0.85],
-              [356, 744, 0.85],
-              [238, 844, 0.8],
-              [356, 844, 0.8],
-              [560, 835, 1.15],
-              [710, 575, 1],
-              [890, 575, 1],
-              [710, 750, 1],
-              [890, 750, 1],
-              [800, 105, 1.2],
-              ...DESTINATIONS.filter((l) => l.w).flatMap((l) => [
-                [l.doorX, l.doorY - 15, 1.2],
-                [l.x + 65, l.y + 105, 1],
-                [l.x + l.w - 65, l.y + 105, 1],
-              ]),
-            ];
-            this.accentLights = accentLights.map(([x, y, scale]) => ({
-              halo: this.add
-                .image(x, y, 'lamp-glow')
-                .setScale(scale)
-                .setDepth(2001)
-                .setBlendMode(Phaser.BlendModes.ADD),
-              bulb: this.add.rectangle(x, y, 4, 4, 0xffdf98).setDepth(2002),
             }));
             this.dayElapsed = 0;
             this.wasFishing = false;
@@ -349,8 +324,8 @@ export default function World({
             if (!document.hidden) this.dayElapsed += Math.min(delta, 100);
             const darkness = nightAmount(this.dayElapsed);
             this.night.setAlpha(darkness * 0.42);
-            [...this.lamps, ...this.accentLights].forEach(({ halo, bulb }) => {
-              halo.setAlpha(darkness * 0.9);
+            this.lamps.forEach(({ halo, bulb }) => {
+              halo.setAlpha(darkness * 0.6);
               bulb.setAlpha(darkness);
             });
             const f = live.current.fishing;
@@ -435,7 +410,6 @@ export default function World({
                 live.current.onTravel?.(this.trip ? l : null);
               }
             }
-            if (live.current.paused) return;
             this.npcs.forEach((npc, i) => {
               if (npc.sittingUntil) {
                 if (time < npc.sittingUntil) return;
@@ -512,7 +486,7 @@ export default function World({
                 this.water.fillRect(749 + i * 13, y, 5, 1);
               }
             }
-            if (!playing || f) return;
+            if (!playing || f || live.current.paused) return;
             const k = this.keys,
               c = live.current.controls || {};
             const dx =
