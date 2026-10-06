@@ -106,6 +106,8 @@ export function updateExploration(
   reduced,
 ) {
   const dt = Math.min(delta, 100);
+  state.match.difficulty =
+    live.footballDifficulty === 'sengit' ? 'sengit' : 'santai';
   const mode = live.footballActive ? live.footballMode || 'watch' : null;
   if (mode !== state.mode) {
     const cam = scene.cameras.main;

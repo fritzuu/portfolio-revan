@@ -3929,3 +3929,47 @@ textarea::placeholder {
     padding: 7px 3px;
   }
 }
+
+.football-difficulty {
+  position: absolute;
+  top: 157px;
+  left: 18px;
+  display: flex;
+  gap: 4px;
+  pointer-events: auto;
+}
+.football-difficulty button {
+  min-height: 44px;
+  padding: 4px 10px;
+  border: 1px solid #e7d5a2;
+  border-radius: 9px;
+  color: #f6edcf;
+  background: #294c45;
+  font:
+    22px 'VT323',
+    monospace;
+}
+.football-difficulty button[aria-pressed='true'] {
+  color: #263f39;
+  background: #ead59c;
+}
+.football-difficulty button:hover {
+  background: #47675a;
+  color: #fff3d0;
+}
+@media (max-width: 760px) {
+  .football-difficulty {
+    top: 135px;
+    left: 12px;
+    gap: 3px;
+  }
+  .football-difficulty button {
+    font-size: 18px;
+    padding: 3px 7px;
+  }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .football-difficulty {
+    top: 135px;
+  }
+}

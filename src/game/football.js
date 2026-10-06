@@ -28,6 +28,8 @@ const unit = (x, y) => {
 };
 export const attackDirection = (m, team) =>
   (team === 0 ? 1 : -1) * (m.half === 1 ? 1 : -1);
+const relaxed = (m) => m.difficulty !== 'sengit' && m.controlled !== null;
+const enemy = (m, p) => relaxed(m) && p.team !== m.players[m.controlled].team;
 const freshStats = () => ({
   goals: 0,
   assists: 0,
@@ -143,6 +145,7 @@ export function createMatch(seed = 8) {
   const m = {
     players,
     seed,
+    difficulty: 'santai',
     owner: 1,
     score: [0, 0],
     clock: 0,
@@ -264,7 +267,24 @@ function shoot(m, p, power) {
     (power > 0.78 ? (power - 0.78) * 0.55 : 0) +
     (p.sprinting || p.sprintRecovery > 0 ? 0.055 : p.running ? 0.02 : 0) +
     (pressure < 55 ? 0.045 : 0);
-  const angle = Math.atan2(p.aim.y, p.aim.x) + (random(m) - 0.5) * spread;
+  let aim = p.aim;
+  if (relaxed(m) && m.controlled === m.owner) {
+    const dir = attackDirection(m, p.team);
+    const goal = unit(
+      (dir > 0 ? FIELD.right : FIELD.left) - m.ball.x,
+      1332 - m.ball.y,
+    );
+    if (
+      aim.x * goal.x + aim.y * goal.y > 0.7 &&
+      Math.abs((dir > 0 ? FIELD.right : FIELD.left) - p.x) < 650
+    )
+      aim = unit(aim.x * 0.3 + goal.x * 0.7, aim.y * 0.3 + goal.y * 0.7);
+  }
+  const angle =
+    Math.atan2(aim.y, aim.x) +
+    (random(m) - 0.5) *
+      spread *
+      (relaxed(m) && m.controlled === m.owner ? 0.4 : 1);
   launch(
     m,
     {
@@ -276,16 +296,24 @@ function shoot(m, p, power) {
   );
 }
 function pass(m, p, through) {
-  const dir = attackDirection(m, p.team),
-    mate = m.players
-      .map((q, i) => ({ q, i }))
-      .filter((v) => v.q.team === p.team && v.q !== p && !v.q.keeper)
-      .sort(
-        (a, b) =>
-          distance(a.q, p) -
-          Math.max(0, (a.q.x - p.x) * dir) * 0.3 -
-          (distance(b.q, p) - Math.max(0, (b.q.x - p.x) * dir) * 0.3),
-      )[0];
+  const dir = attackDirection(m, p.team);
+  let mate = m.players
+    .map((q, i) => ({ q, i }))
+    .filter((v) => v.q.team === p.team && v.q !== p && !v.q.keeper)
+    .sort(
+      (a, b) =>
+        distance(a.q, p) -
+        Math.max(0, (a.q.x - p.x) * dir) * 0.3 -
+        (distance(b.q, p) - Math.max(0, (b.q.x - p.x) * dir) * 0.3),
+    )[0];
+  const visitor = m.players[m.controlled];
+  if (
+    relaxed(m) &&
+    visitor !== p &&
+    visitor.team === p.team &&
+    distance(visitor, p) < 420
+  )
+    mate = { q: visitor, i: m.controlled };
   if (mate)
     launch(
       m,
@@ -368,6 +396,7 @@ function actions(m, dt, input) {
           victim.action = { type: 'stumble', progress: 0 };
           victim.cooldown = 1;
           m.owner = i;
+          if (relaxed(m) && i === m.controlled) p.immune = 1.6;
           m.charge = null;
           m.windup = null;
           p.cooldown = 0.7;
@@ -376,7 +405,8 @@ function actions(m, dt, input) {
         }
       }
       if (t.age >= 0.46) {
-        if (!t.connected) p.stunned = 0.3;
+        if (!t.connected)
+          p.stunned = relaxed(m) && i === m.controlled ? 0.15 : 0.3;
         p.tackle = null;
         p.action = null;
       }
@@ -409,7 +439,7 @@ function keeperTarget(m, p) {
   if (m.clock > (p.reactAt || 0)) {
     const eta = incoming ? clamp((x - b.x) / (b.vx || 1), 0, 0.1) : 0;
     p.trackY = clamp(b.y + b.vy * eta, 1292, 1372);
-    p.reactAt = m.clock + 0.46;
+    p.reactAt = m.clock + (enemy(m, p) ? 0.72 : 0.46);
     if (incoming && Math.abs(b.x - x) < 130 && !p.dive && p.cooldown === 0) {
       p.dive = { age: 0 };
       p.action = { type: 'save', progress: 0 };
@@ -476,7 +506,12 @@ function step(m, dt, input) {
       if (!input.sprint || p.stamina >= 25) p.exhausted = false;
       p.sprinting = !!input.sprint && moving && !p.exhausted && !m.charge;
       if (p.sprinting) p.sprintRecovery = 0.35;
-      p.stamina = clamp(p.stamina + (p.sprinting ? -31 : 18) * dt, 0, 100);
+      p.stamina = clamp(
+        p.stamina +
+          (p.sprinting ? (relaxed(m) ? -18 : -31) : relaxed(m) ? 28 : 18) * dt,
+        0,
+        100,
+      );
       target = {
         x: p.x + (input.dx || 0) * 100,
         y: p.y + (input.dy || 0) * 100,
@@ -499,19 +534,20 @@ function step(m, dt, input) {
         p.action = { type: 'save', progress: Math.min(1, p.dive.age / 0.5) };
         if (p.dive.age > 0.5) p.dive = null;
       }
-      speed = p.dive ? 140 : 75;
+      speed = p.dive ? (enemy(m, p) ? 105 : 140) : enemy(m, p) ? 60 : 75;
     } else if (
       m.owner === null ||
       (pressing[p.team] === i && p.team !== team)
     ) {
       target = { x: b.x + (b.vx || 0) * 0.1, y: b.y + (b.vy || 0) * 0.1 };
-      speed = 132;
+      speed = enemy(m, p) ? 98 : 132;
       if (
         i !== m.controlled &&
         owner &&
         owner.team !== p.team &&
+        owner.immune === 0 &&
         distance(p, b) < 60 &&
-        random(m) < dt * 1.2
+        random(m) < dt * (enemy(m, p) ? 0.45 : 1.2)
       )
         beginTackle(m, i);
     } else {
@@ -533,7 +569,7 @@ function step(m, dt, input) {
         ),
         y: clamp(h.y + Math.sin(m.clock * 0.7 + i) * 23, 1210, 1455),
       };
-      speed = p.team === team ? 147 : 125;
+      speed = p.team === team ? 147 : enemy(m, p) ? 105 : 125;
     }
     move(p, target, dt, speed);
   });
@@ -564,7 +600,14 @@ function step(m, dt, input) {
     }
   } else if (owner) {
     const touch = owner.aim || { x: attackDirection(m, owner.team), y: 0 },
-      stride = owner.sprinting ? 23 : 12;
+      stride =
+        relaxed(m) && m.controlled === m.owner
+          ? owner.sprinting
+            ? 16
+            : 10
+          : owner.sprinting
+            ? 23
+            : 12;
     const fx = clamp(
         owner.x + touch.x * stride,
         FIELD.left + 2,
@@ -597,7 +640,11 @@ function step(m, dt, input) {
       ) {
         if (!m.charge) m.charge = { time: 0, power: 0.12 };
         m.charge.time += dt;
-        m.charge.power = clamp(0.12 + m.charge.time / 1.1, 0.12, 1);
+        m.charge.power = clamp(
+          0.12 + m.charge.time / (relaxed(m) ? 0.6 : 1.1),
+          0.12,
+          1,
+        );
       } else if (m.charge && input.action !== 'cancelShot') {
         const power = m.charge.power;
         m.charge = null;
@@ -614,7 +661,14 @@ function step(m, dt, input) {
           .filter((p) => p.team !== owner.team && !p.keeper)
           .map((p) => distance(p, owner)),
       );
-      if (Math.abs(goalX - owner.x) < 450 && random(m) < dt * 3) {
+      if (
+        relaxed(m) &&
+        owner.team === m.players[m.controlled].team &&
+        distance(owner, m.players[m.controlled]) < 420 &&
+        random(m) < dt * (pressure < 100 ? 2.8 : 0.9)
+      ) {
+        pass(m, owner, false);
+      } else if (Math.abs(goalX - owner.x) < 450 && random(m) < dt * 3) {
         owner.aim = unit(
           goalX - owner.x,
           1332 + (random(m) - 0.5) * 130 - owner.y,
@@ -698,8 +752,12 @@ function step(m, dt, input) {
             v.d <
               (v.p.keeper
                 ? v.p.dive
-                  ? 20
-                  : 11
+                  ? enemy(m, v.p)
+                    ? 15
+                    : 20
+                  : enemy(m, v.p)
+                    ? 9
+                    : 11
                 : b.shot
                   ? Math.hypot(b.vx, b.vy) > 450
                     ? 8
@@ -742,6 +800,7 @@ function step(m, dt, input) {
         else if (m.lastPass && m.players[m.lastPass.from].team !== p.team)
           m.lastPass = null;
         m.owner = candidate.i;
+        if (relaxed(m) && candidate.i === m.controlled) p.immune = 1.6;
         m.lastTouch = candidate.i;
         p.cooldown = 0.8;
         b.vx = 0;

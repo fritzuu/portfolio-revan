@@ -121,6 +121,7 @@ export default function App() {
   const { discoveries, discover } = useExploration();
   const [night, setNight] = useState(false);
   const [footballMode, setFootballMode] = useState('watch');
+  const [footballDifficulty, setFootballDifficulty] = useState('santai');
   const [matchState, setMatchState] = useState({
     score: [0, 0],
     clock: 60,
@@ -348,6 +349,7 @@ export default function App() {
             kick={kick}
             onShot={onShot}
             footballMode={footballMode}
+            footballDifficulty={footballDifficulty}
             onMatchState={setMatchState}
             onSound={playSound}
             discoveries={discoveries}
@@ -741,6 +743,11 @@ export default function App() {
       {phase === 'playing' && panel === 'football' && (
         <FootballChallenge
           mode={footballMode}
+          difficulty={footballDifficulty}
+          onDifficulty={(value) => {
+            setFootballDifficulty(value);
+            stage.current?.focus();
+          }}
           match={matchState}
           onMode={(mode) => {
             setFootballMode(mode);

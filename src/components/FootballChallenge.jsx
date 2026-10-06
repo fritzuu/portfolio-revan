@@ -48,6 +48,8 @@ function HoldAction({
 }
 export default function FootballChallenge({
   mode,
+  difficulty,
+  onDifficulty,
   match,
   onMode,
   onAction,
@@ -103,6 +105,23 @@ export default function FootballChallenge({
           <b>{match.score[1]}</b> YAMAL
         </span>
       </div>
+      {mode !== 'training' && (
+        <div
+          className="football-difficulty"
+          role="group"
+          aria-label="Match difficulty"
+        >
+          {['santai', 'sengit'].map((value) => (
+            <button
+              key={value}
+              aria-pressed={difficulty === value}
+              onClick={() => onDifficulty(value)}
+            >
+              {value === 'santai' ? 'Santai' : 'Sengit'}
+            </button>
+          ))}
+        </div>
+      )}
       <button
         className="football-close"
         aria-label="Leave football park"
@@ -184,7 +203,10 @@ export default function FootballChallenge({
             onControl={onControl}
             onRelease={(seconds) =>
               onAction('releaseShot', {
-                power: Math.min(1, 0.12 + seconds / 1.1),
+                power: Math.min(
+                  1,
+                  0.12 + seconds / (difficulty === 'santai' ? 0.6 : 1.1),
+                ),
               })
             }
             onCancel={() => onAction('cancelShot')}

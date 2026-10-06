@@ -10,6 +10,7 @@ const ticks = (m, n, input = {}) => {
 };
 function controlled() {
   const m = createMatch();
+  m.difficulty = 'sengit';
   m.kickoffWait = 0;
   m.controlled = m.owner;
   m.players.forEach((p) => {
@@ -315,4 +316,58 @@ test('a received teammate pass earns an assist when its recipient scores', () =>
   assert.equal(m.players[0].stats.goals, 1);
   assert.equal(m.players[1].stats.assists, 1);
   assert.equal(m.totals.assists, 1);
+});
+
+test('Santai charges sooner and allows longer sprints than Sengit', () => {
+  const easy = controlled(),
+    hard = controlled();
+  easy.difficulty = 'santai';
+  ticks(easy, 36, { shootHeld: true });
+  ticks(hard, 36, { shootHeld: true });
+  assert.equal(easy.charge.power, 1);
+  assert.ok(hard.charge.power < 0.7);
+  const sprintEasy = controlled(),
+    sprintHard = controlled();
+  sprintEasy.difficulty = 'santai';
+  ticks(sprintEasy, 120, { dx: 1, sprint: true });
+  ticks(sprintHard, 120, { dx: 1, sprint: true });
+  assert.ok(
+    sprintEasy.players[sprintEasy.controlled].stamina >
+      sprintHard.players[sprintHard.controlled].stamina + 20,
+  );
+});
+test('Santai assists a forward shot but preserves shots deliberately aimed away from goal', () => {
+  function shot(difficulty, aim) {
+    const m = controlled();
+    m.difficulty = difficulty;
+    const p = m.players[m.owner];
+    p.x = 950;
+    p.y = 1332;
+    p.aim = aim;
+    m.ball.x = 962;
+    m.ball.y = 1330;
+    updateMatch(m, 1 / 60, { action: 'releaseShot', power: 0.5 });
+    return m.windup.aim;
+  }
+  const easy = shot('santai', { x: 0.96, y: 0.28 });
+  const hard = shot('sengit', { x: 0.96, y: 0.28 });
+  assert.ok(Math.abs(easy.y) < Math.abs(hard.y) / 2);
+  const away = shot('santai', { x: -1, y: 0 });
+  assert.ok(away.x < -0.99);
+});
+test('Santai gives a visitor 1.6 seconds of tackle protection after receiving the ball', () => {
+  const m = controlled();
+  m.difficulty = 'santai';
+  const p = m.players[m.controlled];
+  m.owner = null;
+  p.cooldown = 0;
+  Object.assign(m.ball, { x: p.x, y: p.y, vx: 0, vy: 0, shot: false });
+  ticks(m, 1);
+  assert.equal(m.owner, m.controlled);
+  assert.equal(p.immune, 1.6);
+  ticks(m, 60);
+  assert.equal(m.owner, m.controlled);
+  assert.ok(p.immune > 0.59);
+  ticks(m, 37);
+  assert.equal(p.immune, 0);
 });
