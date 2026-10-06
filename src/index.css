@@ -2861,3 +2861,315 @@ textarea::placeholder {
   min-height: 36px;
   font-size: 14px;
 }
+
+/* Shared HUD scale: readable pixel labels and comfortable control targets. */
+.city-app {
+  --hud-label: 26px;
+  --hud-body: 15px;
+  --hud-caption: 14px;
+  --hud-target: 52px;
+}
+.hud-icon {
+  width: var(--hud-target);
+  height: var(--hud-target);
+}
+.hud-icon svg {
+  width: 24px;
+  height: 24px;
+}
+.hud-coins {
+  min-height: var(--hud-target);
+  font-size: 30px;
+  gap: 8px;
+  padding: 6px 14px;
+}
+.hud-coins svg {
+  width: 22px;
+  height: 22px;
+}
+.game-logo > small {
+  font-size: 17px;
+}
+.city-navigation {
+  gap: 7px;
+  padding: 8px;
+}
+.city-navigation > button {
+  font-size: var(--hud-label);
+  min-height: var(--hud-target);
+  padding: 10px 18px;
+}
+.city-navigation > button > span {
+  font-size: 20px;
+}
+.angler-tools {
+  width: 290px;
+  gap: 6px;
+}
+.angler-tools button {
+  font-size: var(--hud-label);
+  min-height: var(--hud-target);
+  padding: 8px;
+}
+.angler-tools button svg {
+  width: 21px;
+  height: 21px;
+}
+.angler-tools button > span {
+  font-size: 20px;
+}
+.quest-panel,
+.quest-panel.collapsed {
+  width: 320px;
+}
+.quest-toggle {
+  font-size: var(--hud-label);
+  min-height: var(--hud-target);
+  padding: 12px 16px;
+}
+.quest-toggle small {
+  font-size: 22px;
+  margin-left: 8px;
+}
+#quest-list {
+  max-height: calc(100dvh - 445px);
+  overflow-y: auto;
+}
+#quest-list > p,
+#quest-list > small {
+  font-size: var(--hud-caption);
+  line-height: 1.5;
+}
+#quest-list > button {
+  font-size: var(--hud-label);
+  min-height: 62px;
+  padding: 10px;
+  gap: 10px;
+}
+#quest-list button small {
+  font-size: var(--hud-caption);
+  line-height: 1.4;
+}
+.quest-check {
+  font-size: 24px;
+}
+.city-help {
+  font-size: 22px;
+  bottom: 130px;
+  max-width: 420px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+}
+.city-help kbd {
+  font-size: 15px;
+  padding: 4px 6px;
+}
+.city-help small {
+  font-size: var(--hud-caption);
+}
+.city-interaction {
+  bottom: 165px;
+}
+.city-interaction > button {
+  font-size: var(--hud-label);
+  min-height: var(--hud-target);
+  padding: 12px 20px;
+}
+.city-interaction kbd {
+  font-size: 17px;
+}
+.minimap-button {
+  width: 190px;
+  bottom: 130px;
+}
+.minimap-button > span {
+  font-size: 22px;
+  padding: 8px;
+}
+.minimap-button > span > svg {
+  width: 18px;
+  height: 18px;
+}
+.travel-status {
+  font-size: var(--hud-label);
+}
+.travel-status small {
+  font-size: var(--hud-caption);
+}
+.city-dpad {
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(2, 48px);
+  gap: 4px;
+}
+.city-dpad > button {
+  font-size: 32px;
+}
+.world-fishing-controls .button {
+  font-size: 20px;
+  min-height: var(--hud-target);
+}
+.world-fishing-controls .fishing-hint {
+  font-size: var(--hud-body);
+}
+.world-fishing-controls .catch-result small {
+  font-size: var(--hud-caption);
+}
+.world-fishing-controls .rarity-tag,
+.world-fishing-controls .new-discovery {
+  font-size: 22px;
+}
+.world-fishing-controls .fishing-exit {
+  width: 44px;
+  height: 44px;
+  right: 0;
+  top: 0;
+}
+.world-fishing-controls .fishing-caption {
+  padding: 0 30px;
+}
+.world-fishing-controls .fishing-actions .button:not(.primary) {
+  font-size: 17px;
+  min-height: 44px;
+  padding: 8px 18px;
+}
+.world-fishing-controls .reel-controls .button {
+  min-width: 48px;
+}
+/* Field-note panels use the same readable minimums as the world HUD. */
+.fishing-hub {
+  font-size: 15px;
+}
+.fishing-hub .fishing-tabs button {
+  font-size: 23px;
+  min-height: 52px;
+}
+.fishing-hub .button {
+  font-size: 15px;
+  min-height: 48px;
+}
+.fishing-hub p,
+.fishing-hub label {
+  font-size: 15px;
+}
+.fishing-hub small,
+.fishing-hub .fishing-storage-note,
+.map-legend {
+  font-size: 14px;
+}
+.atlas-locations .button {
+  font-size: 16px;
+  min-height: 52px;
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .city-app {
+    --hud-label: 24px;
+  }
+  .city-navigation > button {
+    padding: 10px 14px;
+  }
+  .city-help {
+    max-width: 340px;
+  }
+  .quest-panel,
+  .quest-panel.collapsed {
+    width: 290px;
+  }
+}
+@media (max-width: 760px) {
+  .city-app {
+    --hud-label: 24px;
+    --hud-target: 48px;
+  }
+  .city-header {
+    left: 12px;
+    right: 12px;
+  }
+  .hud-tools {
+    gap: 6px;
+  }
+  .hud-coins {
+    padding: 5px 8px;
+    font-size: 26px;
+  }
+  .game-logo {
+    font-size: 26px;
+  }
+  .game-logo > span {
+    font-size: 20px;
+  }
+  .game-logo > small {
+    font-size: 15px;
+  }
+  .city-navigation {
+    gap: 5px;
+    padding: 6px;
+  }
+  .city-navigation > button {
+    padding: 8px 5px;
+  }
+  .angler-tools {
+    width: calc(100% - 24px);
+    left: 12px;
+    bottom: 135px;
+    padding: 6px;
+    gap: 5px;
+  }
+  .angler-tools button {
+    padding: 7px 4px;
+    font-size: 22px;
+  }
+  .angler-tools button svg {
+    width: 19px;
+    height: 19px;
+  }
+  .quest-panel,
+  .quest-panel.collapsed {
+    top: 90px;
+    right: 12px;
+    width: min(300px, calc(100vw - 24px));
+  }
+  .quest-toggle {
+    padding: 10px 12px;
+    font-size: 24px;
+  }
+  #quest-list {
+    max-height: 26dvh;
+  }
+  #quest-list > button {
+    min-height: 60px;
+  }
+  .city-dpad {
+    bottom: 235px;
+    left: 12px;
+  }
+  .minimap-button {
+    bottom: 235px;
+    right: 12px;
+    width: 125px;
+  }
+  .minimap-button > span {
+    font-size: 19px;
+    gap: 5px;
+    padding: 6px 3px;
+  }
+  .city-interaction {
+    bottom: 355px;
+    max-width: calc(100% - 24px);
+  }
+  .city-interaction > button {
+    padding: 10px 14px;
+    font-size: 24px;
+  }
+  .travel-status {
+    bottom: 425px;
+    font-size: 24px;
+  }
+  .fishing-hub .fishing-tabs {
+    gap: 4px;
+  }
+  .fishing-hub .fishing-tabs button {
+    font-size: 21px;
+    padding: 8px 5px;
+  }
+}
