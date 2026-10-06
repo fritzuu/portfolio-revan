@@ -1,4 +1,6 @@
-// Local transparent reference sprites, split into rows for restrained pixel deformation.
+// Darkrai keeps the reference sprite; Jekek uses a small articulated, uncoiled silhouette.
+import { createSnake, updateSnake } from './snake.js';
+import { drawSnake } from './snakeArt.js';
 function creature(scene, key, x, y, size) {
   const texture = scene.textures.createCanvas(`${key}-pixels`, 128, 128),
     ctx = texture.context;
@@ -24,7 +26,9 @@ function creature(scene, key, x, y, size) {
   return { body, strips };
 }
 export function createCreatures(scene) {
-  const jekek = creature(scene, 'jekek', 2260, 410, 136);
+  const snakeTexture = scene.textures.createCanvas('jekek-moving', 192, 192);
+  snakeTexture.context.imageSmoothingEnabled = false;
+  const jekek = scene.add.image(1810, 395, 'jekek-moving').setOrigin(0);
   const darkrai = creature(scene, 'darkrai', 2050, 843, 168);
   const shadows = scene.add.graphics();
   const label = scene.add
@@ -36,27 +40,36 @@ export function createCreatures(scene) {
       padding: { x: 4, y: 2 },
     })
     .setOrigin(0.5);
-  return { jekek, darkrai, shadows, label, elapsed: 0, nightAlpha: 0 };
+  return {
+    jekek,
+    snakeTexture,
+    snake: createSnake(),
+    headImage: scene.textures.get('jekek-source').getSourceImage(),
+    darkrai,
+    shadows,
+    label,
+    elapsed: 0,
+    nightAlpha: 0,
+  };
 }
 export function updateCreatures(scene, state, delta, darkness, reduced) {
   const dt = Math.min(delta, 100);
   state.elapsed += dt;
-  const t = state.elapsed / 1000,
-    cycle = t % 30;
-  // The coiled reference remains intact. Slow travel, rest and tiny coil/tail shifts replace the square-segment body.
-  const angle = (Math.min(cycle, 25) / 25) * Math.PI * 2;
-  const x = reduced ? 1815 : 2050 + 210 * Math.cos(angle),
-    y = reduced ? 405 : 410 + 60 * Math.sin(angle);
+  const t = state.elapsed / 1000;
   const { jekek, darkrai, label, shadows } = state;
-  jekek.body.setPosition(Math.round(x), Math.round(y)).setDepth(y + 50);
-  jekek.strips.forEach((strip, row) =>
-    strip.setX(
-      reduced
-        ? 0
-        : Math.round(Math.sin(t * 2.2 + row * 0.55) * (row < 5 ? 2 : 1)),
-    ),
+  const snake = updateSnake(state.snake, delta, reduced),
+    { x, y } = snake.head;
+  const origin = drawSnake(
+    state.snakeTexture.context,
+    snake,
+    reduced ? 500 : state.elapsed,
+    state.headImage,
   );
-  label.setPosition(x, y - 69).setDepth(y + 51);
+  state.snakeTexture.refresh();
+  jekek
+    .setPosition(origin.x, origin.y)
+    .setDepth(Math.max(...snake.joints.map((p) => p.y)) + 8);
+  label.setPosition(x, y - 23).setDepth(jekek.depth + 1);
   const night = darkness > 0.65;
   state.nightAlpha +=
     ((night ? 1 : 0) - state.nightAlpha) * Math.min(1, dt / 280);
@@ -81,7 +94,8 @@ export function updateCreatures(scene, state, delta, darkness, reduced) {
   shadows.clear();
   shadows.setDepth(1);
   shadows.fillStyle(0x2d493c, 0.2);
-  shadows.fillEllipse(x, y + 45, 105, 21);
+  for (const p of snake.joints.filter((_, i) => i % 3 === 0))
+    shadows.fillEllipse(p.x, p.y + 3, 7, 3);
   if (state.nightAlpha > 0.01) {
     shadows.fillStyle(0x34314b, 0.2 * state.nightAlpha);
     shadows.fillEllipse(2050, 905, 74 - float, 16);
