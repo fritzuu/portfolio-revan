@@ -100,15 +100,49 @@ export function drawCharacter(
     );
     r(10, 28, 6, 4, '#35475a');
     r(19, 28, 5, 4, '#35475a');
-    r(left ? 19 : 9, 32, 7, 3, '#3c302c');
+    if (direction === 'up' || direction === 'down') {
+      r(9, 32, 7, 3, '#3c302c');
+      r(
+        19,
+        direction === 'up'
+          ? 31 - Math.round(reach * 0.65)
+          : Math.min(33, 31 + Math.round(reach * 0.4)),
+        7,
+        3,
+        '#3c302c',
+      );
+    } else {
+      r(left ? 19 : 9, 32, 7, 3, '#3c302c');
+      r(
+        left ? 9 - reach : Math.min(25, 19 + reach),
+        31 - Math.round(reach * 0.3),
+        7,
+        3,
+        '#3c302c',
+      );
+    }
+  } else if (action?.type === 'tackle') {
+    const reach = Math.round(Math.sin(action.progress * Math.PI) * 7),
+      left = direction === 'left';
+    ctx.clearRect(x + 5, y + 28, 27, 8);
+    r(10, 28, 14, 4, '#35475a');
     r(
-      left ? 9 - reach : Math.min(25, 19 + reach),
-      31 - Math.round(reach * 0.3),
+      left ? Math.max(0, 9 - reach) : Math.min(25, 19 + reach),
+      32,
       7,
       3,
       '#3c302c',
     );
-  } else if (action?.type === 'save') {
+    r(left ? 19 : 9, 33, 7, 3, '#3c302c');
+    r(left ? 5 : 24, 22, 4, 6, SKINS[skin]);
+  } else if (action?.type === 'skill') {
+    ctx.clearRect(x + 5, y + 28, 27, 8);
+    r(10, 28, 6, 4, '#35475a');
+    r(19, 28, 5, 4, '#35475a');
+    const cross = Math.round(Math.sin(action.progress * Math.PI) * 5);
+    r(9 + cross, 31, 7, 3, '#3c302c');
+    r(19 - cross, 33, 7, 3, '#3c302c');
+  } else if (action?.type === 'save' || action?.type === 'catch') {
     ctx.clearRect(x + 5, y + 17, 4, 11);
     ctx.clearRect(x + 24, y + 17, 5, 11);
     r(3, 19, 8, 4, SKINS[skin]);

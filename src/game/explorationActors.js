@@ -122,9 +122,11 @@ export function updateExploration(
     });
     scene.player.path = [];
     scene.cancelTravel();
+    state.match.charge = null;
+    state.match.mustReleaseShoot = false;
     scene.player.config.footballAction = null;
     scene.player.poseKey = 'idle';
-    scene.player.image.setAngle(0);
+    scene.player.image.setAngle(0).setScale(scene.player.baseScale);
     scene.move(scene.player, 0, 0, delta, 0);
     if (mode === 'training') {
       scene.player.image.setPosition(1410, 1332);
@@ -335,17 +337,38 @@ export function updateExploration(
     discover('football');
   const keys = scene.keys,
     c = live.controls || {};
+  const keyboardAllowed = !document.activeElement?.closest(
+    'button,input,select,textarea',
+  );
   const dx =
-    Number(!!(keys.D.isDown || keys.RIGHT.isDown || c.right)) -
-    Number(!!(keys.A.isDown || keys.LEFT.isDown || c.left));
+    Number(
+      !!((keyboardAllowed && (keys.D.isDown || keys.RIGHT.isDown)) || c.right),
+    ) -
+    Number(
+      !!((keyboardAllowed && (keys.A.isDown || keys.LEFT.isDown)) || c.left),
+    );
   const dy =
-    Number(!!(keys.S.isDown || keys.DOWN.isDown || c.down)) -
-    Number(!!(keys.W.isDown || keys.UP.isDown || c.up));
-  let action = null;
-  if (keys.SPACE.isDown && !state.spaceDown) action = 'shoot';
-  if (keys.Q.isDown && !state.qDown) action = 'pass';
-  state.spaceDown = keys.SPACE.isDown;
-  state.qDown = keys.Q.isDown;
+    Number(
+      !!((keyboardAllowed && (keys.S.isDown || keys.DOWN.isDown)) || c.down),
+    ) -
+    Number(!!((keyboardAllowed && (keys.W.isDown || keys.UP.isDown)) || c.up));
+  const participating = mode === 'messi' || mode === 'yamal';
+  let action = null,
+    through = false,
+    power;
+  if ((!keyboardAllowed || !keys.Q.isDown) && state.qDown) {
+    action = 'pass';
+    through = time - (state.passStarted || time) > 0.35 * 1000;
+  }
+  if (keyboardAllowed && keys.Q.isDown && !state.qDown)
+    state.passStarted = time;
+  if (participating && keyboardAllowed && keys.E.isDown && !state.tackleDown)
+    action = 'tackle';
+  if (participating && keyboardAllowed && keys.F.isDown && !state.skillDown)
+    action = 'skill';
+  state.qDown = keyboardAllowed && keys.Q.isDown;
+  state.tackleDown = keys.E.isDown;
+  state.skillDown = keys.F.isDown;
   const kick = live.kick;
   if (kick && kick.stamp !== state.lastKick) {
     state.lastKick = kick.stamp;
@@ -359,25 +382,51 @@ export function updateExploration(
         vy: (aim - 50) * 3,
         keeperY: 1332,
       };
-    } else action = kick.type;
+    } else {
+      action = kick.type;
+      through = kick.through;
+      power = kick.power;
+    }
   }
   updateMatch(state.match, dt / 1000, {
-    dx: mode === 'messi' || mode === 'yamal' ? dx : 0,
-    dy: mode === 'messi' || mode === 'yamal' ? dy : 0,
-    action,
+    dx: participating ? dx : 0,
+    dy: participating ? dy : 0,
+    action: participating ? action : null,
+    through,
+    power,
+    shootHeld:
+      participating && !!((keyboardAllowed && keys.SPACE.isDown) || c.shoot),
+    sprint:
+      participating && !!((keyboardAllowed && keys.SHIFT.isDown) || c.sprint),
+    hidden: document.hidden,
   });
-  if (
-    state.match.stats.shots + state.match.stats.passes !==
-    state.lastBallKick
-  ) {
-    if (state.lastBallKick !== undefined) live.onSound?.('kick');
-    state.lastBallKick = state.match.stats.shots + state.match.stats.passes;
+  const roundKey = `${state.match.matchNumber}:${state.match.half}:${state.match.status}`;
+  if (roundKey !== state.roundKey) {
+    if (state.roundKey) {
+      live.onSound?.('whistle');
+      if (mode && state.match.status === 'playing') {
+        if (state.match.controlled !== null) {
+          const p = state.match.players[state.match.controlled];
+          scene.cameras.main.centerOn(p.x, p.y + 24);
+        }
+        scene.cameras.main.fadeIn(reduced ? 0 : 300, 24, 49, 44);
+      }
+    }
+    state.roundKey = roundKey;
   }
-  const totalGoals = state.match.score[0] + state.match.score[1];
-  if (totalGoals !== (state.lastGoal || 0)) {
-    live.onSound?.('goal');
-    state.lastGoal = totalGoals;
+  const totals = state.match.totals;
+  for (const [counter, sound] of [
+    ['shots', 'kick'],
+    ['passes', 'kick'],
+    ['tackles', 'tackle'],
+    ['saves', 'save'],
+    ['posts', 'post'],
+    ['goals', 'goal'],
+  ]) {
+    if (state.soundCounts && totals[counter] > state.soundCounts[counter])
+      live.onSound?.(sound);
   }
+  state.soundCounts = { ...totals };
   const sync = (actor, p) => {
     actor.config.footballAction = p.action;
     actor.poseKey = p.action
@@ -394,12 +443,29 @@ export function updateExploration(
         Math.max(Math.min(delta, 40), 1),
     );
     actor.lockFacing = false;
-    if (p.action?.type === 'save' && !reduced)
+    actor.image.setScale(
+      actor.baseScale,
+      actor.baseScale *
+        (p.action?.type === 'tackle' && !reduced
+          ? 1 - Math.sin(p.action.progress * Math.PI) * 0.1
+          : 1),
+    );
+    if (p.action?.type === 'tackle' && !reduced)
       actor.image.setAngle(
         (p.facing === 'left' ? -1 : 1) *
           Math.sin(p.action.progress * Math.PI) *
-          18,
+          12,
       );
+    else if (p.action?.type === 'skill' && !reduced)
+      actor.image.setAngle(Math.sin(p.action.progress * Math.PI * 2) * 6);
+    else if (p.action?.type === 'save' && !reduced)
+      actor.image.setAngle(
+        (p.facing === 'left' ? -1 : 1) *
+          Math.sin(p.action.progress * Math.PI) *
+          32,
+      );
+    else if (p.action?.type === 'stumble' && !reduced)
+      actor.image.setAngle(Math.sin(p.action.progress * Math.PI * 2) * 8);
     else actor.image.setAngle(0);
   };
   state.players.forEach((actor, i) => sync(actor, state.match.players[i]));
@@ -407,22 +473,66 @@ export function updateExploration(
     const p = state.match.players[state.match.controlled];
     sync(scene.player, p);
     const cam = scene.cameras.main;
-    const targetX = p.x * 0.8 + state.match.ball.x * 0.2;
+    const limit = window.innerWidth < 760 ? 40 : 90;
+    const targetX =
+      p.x +
+      Math.max(-limit, Math.min(limit, (state.match.ball.x - p.x) * 0.16));
     cam.centerOn(
       cam.midPoint.x + (targetX - cam.midPoint.x) * (reduced ? 1 : 0.06),
-      p.y * 0.8 + state.match.ball.y * 0.2 + 24,
+      p.y + Math.max(-20, Math.min(20, (state.match.ball.y - p.y) * 0.1)) + 24,
     );
     state.water.lineStyle(2, p.team === 0 ? 0x81c6ff : 0xffb5a1);
     state.water.strokeEllipse(p.x, p.y + 5, 24, 7);
   }
   state.cheer.setText(state.match.event).setVisible(state.match.goal);
+  if (participating && state.match.charge) {
+    const p = state.match.players[state.match.controlled],
+      x = p.x - 19,
+      y = p.y + 15,
+      power = state.match.charge.power;
+    state.water.fillStyle(0x284b43, 0.9);
+    state.water.fillRoundedRect(x - 2, y - 2, 42, 9, 3);
+    state.water.fillStyle(power > 0.78 ? 0xee9277 : 0xffd184);
+    state.water.fillRect(x, y, Math.round(38 * power), 5);
+    state.water.lineStyle(1, 0xffefc2, 0.75);
+    state.water.lineBetween(
+      p.x,
+      p.y - 10,
+      p.x + p.aim.x * (24 + power * 20),
+      p.y - 10 + p.aim.y * (24 + power * 20),
+    );
+  }
   if (mode && time > (state.nextReport || 0)) {
     state.nextReport = time + 200;
     live.onMatchState?.({
       score: [...state.match.score],
-      clock: Math.floor(state.match.clock),
+      clock: state.match.remaining,
+      half: state.match.half,
+      status: state.match.status,
+      charging: !!state.match.charge,
+      power: state.match.charge?.power || 0,
+      stamina:
+        state.match.controlled !== null
+          ? Math.round(state.match.players[state.match.controlled].stamina)
+          : 100,
+      tackleReady:
+        state.match.status === 'playing' &&
+        state.match.controlled !== null &&
+        state.match.players[state.match.controlled].tackleCooldown === 0,
+      skillReady:
+        state.match.status === 'playing' &&
+        state.match.controlled !== null &&
+        state.match.owner === state.match.controlled &&
+        state.match.players[state.match.controlled].skillCooldown === 0,
+      result: state.match.status === 'fulltime' ? state.match.lastResult : null,
+      visitorStats:
+        state.match.controlled !== null
+          ? { ...state.match.players[state.match.controlled].stats }
+          : null,
       event: state.match.event,
-      hasBall: state.match.owner === state.match.controlled,
+      hasBall:
+        state.match.controlled !== null &&
+        state.match.owner === state.match.controlled,
     });
   }
   const drawBall = (b) => {

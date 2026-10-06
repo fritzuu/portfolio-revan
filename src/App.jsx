@@ -123,7 +123,10 @@ export default function App() {
   const [footballMode, setFootballMode] = useState('watch');
   const [matchState, setMatchState] = useState({
     score: [0, 0],
-    clock: 0,
+    clock: 60,
+    half: 1,
+    status: 'playing',
+    stamina: 100,
     event: 'Kick off',
   });
   const [kick, setKick] = useState(null);
@@ -746,8 +749,11 @@ export default function App() {
             setControls({});
             setTimeout(() => stage.current?.focus(), 0);
           }}
-          onAction={(type) => {
-            setKick({ type, stamp: ++tripSequence.current });
+          onControl={(name, held) =>
+            setControls((previous) => ({ ...previous, [name]: held }))
+          }
+          onAction={(type, details = {}) => {
+            setKick({ ...details, type, stamp: ++tripSequence.current });
             setTimeout(() => stage.current?.focus(), 0);
           }}
           results={shots}

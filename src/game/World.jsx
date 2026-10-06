@@ -245,7 +245,7 @@ export default function World({
               );
             else cam.centerOn(650, 410);
             this.keys = this.input.keyboard.addKeys(
-              'W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER,ESC,SPACE,Q',
+              'W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER,ESC,SPACE,Q,SHIFT,F',
             );
             this.input.keyboard.disableGlobalCapture();
             this.input.on('pointerdown', (p) => {
@@ -268,6 +268,7 @@ export default function World({
             return {
               texture,
               frameCache: new Map(),
+              baseScale: scale,
               config,
               image: this.add
                 .image(x, y, name)

@@ -18,8 +18,9 @@ No paid assets were purchased; no hotlinking or CDN dependencies were added. Ori
 
 - Garden/grove composition, planted beds, winding trail, rest bench, moon court, original wooden pergola and animated gate leaves.
 - Walking/watering gardener, butterflies, birds, limited fireflies and Darkrai wisps; six football spectators react to goals.
-- Two opposing teams, eight players, one fixed-step ball model, variable match outcomes, real crossing-based scoring and visible restarts.
-- Join Messi/Yamal with visitor avatar and compact peripheral controls, separate practice lane, responsive camera, Escape to leave.
+- Two opposing teams, eight players, fixed-step ball physics, dribbling, sprint/stamina, telegraphed tackles, skill moves, charged directional shots, through passes, keeper catches/parries and playable rebounds.
+- Two 60-second halves, four-second halftime with side switching, five-second result screen, then score reset to 0–0. Hidden tabs pause the clock; menus keep the match running.
+- Join Messi/Yamal with visitor avatar and compact peripheral controls, separate practice lane, responsive camera, Escape to leave. Desktop uses Shift/E/F for sprint/tackle/dribble, hold Space to charge and release to shoot, hold Q for a through ball.
 - Intact Darkrai sprite, snake angle hysteresis/proximity rest, action-facing priority, pose frame caching, offscreen snake render culling.
 - Correct atlas aspect/legend/discoveries, short district/NEW notifications, footsteps and match sounds controlled by existing music toggle.
 - Existing local progress retained; backend unchanged.

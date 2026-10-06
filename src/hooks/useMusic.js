@@ -74,6 +74,16 @@ export default function useMusic(enabled, district = 'town') {
           0.045,
           'triangle',
         );
+      if (event === 'tackle') tone(38, now, 0.09, 0.16, 'triangle');
+      if (event === 'save') {
+        tone(52, now, 0.07, 0.16, 'triangle');
+        tone(64, now + 0.07, 0.1, 0.1, 'sine');
+      }
+      if (event === 'post') tone(88, now, 0.24, 0.1, 'sine');
+      if (event === 'whistle') {
+        tone(98, now, 0.18, 0.07, 'sine');
+        tone(100, now + 0.2, 0.25, 0.07, 'sine');
+      }
       if (event === 'kick') tone(40, now, 0.07, 0.24, 'triangle');
       if (event === 'goal')
         [72, 76, 79, 84].forEach((n, i) =>
