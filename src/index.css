@@ -3973,3 +3973,85 @@ textarea::placeholder {
     top: 135px;
   }
 }
+
+/* Collapsed tools leave the left side of the world clear. */
+.angler-menu {
+  position: absolute;
+  top: 108px;
+  left: 25px;
+  z-index: 15;
+}
+.angler-menu-toggle.hud-icon {
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  background: #263c43ee;
+  color: #fff0cf;
+  border: 1px solid #b9c6ab;
+  box-shadow: 0 3px 0 #1b3039;
+}
+.angler-menu-toggle.hud-icon:hover {
+  background: #3b555b;
+  color: #ffe0a0;
+}
+.angler-menu .angler-tools {
+  top: 61px;
+  bottom: auto;
+  left: 0;
+  width: min(290px, calc(100vw - 24px));
+  grid-template-columns: 1fr;
+  padding: 7px;
+  gap: 5px;
+  box-shadow: 0 5px 0 #1b303960;
+  animation: tools-reveal 150ms ease-out;
+}
+.angler-menu .angler-tools button {
+  justify-content: flex-start;
+  min-height: 48px;
+  padding: 8px 12px;
+  font-size: 24px;
+  gap: 10px;
+}
+.angler-menu .angler-tools button svg {
+  display: block;
+}
+.angler-menu .angler-tools button > span {
+  margin-left: auto;
+}
+.is-football .angler-menu,
+.is-fishing .angler-menu {
+  display: none;
+}
+@keyframes tools-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 760px) {
+  .angler-menu {
+    top: 74px;
+    left: 12px;
+  }
+  .angler-menu-toggle.hud-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .angler-menu .angler-tools {
+    top: 52px;
+    width: min(250px, calc(100vw - 24px));
+  }
+  .angler-menu .angler-tools button {
+    font-size: 21px;
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .angler-menu .angler-tools {
+    animation: none;
+  }
+}

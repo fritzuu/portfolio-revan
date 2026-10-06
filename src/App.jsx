@@ -10,6 +10,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
+  Menu,
   Map,
   Settings,
   X,
@@ -120,6 +121,25 @@ export default function App() {
   const fishing = useFishing();
   const { discoveries, discover } = useExploration();
   const [night, setNight] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const toolsMenu = useRef(null);
+  useEffect(() => {
+    if (!toolsOpen) return;
+    const dismiss = (event) => {
+      if (!toolsMenu.current?.contains(event.target)) setToolsOpen(false);
+    };
+    const escape = (event) => {
+      if (event.key !== 'Escape') return;
+      setToolsOpen(false);
+      toolsMenu.current?.querySelector('button')?.focus();
+    };
+    document.addEventListener('pointerdown', dismiss);
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.removeEventListener('pointerdown', dismiss);
+      document.removeEventListener('keydown', escape);
+    };
+  }, [toolsOpen]);
   const [footballMode, setFootballMode] = useState('watch');
   const [footballDifficulty, setFootballDifficulty] = useState('santai');
   const [matchState, setMatchState] = useState({
@@ -457,27 +477,46 @@ export default function App() {
               </button>
             </div>
           </header>
-          <nav className="angler-tools" aria-label="Angler tools">
-            {[
-              ['fishing', 'Go fishing', Fish],
-              ['backpack', 'Backpack', Backpack],
-              ['journal', 'Fish journal', BookOpen],
-              ['shop', 'Tackle shop', ShoppingBag],
-            ].map(([id, label, Icon]) => (
-              <button
-                key={id}
-                onClick={() =>
-                  ['fishing', 'shop'].includes(id) ? walkTo(id) : visit(id)
-                }
+          <div className="angler-menu" ref={toolsMenu}>
+            <button
+              className="angler-menu-toggle hud-icon"
+              aria-label={toolsOpen ? 'Close game menu' : 'Open game menu'}
+              aria-expanded={toolsOpen}
+              aria-controls="angler-navigation"
+              onClick={() => setToolsOpen((open) => !open)}
+            >
+              {toolsOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+            {toolsOpen && (
+              <nav
+                id="angler-navigation"
+                className="angler-tools"
+                aria-label="Angler tools"
               >
-                <Icon size={17} />
-                {label}
-                {id === 'backpack' && fishing.state.items.length > 0 && (
-                  <span>{fishing.state.items.length}</span>
-                )}
-              </button>
-            ))}
-          </nav>
+                {[
+                  ['fishing', 'Go fishing', Fish],
+                  ['backpack', 'Backpack', Backpack],
+                  ['journal', 'Fish journal', BookOpen],
+                  ['shop', 'Tackle shop', ShoppingBag],
+                ].map(([id, label, Icon]) => (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      setToolsOpen(false);
+                      if (['fishing', 'shop'].includes(id)) walkTo(id);
+                      else visit(id);
+                    }}
+                  >
+                    <Icon size={17} />
+                    {label}
+                    {id === 'backpack' && fishing.state.items.length > 0 && (
+                      <span>{fishing.state.items.length}</span>
+                    )}
+                  </button>
+                ))}
+              </nav>
+            )}
+          </div>
           <aside
             className={cn('quest-panel', !questsOpen && 'collapsed')}
             aria-label="City quests"
