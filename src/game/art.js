@@ -351,16 +351,8 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
   label('MOONWATER DOCK', 300, 919, 13);
   label('FISH • SELL • DISCOVER', 300, 938, 9);
   // A framed plaza; benches share two aligned rows around the fountain.
-  r(680, 560, 240, 173, '#c68dc0');
+  r(680, 560, 240, 173, '#849aa0');
   r(687, 567, 226, 159, '#ffe6b7');
-  for (let x = 696; x < 910; x += 18) {
-    r(x, 571, 9, 7, '#eea3bd');
-    r(x, 721, 9, 7, '#eea3bd');
-  }
-  for (let y = 583; y < 720; y += 18) {
-    r(691, y, 7, 9, '#80bdc7');
-    r(902, y, 7, 9, '#80bdc7');
-  }
   r(727, 593, 146, 119, '#568dac');
   r(732, 598, 136, 109, '#9bd0da');
   water(741, 607, 118, 91);
@@ -436,6 +428,108 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
     for (let xx = x - 4; xx < x + w + 4; xx += 24)
       r(xx, y + 31, 12, 19, theme.accent);
     r(x - 4, y + 49, w + 8, 4, '#526b62');
+    // Architecture, materials and window interiors give each address its own identity.
+    if (l.id !== 'contact') {
+      r(x - 4, y + 31, w + 8, 23, theme.roof);
+      r(x, y + 34, w, 5, theme.trim);
+    }
+    if (l.id === 'about') {
+      // A mint townhouse: terracotta roof tiles, painted shutters and a wooden porch.
+      r(x, y - 17, w, 22, '#a96553');
+      for (let ty = y - 14; ty < y + 4; ty += 7)
+        for (let tx = x + 6; tx < x + w - 6; tx += 18) {
+          r(tx, ty, 14, 3, '#d9916c');
+        }
+      for (const wx of [x + 22, x + w - 64]) {
+        r(wx - 8, y + 61, 7, h - 94, '#368475');
+        r(wx + 43, y + 61, 7, h - 94, '#368475');
+        for (let sy = y + 66; sy < y + h - 35; sy += 8) {
+          r(wx - 7, sy, 5, 2, '#6fb39a');
+          r(wx + 44, sy, 5, 2, '#6fb39a');
+        }
+      }
+      r(l.doorX - 20, y + h - 85, 40, 85, '#805445');
+      r(l.doorX - 15, y + h - 78, 30, 67, '#b57e5c');
+      r(l.doorX - 10, y + h - 69, 20, 24, '#8fbdb5');
+      r(l.doorX + 9, y + h - 36, 3, 3, '#ffe1a0');
+      r(l.doorX - 31, y + h - 91, 62, 6, '#476f66');
+      r(l.doorX - 26, y + h - 85, 4, 85, '#e8d9b7');
+      r(l.doorX + 23, y + h - 85, 4, 85, '#e8d9b7');
+    } else if (l.id === 'projects') {
+      // Workshop with a sawtooth roof and visible workstations behind wide glass.
+      r(x, y - 17, w, 22, '#8f564c');
+      for (let tx = x; tx < x + w; tx += 40) {
+        ctx.fillStyle = '#dc9572';
+        ctx.beginPath();
+        ctx.moveTo(tx, y + 4);
+        ctx.lineTo(tx + 30, y - 15);
+        ctx.lineTo(tx + 40, y + 4);
+        ctx.fill();
+        r(tx + 27, y - 11, 4, 11, '#bfe7e2');
+      }
+      for (const wx of [x + 20, x + w - 112]) {
+        r(wx, y + 61, 92, h - 87, '#537d87');
+        r(wx + 4, y + 65, 84, h - 95, '#abd8d8');
+        r(wx + 6, y + h - 40, 80, 5, '#9d684e');
+        r(wx + 15, y + h - 74, 27, 21, '#314e65');
+        r(wx + 18, y + h - 71, 21, 13, '#5db6b1');
+        r(wx + 20, y + h - 68, 9, 2, '#dfebbe');
+        r(wx + 20, y + h - 64, 15, 2, '#9fe0ce');
+        r(wx + 14, y + h - 34, 4, 19, '#725c50');
+        r(wx + 67, y + h - 34, 4, 19, '#725c50');
+        r(wx + 45, y + 65, 3, h - 95, '#537d87');
+      }
+    } else if (l.id === 'skills') {
+      // Bookshop/library windows reveal shelves rather than generic blue panes.
+      for (const wx of [x + 20, x + w - 104]) {
+        r(wx, y + 63, 84, h - 89, '#625689');
+        r(wx + 5, y + 68, 74, h - 99, '#c8d6da');
+        for (let sy = y + 87; sy < y + h - 32; sy += 24) {
+          r(wx + 8, sy, 68, 4, '#8b665b');
+          for (let book = 0; book < 8; book++) {
+            r(
+              wx + 10 + book * 8,
+              sy - 15,
+              5,
+              15 - (book % 3) * 2,
+              ['#b77883', '#6b99a2', '#bcaa6a', '#8279aa'][book % 4],
+            );
+          }
+        }
+        r(wx + 39, y + 68, 3, h - 99, '#625689');
+      }
+      r(l.doorX - 21, y + 32, 19, 14, '#f3e1ba');
+      r(l.doorX + 2, y + 32, 19, 14, '#f3e1ba');
+      r(l.doorX - 1, y + 34, 2, 14, '#d0bca4');
+      r(l.doorX - 16, y + 36, 12, 2, '#947c8f');
+      r(l.doorX + 5, y + 36, 12, 2, '#947c8f');
+    } else if (l.id === 'experience') {
+      // A small civic museum: limestone columns and a central frieze.
+      r(x, y + 31, w, 19, '#e8d9bf');
+      r(x, y + 46, w, 5, '#8aa4aa');
+      for (const cx of [x + 10, x + 66, x + w - 78, x + w - 22]) {
+        r(cx, y + 54, 12, h - 69, '#f0e5cd');
+        r(cx + 3, y + 56, 3, h - 73, '#fff2da');
+        r(cx - 3, y + 50, 18, 5, '#c6b8a0');
+        r(cx - 3, y + h - 20, 18, 6, '#c6b8a0');
+      }
+      r(l.doorX - 16, y + 32, 32, 13, '#5f8596');
+      r(l.doorX - 5, y + 35, 10, 7, '#dbbd78');
+    } else if (l.id === 'contact') {
+      // Rose cafe with amber windows, tiled counter and a cup emblem on the door.
+      for (const wx of [x + 22, x + w - 64]) {
+        r(wx + 4, y + 60, 34, h - 94, '#f4d7aa');
+        r(wx + 7, y + 64, 6, h - 105, '#ffedcc');
+        r(wx + 4, y + h - 50, 34, 3, '#805b6f');
+        r(wx + 20, y + 59, 3, h - 92, '#805b6f');
+      }
+      r(l.doorX - 8, y + h - 59, 14, 11, '#fff0d3');
+      r(l.doorX + 6, y + h - 56, 5, 6, '#fff0d3');
+      r(l.doorX + 7, y + h - 54, 2, 2, '#6f9ca8');
+      r(l.doorX - 10, y + h - 47, 24, 3, '#deb78a');
+      for (let tx = x + 6; tx < x + w - 6; tx += 12)
+        r(tx, y + h - 12, 8, 5, '#dc8da0');
+    }
     r(x + 20, y + 5, w - 40, 23, theme.sign);
     label(l.name.toUpperCase(), x + w / 2, y + 22, 13, '#f4e5bf');
     r(l.doorX - 29, l.doorY, 58, 8, '#eee4c7');
@@ -446,34 +540,6 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
       r(xx + 1, y + h - 23, 5, 5, '#d89b80');
       r(xx + 11, y + h - 24, 5, 5, '#e8c17f');
     }
-  }
-  // Festival bunting connects the storefronts above the broad main street.
-  ctx.strokeStyle = '#668678';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(440, 426);
-  ctx.quadraticCurveTo(800, 460, 1120, 426);
-  ctx.stroke();
-  for (let x = 450; x < 1120; x += 25) {
-    const y = 426 + Math.sin(((x - 440) / 680) * Math.PI) * 16;
-    ctx.fillStyle = ['#f5788f', '#f6c756', '#60bbc0', '#a188d3'][
-      Math.floor(x / 25) % 4
-    ];
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + 13, y);
-    ctx.lineTo(x + 6, y + 14);
-    ctx.fill();
-  }
-  // Painted compass tiles and petal accents are flat ground details, not new obstacles.
-  for (const [x, y] of [
-    [605, 480],
-    [1055, 480],
-    [800, 985],
-  ]) {
-    r(x - 16, y - 16, 32, 32, '#fff1cf');
-    r(x - 11, y - 11, 22, 22, '#e891aa');
-    r(x - 6, y - 6, 12, 12, '#ffe2a0');
   }
   label('MIRA’S TACKLE', 550, 958, 12);
   label('A GOOD CATCH HAS A GOOD STORY', 550, 973, 8);
