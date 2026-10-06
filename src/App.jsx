@@ -417,7 +417,7 @@ export default function App() {
               ['about', 'About me'],
               ['experience', 'Resume'],
               ['projects', 'Projects'],
-              ['skills', 'Technologies'],
+              ['skills', 'Tech'],
               ['contact', 'Contact'],
             ].map(([id, label]) => (
               <button

@@ -3173,3 +3173,54 @@ textarea::placeholder {
     padding: 8px 5px;
   }
 }
+
+@media (max-width: 760px) {
+  /* The full-width angler bar uses a left inset, not desktop centering. */
+  .angler-tools {
+    transform: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .city-navigation {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .city-navigation > button {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .angler-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .angler-tools button {
+    min-width: 0;
+  }
+  .city-dpad,
+  .minimap-button {
+    bottom: 280px;
+  }
+  .city-interaction {
+    bottom: 420px;
+  }
+  .travel-status {
+    top: 154px;
+    bottom: auto;
+  }
+  #quest-list {
+    max-height: clamp(90px, calc(100dvh - 590px), 26dvh);
+  }
+  .city-app:has(.quest-toggle[aria-expanded='true']) .city-interaction {
+    display: none;
+  }
+  .city-app:has(.travel-status) .quest-panel {
+    display: none;
+  }
+}
+@media (max-width: 380px) {
+  .city-navigation > button {
+    font-size: 22px;
+    gap: 4px;
+    padding: 8px 3px;
+  }
+}
