@@ -289,14 +289,14 @@ export default function App() {
     },
     [discoveries],
   );
-  const doneIntro = useCallback(() => setPhase('create'), []);
-  const enter = () => {
+  const [editingCharacter, setEditingCharacter] = useState(false);
+  const enter = useCallback(() => {
     setDestination(null);
     setTravel(null);
     setPhase('playing');
     setControls({});
     setTimeout(() => stage.current?.focus(), 0);
-  };
+  }, []);
   if (window.location.pathname === '/admin') return <Admin />;
   return (
     <div
@@ -406,7 +406,8 @@ export default function App() {
             <button
               className="play-button"
               onClick={() => {
-                setPhase('intro');
+                setEditingCharacter(false);
+                setPhase('create');
                 setMusic(true);
               }}
             >
@@ -656,7 +657,7 @@ export default function App() {
       )}
       {phase === 'intro' && (
         <Cutscene
-          onDone={doneIntro}
+          onDone={enter}
           reduced={reduced}
           character={character}
           music={music}
@@ -696,7 +697,10 @@ export default function App() {
       <Modal
         open={phase === 'create'}
         onOpenChange={(v) => {
-          if (!v) setPhase('landing');
+          if (!v) {
+            if (editingCharacter) enter();
+            else setPhase('landing');
+          }
         }}
         title="Meet your tiny alter ego."
         className="character-modal"
@@ -772,8 +776,15 @@ export default function App() {
             </fieldset>
           </div>
         </div>
-        <button className="button primary full" onClick={enter}>
-          Let the adventure begin <ArrowRight size={18} />
+        <button
+          className="button primary full"
+          onClick={() => {
+            if (editingCharacter) enter();
+            else setPhase('intro');
+          }}
+        >
+          {editingCharacter ? 'Back to the world' : 'Begin the story'}{' '}
+          <ArrowRight size={18} />
         </button>
         <small className="save-note">
           Your character and discoveries are saved on this device.
@@ -901,6 +912,7 @@ export default function App() {
               className="button"
               onClick={() => {
                 setPanel(null);
+                setEditingCharacter(true);
                 setPhase('create');
                 setControls({});
               }}

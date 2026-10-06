@@ -15,7 +15,7 @@ const STORY = [
   {
     chapter: '03 / WELCOME TO REVAN’S WORLD',
     speaker: 'REVAN',
-    line: 'Come on in! Visit my studio, discover my tools, and follow the story behind my work. First, let’s find your look.',
+    line: 'Come on in! Visit my studio, discover my tools, and follow the story behind my work. Your adventure starts right here.',
   },
 ];
 export default function Cutscene({
@@ -218,7 +218,7 @@ export default function Cutscene({
             ))}
           </span>
           <button onClick={next}>
-            {step === 2 ? 'Choose your character' : 'Continue'}{' '}
+            {step === 2 ? 'Enter the world' : 'Continue'}{' '}
             <ArrowRight size={18} />
           </button>
         </div>
