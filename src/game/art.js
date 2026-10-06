@@ -1,4 +1,5 @@
-import { drawTownProp, tile } from './townAssets.js';
+import { drawGardenProp } from './gardenArt.js';
+import { drawTownProp } from './townAssets.js';
 // Procedural town/avatar art. Reference creature sprites are bundled locally.
 export const OUTFITS = ['#e7a54b', '#789ac4', '#c87972', '#87a875'];
 export const SKINS = ['#f2c99f', '#c99066', '#8d5e46'];
@@ -140,9 +141,8 @@ export function drawProp(ctx, p, assets = {}) {
     drawTownProp(ctx, p, assets.town);
     return;
   }
-  if (p.type === 'gatePillar') {
-    tile(ctx, assets.town, 102, p.x - 16, p.y - 56, 2);
-    tile(ctx, assets.town, 126, p.x - 16, p.y - 24, 2);
+  if (p.type.startsWith('garden') || p.type === 'gatePillar') {
+    drawGardenProp(ctx, p);
     return;
   }
   const { x, y, s = 1, type } = p;

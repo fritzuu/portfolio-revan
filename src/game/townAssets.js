@@ -34,57 +34,6 @@ export function drawTownProp(c, p, image) {
   } else tile(c, image, p.tile ?? 29, x - 8 * s, y - 12 * s, s);
 }
 export const DISTRICT_PROPS = [
-  // Garden edge beds frame the open trail and the snake's existing circuit.
-  ...[
-    [1715, 300],
-    [1715, 395],
-    [1715, 550],
-    [1890, 255],
-    [2150, 250],
-    [2395, 310],
-    [2395, 435],
-    [2395, 550],
-  ].map(([x, y], i) => ({
-    type: 'assetTree',
-    x,
-    y,
-    s: 2,
-    variant: i % 3 === 0 ? 'autumn' : 'green',
-  })),
-  ...[
-    [1935, 245],
-    [2130, 575],
-    [1895, 575],
-    [2190, 575],
-    [2180, 245],
-    [2250, 255],
-  ].map(([x, y], i) => ({
-    type: 'assetPine',
-    x,
-    y,
-    s: 2,
-    variant: i % 2 ? 'autumn' : 'green',
-  })),
-  ...[
-    [1748, 325],
-    [1760, 348],
-    [1750, 530],
-    [1775, 542],
-    [1915, 270],
-    [1934, 276],
-    [2280, 535],
-    [2310, 538],
-    [2355, 360],
-    [2360, 385],
-    [2100, 560],
-  ].map(([x, y], i) => ({
-    type: 'assetDecor',
-    tile: i % 3 === 0 ? 29 : i % 3 === 1 ? 27 : 28,
-    x,
-    y,
-    s: 1.5,
-    solid: false,
-  })),
   // Grove canopy surrounds a generously cleared moon court; no props cross entry points.
   ...[
     [1740, 785],
@@ -133,7 +82,4 @@ export const DISTRICT_PROPS = [
     s: 1.5,
     solid: false,
   })),
-  // Gate pillars share geometry with their visible stone bases.
-  { type: 'gatePillar', x: 1537, y: 510 },
-  { type: 'gatePillar', x: 1644, y: 510 },
 ];

@@ -1,6 +1,6 @@
-import { tile } from './townAssets.js';
+import { drawGardenGround } from './gardenArt.js';
 // District art shares the navigation layout; flat paths remain walkable.
-export function drawExtension(c, assets = {}) {
+export function drawExtension(c) {
   const r = (x, y, w, h, color) => {
     c.fillStyle = color;
     c.fillRect(x, y, w, h);
@@ -22,53 +22,7 @@ export function drawExtension(c, assets = {}) {
     r(x - 3, y - 3, w + 6, h + 6, '#b9a482');
     r(x, y, w, h, '#f7dab2');
   }
-  // Rounded planted islands and stepping stones leave broad, irregular trails.
-  c.fillStyle = '#8cbb82';
-  c.beginPath();
-  c.roundRect(1690, 250, 750, 345, 48);
-  c.fill();
-  c.strokeStyle = '#e3c89b';
-  c.lineWidth = 30;
-  c.lineJoin = 'round';
-  c.beginPath();
-  c.moveTo(1700, 480);
-  c.quadraticCurveTo(1790, 485, 1790, 400);
-  c.quadraticCurveTo(1775, 292, 1940, 303);
-  c.quadraticCurveTo(2110, 282, 2318, 315);
-  c.quadraticCurveTo(2370, 410, 2325, 485);
-  c.quadraticCurveTo(2180, 520, 1910, 506);
-  c.stroke();
-  c.fillStyle = '#85c769';
-  c.beginPath();
-  c.roundRect(1855, 350, 345, 108, 30);
-  c.fill();
-  for (const [px, py] of [
-    [1870, 367],
-    [1890, 367],
-    [1870, 387],
-    [1890, 387],
-    [2115, 374],
-    [2135, 374],
-    [2155, 394],
-    [2135, 394],
-  ])
-    tile(c, assets.town, 2, px, py, 1.25);
-  for (const [px, py] of [
-    [1930, 425],
-    [2160, 430],
-    [1920, 358],
-    [2180, 368],
-  ])
-    tile(c, assets.town, 28, px, py, 1.25);
-  r(2000, 390, 62, 28, '#8b9f88');
-  r(2005, 386, 50, 22, '#c7ccb4');
-  for (const [x, y] of [
-    [1910, 475],
-    [1950, 465],
-    [2110, 465],
-    [2150, 470],
-  ])
-    tile(c, assets.town, 43, x, y, 1.5);
+  drawGardenGround(c);
   label('JEKEK’S GARDEN', 2060, 635);
   // A quiet grove with a moon-shaped stone mosaic and dim violet vegetation.
   c.fillStyle = '#527f78';
@@ -137,11 +91,6 @@ export function drawExtension(c, assets = {}) {
   r(1632, 1280, 26, 220, '#ba9167');
   for (let y = 1283; y < 1500; y += 12) r(1635, y, 20, 2, '#e0b487');
   label('THE ANGLER’S SHORE', 2090, 1550);
-  // Atlas stone arch and vines: the passage remains open between solid pillars.
-  tile(c, assets.town, 113, 1542, 438, 3);
-  tile(c, assets.town, 114, 1590, 438, 3);
-  tile(c, assets.town, 28, 1525, 470, 1.5);
-  tile(c, assets.town, 28, 1630, 470, 1.5);
   label('GARDEN GATE', 1590, 565);
   // A separate compact practice lane keeps training out of the live match.
   r(1380, 1190, 130, 300, '#74a97a');

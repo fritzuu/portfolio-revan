@@ -1,6 +1,10 @@
 # World refresh and asset selection
 
-Selected [Kenney Tiny Town 1.1](https://kenney.nl/assets/tiny-town), CC0, after inspecting its atlas. The local atlas supplies tree canopies, pine trees, shrubs, mushrooms, flowers, stepping stones and stone gate components. Plants are grouped around open routes; the moon court and snake circuit stay clear. A small trunk joins the complete round-canopy tile; unrelated atlas plant tiles are never joined into a fake tree.
+Jekek’s Garden and its gate now use original procedural pixel art, matching the existing town palette, stepped shapes and wooden details. Garden trees reuse the town renderer. Custom flowering hedges, ferns, sunflowers, low flower clusters, pots, nursery seedlings and planted islands frame the open trail. The gate is a vine-covered wooden pergola with a nameplate, stone feet and animated picket leaves.
+
+![Original garden and pergola composition](garden-custom.png)
+
+The local [Kenney Tiny Town 1.1](https://kenney.nl/assets/tiny-town) CC0 atlas remains limited to Dream Grove trees, shrubs and mushrooms. No external tile assets are used by the garden or gate.
 
 ![Environment asset composition](district-assets.png)
 
@@ -12,7 +16,7 @@ No paid assets were purchased; no hotlinking or CDN dependencies were added. Ori
 
 ## Implemented behavior
 
-- Garden/grove composition, planted beds, winding trail, rest bench, moon court, stone arch and animated gate leaves.
+- Garden/grove composition, planted beds, winding trail, rest bench, moon court, original wooden pergola and animated gate leaves.
 - Walking/watering gardener, butterflies, birds, limited fireflies and Darkrai wisps; six football spectators react to goals.
 - Two opposing teams, eight players, one fixed-step ball model, variable match outcomes, real crossing-based scoring and visible restarts.
 - Join Messi/Yamal with visitor avatar and compact peripheral controls, separate practice lane, responsive camera, Escape to leave.

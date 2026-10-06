@@ -1,3 +1,4 @@
+import { drawGardenGateLeaves } from './gardenArt.js';
 import { gateUnlocked } from './exploration.js';
 import { createCreatures, updateCreatures } from './creatureSprites.js';
 import { FOOTBALL_HOMES, createMatch, updateMatch } from './football.js';
@@ -163,14 +164,7 @@ export function updateExploration(
   state.gateOpen +=
     ((opened ? 1 : 0) - state.gateOpen) * Math.min(1, dt / (reduced ? 1 : 350));
   state.gate.clear();
-  state.gate.lineStyle(4, 0x79593b);
-  state.gate.fillStyle(opened ? 0xc4d399 : 0xbe9462);
-  const leafWidth = 36 * (1 - state.gateOpen) + 4;
-  for (const x of [1553, 1629 - leafWidth]) {
-    state.gate.fillRect(x, 483, leafWidth, 22);
-    for (let i = 0; i < leafWidth; i += 8)
-      state.gate.lineBetween(x + i, 483, x + i, 505);
-  }
+  drawGardenGateLeaves(state.gate, state.gateOpen);
   // Gate leaves swing into the pillars. The unlocked shortcut is a destination action,
   // not an invisible wall across the only district street.
   state.ambiance.clear();

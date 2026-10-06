@@ -1,3 +1,4 @@
+import { GARDEN_PROPS } from './gardenArt.js';
 import { DISTRICT_PROPS } from './townAssets.js';
 // Hand-authored districts: broad connecting streets and decorations anchored to gardens.
 export const WORLD_SIZE = { width: 2600, height: 1600 };
@@ -142,6 +143,7 @@ export const GARDENS = [
 ];
 export const PROPS = [
   ...DISTRICT_PROPS,
+  ...GARDEN_PROPS,
   ...[
     [107, 335, 0.7],
     [515, 335, 0.8],

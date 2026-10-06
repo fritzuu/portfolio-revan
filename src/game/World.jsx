@@ -123,11 +123,11 @@ export default function World({
             map.refresh();
             this.add.image(0, 0, 'city').setOrigin(0);
             PROPS.forEach((p, i) => {
-              const t = this.textures.createCanvas(`prop-${i}`, 160, 160);
-              drawProp(t.context, { ...p, x: 60, y: 110 }, this.artAssets);
+              const t = this.textures.createCanvas(`prop-${i}`, 192, 160);
+              drawProp(t.context, { ...p, x: 80, y: 110 }, this.artAssets);
               t.refresh();
               this.add
-                .image(p.x - 60, p.y - 110, `prop-${i}`)
+                .image(p.x - 80, p.y - 110, `prop-${i}`)
                 .setOrigin(0)
                 .setDepth(p.y + 12);
             });
