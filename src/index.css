@@ -2678,64 +2678,119 @@ textarea::placeholder {
   }
 }
 
-/* Fishing takes place on the actual dock; only the controls sit above the map. */
+/* An unobtrusive centered HUD, with the world remaining fully visible. */
 .world-fishing-controls {
-  color: #2d4437;
+  color: #fff2cf;
   position: fixed;
   z-index: 25;
-  right: 24px;
-  bottom: 28px;
-  width: min(370px, calc(100vw - 32px));
-  max-height: calc(100dvh - 110px);
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 34px;
+  width: min(440px, calc(100vw - 32px));
+  max-height: 42dvh;
   overflow-y: auto;
-  background: #f7f1dded;
-  border: 3px solid #354f56;
-  box-shadow: 5px 5px 0 #233a3d50;
-  padding: 16px;
+  padding: 10px 22px;
+  background: radial-gradient(
+    ellipse,
+    #142c3c8c 0%,
+    #142c3c40 52%,
+    transparent 74%
+  );
+  text-shadow:
+    0 2px 2px #152c3c,
+    1px 0 #152c3c;
 }
 .fishing-exit {
-  float: right;
-  margin: -5px -5px 8px 8px;
+  position: absolute;
+  right: 0;
+  top: 6px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: #203d4666;
+  color: #fff2cf;
+  border-radius: 50%;
 }
-.world-fishing-controls .fishing-location {
-  display: block;
-  padding-right: 30px;
-  font-size: 13px;
-}
-.world-fishing-controls .fishing-location span {
-  display: block;
-  margin-bottom: 5px;
-}
-.world-fishing-controls .fishing-caption {
-  margin: 12px 0;
-}
-.world-fishing-controls h3 {
-  font-size: 25px;
-}
+.world-fishing-controls .fishing-location,
+.world-fishing-controls .fishing-caption .eyebrow,
 .world-fishing-controls .fishing-instructions,
-.world-fishing-controls .fishing-footnote {
+.world-fishing-controls .fishing-footnote,
+.world-fishing-controls .reeling-labels,
+.world-fishing-controls .reeling-game > small {
   display: none;
 }
-.world-fishing-controls .fishing-actions {
-  flex-wrap: wrap;
+.world-fishing-controls .fishing-caption {
+  margin: 2px 0 10px;
 }
-.world-fishing-controls .fishing-actions .button {
-  flex: 1;
-  white-space: nowrap;
-  padding: 10px;
+.world-fishing-controls h3 {
+  font-size: 24px;
+}
+.world-fishing-controls .fishing-hint {
+  padding: 0;
+  font-size: 12px;
+}
+.world-fishing-controls .fishing-actions {
+  margin: 12px 0 0;
+  gap: 8px;
+}
+.world-fishing-controls .button {
+  border: 1px solid #ecdebc66;
+  border-radius: 24px;
+  padding: 8px 14px;
+  background: #203e49d9;
+  color: #fff2cf;
+  box-shadow: none;
+  text-shadow: none;
+  font-size: 12px;
+}
+.world-fishing-controls .button.primary {
+  background: #f0ce88;
+  color: #243d46;
+}
+.world-fishing-controls .strike-button {
+  width: auto;
+  margin: auto;
+}
+.world-fishing-controls .reeling-track {
+  height: 28px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.world-fishing-controls .catch-progress {
+  height: 5px;
+  margin: 8px 0 12px;
+  border: 0;
+  border-radius: 5px;
+}
+.world-fishing-controls .reel-controls {
+  gap: 6px;
+}
+.world-fishing-controls .reel-controls .button {
+  padding: 8px 10px;
 }
 .world-fishing-controls .catch-result {
-  display: block;
-  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
 }
 .world-fishing-controls .catch-result p {
   display: none;
 }
 .world-fishing-controls .catch-result canvas {
-  width: 100px;
-  height: 80px;
-  float: left;
-  margin-right: 10px;
+  width: 80px;
+  height: 64px;
+}
+.world-fishing-controls .catch-result small {
+  color: #fff2cf;
+}
+.world-fishing-controls .rarity-tag,
+.world-fishing-controls .new-discovery {
+  text-shadow: none;
 }
 .new-discovery {
   display: inline-block;
@@ -2761,16 +2816,17 @@ textarea::placeholder {
 }
 @media (max-width: 760px) {
   .world-fishing-controls {
-    right: 12px;
-    bottom: 12px;
+    bottom: 24px;
     width: calc(100vw - 24px);
-    max-height: 45dvh;
-    padding: 12px;
+    padding: 8px 22px;
+    max-height: 38dvh;
   }
   .world-fishing-controls .fishing-caption h3 {
     font-size: 22px;
   }
-  .world-fishing-controls .reeling-game small {
-    display: none;
-  }
+}
+
+.world-fishing-controls .fishing-exit:hover {
+  background: #203d46;
+  color: #fff2cf;
 }

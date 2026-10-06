@@ -68,13 +68,13 @@ server/app.js                     API, validation, authentication, SQLite schema
 server/index.js                   Production/development server entry point
 ```
 
-The visitor navigation has five destinations; guestbook is removed from the public UI. Revan wears a blue hoodie and thick square black glasses. The noticeboard beside the dock has been removed; Mira’s tackle stall remains. A smooth two-minute morning → night → morning cycle dims the world and brings up warm light halos around street lamps.
+The visitor navigation has five destinations; guestbook is removed from the public UI. Revan wears a blue hoodie and thick square black glasses. The noticeboard beside the dock has been removed; Mira’s tackle stall remains. A smooth two-minute morning → night → morning cycle dims the world and brings up warm light halos around street lamps, dock posts, the tackle shop, plaza, crossing and building entrances/windows. Night dimming peaks at 42% so routes remain easy to see.
 
 ## Moonwater fishing
 
 The hand-authored town has a northern portfolio district, central Curiosity Square, an eastern reading garden, and a western lake with a walkable wooden dock. Fifteen residents follow six long circuits, pause at destinations, yield to the traveler, and sometimes sit on benches. Mira keeps the tackle stall open.
 
-Use **Go fishing** to walk to Moonwater Dock. Fishing happens directly in the world: your traveler casts into the actual lake, while a small control HUD handles reeling. New species display **NEW** on the catch result. Cast a line, watch for the dipping float, then **Space / tap** to strike. During reeling, hold Space or the on-screen button to raise the net; release to lower it. Left/right arrow keys and tap buttons make small adjustments. Keep the creature marker inside the net until the catch meter fills. Rare creatures move faster and need more precise tracking. OS reduced-motion settings slow the tracking and widen the net. Switching tabs pauses the fishing timer.
+Use **Go fishing** to walk to Moonwater Dock. Fishing happens directly in the world: your traveler casts into the actual lake, while a minimal, centered HUD handles reeling without a window frame. New species display **NEW** on the catch result. Cast a line, watch for the dipping float, then **Space / tap** to strike. During reeling, hold Space or the on-screen button to raise the net; release to lower it. Left/right arrow keys and tap buttons make small adjustments. Keep the creature marker inside the net until the catch meter fills. Rare creatures move faster and need more precise tracking. OS reduced-motion settings slow the tracking and widen the net. Switching tabs pauses the fishing timer.
 
 Catches enter the backpack. Select sale quantities and review the total before confirming, or review all unlocked catches together. Inspect individual catches to lock favorites. Selling never removes journal discoveries. Mira’s Tackle Shop sells rod upgrades and lets you equip owned rods.
 
