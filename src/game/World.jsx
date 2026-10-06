@@ -104,6 +104,9 @@ export default function World({
     import('phaser')
       .then(({ default: Phaser }) => {
         if (cancelled) return;
+        // Receive native keys inside the stage before React prevents scrolling
+        // on its ancestor root. Phaser ignores already-prevented events.
+        const keyboardTarget = root.current.closest('.city-stage');
         class City extends Phaser.Scene {
           preload() {
             this.load.image('town-atlas', '/assets/tiny-town/tiles.png');
@@ -248,6 +251,19 @@ export default function World({
               'W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER,ESC,SPACE,Q,SHIFT,F',
             );
             this.input.keyboard.disableGlobalCapture();
+            const clearStageKeys = (event) => {
+              if (keyboardTarget.contains(event.relatedTarget)) return;
+              this.input.keyboard.resetKeys();
+              const match = this.exploration?.match;
+              if (match) {
+                match.charge = null;
+                match.mustReleaseShoot = true;
+              }
+            };
+            keyboardTarget.addEventListener('focusout', clearStageKeys);
+            this.events.once('shutdown', () =>
+              keyboardTarget.removeEventListener('focusout', clearStageKeys),
+            );
             this.input.on('pointerdown', (p) => {
               if (playing && !live.current.paused && !live.current.fishing) {
                 this.cancelTravel();
@@ -653,6 +669,7 @@ export default function World({
         game = new Phaser.Game({
           type: Phaser.CANVAS,
           parent: root.current,
+          input: { keyboard: { target: keyboardTarget } },
           width: root.current.clientWidth,
           height: root.current.clientHeight,
           backgroundColor: '#c0bbaa',
