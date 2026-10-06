@@ -140,7 +140,7 @@ export const PROPS = [
     [445, 875],
     [445, 904],
   ].map(([x, y]) => ({ type: 'crate', x, y })),
-  { type: 'board', x: 480, y: 820 },
+  { type: 'stall', x: 560, y: 870 },
   ...[
     [200, 500],
     [380, 500],

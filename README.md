@@ -68,7 +68,7 @@ server/app.js                     API, validation, authentication, SQLite schema
 server/index.js                   Production/development server entry point
 ```
 
-The visitor navigation has five destinations; guestbook is removed from the public UI. Revan wears a blue hoodie and thick square black glasses. The nearby tackle stand has been removed. A smooth two-minute morning → night → morning cycle dims the world and brings up warm light halos around street lamps.
+The visitor navigation has five destinations; guestbook is removed from the public UI. Revan wears a blue hoodie and thick square black glasses. The noticeboard beside the dock has been removed; Mira’s tackle stall remains. A smooth two-minute morning → night → morning cycle dims the world and brings up warm light halos around street lamps.
 
 ## Moonwater fishing
 
