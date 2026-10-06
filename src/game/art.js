@@ -47,6 +47,19 @@ export function drawCharacter(
   r(19, 28, 5, 4, '#35475a');
   r(9, 31 + swing * 2, 7, 3, '#3c302c');
   r(19, 31 - swing * 2, 7, 3, '#3c302c');
+  if (config.jersey) {
+    const argentina = config.jersey === 'messi';
+    r(9, 18, 15, 10, argentina ? '#f0f4e8' : '#263f89');
+    for (const a of [10, 16, 22])
+      r(a, 18, 3, 10, argentina ? '#74c5e6' : '#bd3755');
+    r(10, 28, 14, 4, argentina ? '#283f51' : '#263f89');
+    if (argentina && direction !== 'up') r(13, 14, 10, 3, '#674936');
+    if (direction === 'up') {
+      ctx.fillStyle = '#fff2bd';
+      ctx.font = 'bold 7px monospace';
+      ctx.fillText(argentina ? '10' : '19', x + 12, y + 26);
+    }
+  }
   if (config.revan) {
     // Blue hoodie with cuffed sleeves, pocket and drawstrings.
     r(8, 17, 17, 11, '#3675bf');
@@ -82,6 +95,7 @@ export {
   OBSTACLES,
   propBounds,
 } from './layout.js';
+import { drawExtension } from './explorationArt.js';
 import { WORLD_SIZE, LOCATIONS, GARDENS, PROPS } from './layout.js';
 export function drawProp(ctx, p) {
   const { x, y, s = 1, type } = p;
@@ -238,8 +252,8 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
   };
   r(0, 0, WORLD_SIZE.width, WORLD_SIZE.height, '#9bd7a0');
   // Soft grass texture gives the districts breathing room between the warm streets.
-  for (let y = 174; y < 1100; y += 24)
-    for (let x = -24; x < 1600; x += 48) {
+  for (let y = 174; y < WORLD_SIZE.height; y += 24)
+    for (let x = -24; x < WORLD_SIZE.width; x += 48) {
       const xx = x + ((y / 24) % 2 ? 24 : 0);
       r(
         xx,
@@ -283,9 +297,9 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
         r(xx + 5, yy + 4, 7, 1, '#8ddce2');
       }
   }
-  water(0, 0, 1600, 155);
-  r(0, 155, 1600, 9, '#e6dfc7');
-  r(0, 164, 1600, 7, '#7f9b94');
+  water(0, 0, WORLD_SIZE.width, 155);
+  r(0, 155, WORLD_SIZE.width, 9, '#e6dfc7');
+  r(0, 164, WORLD_SIZE.width, 7, '#7f9b94');
   r(740, 0, 120, 191, '#53756c');
   r(750, 0, 100, 191, '#c6ac80');
   for (let y = 0; y < 191; y += 14) {
@@ -300,7 +314,7 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
   r(776, 96, 48, 21, '#b8d8cf');
   r(790, 100, 20, 14, '#709faf');
   label('ASTRAL CROSSING', 800, 60, 9, '#f0e2bd');
-  for (let x = 22; x < 1600; x += 32) {
+  for (let x = 22; x < WORLD_SIZE.width; x += 32) {
     if (x > 725 && x < 875) continue;
     r(x, 140, 3, 22, '#526f68');
     r(x, 143, 32, 3, '#6a8777');
@@ -543,6 +557,7 @@ export function drawWorld(ctx, { baseOnly = false } = {}) {
   }
   label('MIRA’S TACKLE', 550, 958, 12);
   label('A GOOD CATCH HAS A GOOD STORY', 550, 973, 8);
+  drawExtension(ctx);
   if (!baseOnly)
     [...PROPS].sort((a, b) => a.y - b.y).forEach((p) => drawProp(ctx, p));
 }

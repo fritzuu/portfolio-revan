@@ -1,5 +1,5 @@
 // Hand-authored districts: broad connecting streets and decorations anchored to gardens.
-export const WORLD_SIZE = { width: 1600, height: 1100 };
+export const WORLD_SIZE = { width: 2600, height: 1600 };
 export const LOCATIONS = [
   {
     id: 'about',
@@ -85,7 +85,51 @@ export const ACTIVITIES = [
     doorY: 65,
   },
 ];
-export const DESTINATIONS = [...LOCATIONS, ...ACTIVITIES];
+export const EXPLORATION = [
+  {
+    id: 'jekek',
+    name: 'Jekek’s Garden',
+    subtitle: 'Meet Revan’s python',
+    doorX: 1810,
+    doorY: 350,
+  },
+  {
+    id: 'dream',
+    name: 'Dream Grove',
+    subtitle: 'A nighttime encounter',
+    doorX: 2050,
+    doorY: 820,
+  },
+  {
+    id: 'football',
+    name: 'Football Park',
+    subtitle: 'Messi, Yamal & friends',
+    doorX: 740,
+    doorY: 1287,
+  },
+  {
+    id: 'story',
+    name: 'Story Bench',
+    subtitle: 'A few personal field notes',
+    doorX: 1520,
+    doorY: 735,
+  },
+  {
+    id: 'shore',
+    name: 'Angler’s Shore',
+    subtitle: 'Watch the resident anglers',
+    doorX: 1610,
+    doorY: 1345,
+  },
+  {
+    id: 'shortcut',
+    name: 'Garden Gate',
+    subtitle: 'Unlock with two discoveries',
+    doorX: 1590,
+    doorY: 460,
+  },
+];
+export const DESTINATIONS = [...LOCATIONS, ...ACTIVITIES, ...EXPLORATION];
 export const GARDENS = [
   { x: 75, y: 270, w: 65, h: 120 },
   { x: 470, y: 270, w: 95, h: 120 },
@@ -148,6 +192,31 @@ export const PROPS = [
   ].map(([x, y]) => ({ type: 'crate', x, y })),
   { type: 'stall', x: 560, y: 870 },
   ...[
+    [1740, 240],
+    [1880, 220],
+    [2300, 220],
+    [2430, 320],
+    [2420, 550],
+    [1730, 550],
+    [1770, 800],
+    [1810, 940],
+    [2380, 940],
+    [1870, 1045],
+    [2300, 1045],
+    [2350, 800],
+    [1760, 1070],
+    [2360, 1070],
+    [80, 1180],
+    [1360, 1450],
+  ].map(([x, y], i) => ({
+    type: 'tree',
+    x,
+    y,
+    s: 0.9,
+    variant: i % 3 === 0 ? 'blossom' : 'green',
+  })),
+  { type: 'bench', x: 1480, y: 730 },
+  ...[
     [200, 500],
     [380, 500],
     [1120, 740],
@@ -174,12 +243,14 @@ export const OBSTACLES = [
     h: l.h + 17,
   })),
   { x: 0, y: 0, w: 739, h: 171 },
-  { x: 862, y: 0, w: 738, h: 171 },
+  { x: 862, y: 0, w: 1738, h: 171 },
   // The dock is a real walkable gap in the lake, not paint over a water collider.
   { x: 85, y: 530, w: 400, h: 200 },
   { x: 85, y: 730, w: 155, h: 135 },
   { x: 360, y: 730, w: 125, h: 135 },
   { x: 735, y: 600, w: 130, h: 105 },
+  { x: 1660, y: 1250, w: 860, h: 245 },
+  { x: 2000, y: 390, w: 62, h: 28 },
   ...PROPS.map(propBounds),
 ];
 // Large circuits connect districts, with occasional bench/garden stops.
@@ -212,7 +283,7 @@ export const NPC_ROUTES = [
   [
     { x: 1040, y: 500 },
     { x: 1260, y: 750 },
-    { x: 1490, y: 750 },
+    { x: 1490, y: 790 },
     { x: 1480, y: 470 },
   ],
   [
@@ -223,4 +294,26 @@ export const NPC_ROUTES = [
     { x: 560, y: 800 },
   ],
 ];
-export const NPC_COUNT = 15;
+NPC_ROUTES.push(
+  [
+    { x: 1590, y: 600 },
+    { x: 1810, y: 640 },
+    { x: 2300, y: 650 },
+    { x: 2300, y: 1140 },
+    { x: 1590, y: 1140 },
+  ],
+  [
+    { x: 1520, y: 1100 },
+    { x: 1600, y: 1530 },
+    { x: 1100, y: 1540 },
+    { x: 550, y: 1540 },
+    { x: 550, y: 1100 },
+  ],
+  [
+    { x: 1600, y: 1170 },
+    { x: 1610, y: 1430 },
+    { x: 1570, y: 1500 },
+    { x: 1450, y: 1100 },
+  ],
+);
+export const NPC_COUNT = 21;

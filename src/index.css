@@ -3419,3 +3419,150 @@ textarea::placeholder {
     font-size: 18px;
   }
 }
+
+/* Personal discoveries keep the same paper palette and touch sizing as portfolio panels. */
+.exploration-intro,
+.exploration-story p,
+.discovery p {
+  font-size: 16px;
+  line-height: 1.65;
+}
+.discovery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.discovery {
+  padding: 22px;
+  border: 1px solid #c4c3a9;
+  border-radius: 12px;
+  background: #ecead9;
+}
+.discovery.found {
+  background: #f7f3df;
+  border-color: #86a892;
+}
+.discovery h3,
+.exploration-story h3 {
+  font-family: 'VT323', monospace;
+  font-size: 32px;
+  margin: 12px 0;
+}
+.exploration-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.football-challenge {
+  position: fixed;
+  z-index: 35;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 170px;
+  width: min(410px, calc(100vw - 32px));
+  padding: 20px 26px;
+  text-align: center;
+  color: #ffedc2;
+  border-radius: 22px;
+  background: #284b43ed;
+  box-shadow: 0 8px 30px #172e3333;
+}
+.football-challenge h2 {
+  font-family: 'VT323', monospace;
+  font-size: 38px;
+  margin: 8px 0;
+}
+.football-challenge p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 8px 0 14px;
+}
+.football-challenge .eyebrow {
+  color: #c9dba9;
+}
+.football-challenge .button {
+  margin: 14px auto 0;
+  font-family: 'VT323', monospace;
+  font-size: 25px;
+  background: #dfad66;
+  color: #263f3b;
+  border-color: #ffde99;
+  min-height: 48px;
+}
+.football-challenge .button:hover {
+  background: #f1c47b;
+}
+.football-close {
+  position: absolute;
+  right: 4px;
+  top: 2px;
+  background: transparent;
+  color: #ffe8b7;
+  border: 0;
+  font-size: 30px;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+}
+.football-aim {
+  position: relative;
+  height: 16px;
+  border-radius: 8px;
+  background: #729c8c;
+  overflow: hidden;
+}
+.football-aim span {
+  position: absolute;
+  left: 40%;
+  width: 20%;
+  height: 100%;
+  background: #f1c67d;
+}
+.football-aim i {
+  position: absolute;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  background: #fff7de;
+  transform: translateX(-50%);
+}
+.football-results {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 10px;
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+}
+.football-challenge label {
+  display: grid;
+  margin-top: 12px;
+}
+@media (max-width: 760px) {
+  .discovery-grid {
+    grid-template-columns: 1fr;
+  }
+  .discovery {
+    padding: 16px;
+  }
+  .football-challenge {
+    bottom: 140px;
+    padding: 14px 20px;
+  }
+  .football-challenge h2 {
+    font-size: 29px;
+  }
+  .football-challenge p {
+    font-size: 12px;
+  }
+  .football-challenge .button {
+    font-size: 21px;
+    min-height: 44px;
+  }
+}
+.is-football .city-dpad,
+.is-football .city-interaction,
+.is-football .city-help,
+.is-football .minimap-button {
+  display: none;
+}

@@ -13,7 +13,7 @@ export default function WorldMap({
     image.width = 400;
     image.height = 275;
     const c = image.getContext('2d');
-    c.scale(0.25, 0.25);
+    c.scale(400 / WORLD_SIZE.width, 275 / WORLD_SIZE.height);
     drawWorld(c);
     base.current = image;
   }, []);
@@ -23,7 +23,12 @@ export default function WorldMap({
     if (base.current) c.drawImage(base.current, 0, 0);
     for (const l of DESTINATIONS) {
       c.fillStyle = visited.includes(l.id) ? '#bdf199' : '#fff0be';
-      c.fillRect(l.doorX / 4 - 4, l.doorY / 4 - 4, 8, 8);
+      c.fillRect(
+        (l.doorX / WORLD_SIZE.width) * 400 - 4,
+        (l.doorY / WORLD_SIZE.height) * 275 - 4,
+        8,
+        8,
+      );
     }
     c.strokeStyle = '#243b43';
     c.lineWidth = 3;

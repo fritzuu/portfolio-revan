@@ -26,6 +26,10 @@ import { LOCATIONS, OUTFITS, SKINS } from './game/art';
 import PixelCharacter from './components/PixelCharacter';
 import Cutscene from './components/Cutscene';
 import useMusic from './hooks/useMusic';
+import useExploration from './hooks/useExploration';
+import ExplorationPanel from './components/ExplorationPanel';
+import FootballChallenge from './components/FootballChallenge';
+import { gateUnlocked } from './game/exploration';
 import useFishing from './hooks/useFishing';
 import WorldMap from './components/WorldMap';
 import PortfolioContent, { api } from './components/PortfolioContent';
@@ -37,6 +41,12 @@ const World = lazy(() => import('./game/World'));
 const cn = (...inputs) => twMerge(clsx(inputs));
 const DEFAULT = { gender: 'male', outfit: 0, skin: 0 };
 const TITLES = {
+  notebook: 'Little discoveries.',
+  jekek: 'Jekek’s Garden.',
+  dream: 'Dream Grove.',
+  story: 'A moment with Revan.',
+  shortcut: 'The Garden Gate.',
+  shore: 'The patient anglers.',
   map: 'Explore Revan’s city.',
   fishing: 'Moonwater Angler’s Club.',
   rift: 'The other side of the water.',
@@ -97,6 +107,18 @@ export default function App() {
     [character, setCharacter] = useState(saved?.character || DEFAULT),
     [visited, setVisited] = useState(saved?.visited || []);
   const fishing = useFishing();
+  const { discoveries, discover } = useExploration();
+  const [night, setNight] = useState(false);
+  const [kick, setKick] = useState(null);
+  const [shots, setShots] = useState([]);
+  const [shotBusy, setShotBusy] = useState(false);
+  const onShot = useCallback((goal) => {
+    setShots((previous) =>
+      previous.length < 3 ? [...previous, goal] : previous,
+    );
+    setShotBusy(false);
+  }, []);
+
   const [worldFishing, setWorldFishing] = useState(null);
   const [resetFishing, setResetFishing] = useState(false);
   const [position, setPosition] = useState({ x: 800, y: 545 });
@@ -145,15 +167,19 @@ export default function App() {
       /* Storage may be disabled; exploration still works. */
     }
   }, [character, visited, phase]);
-  const visit = useCallback((id) => {
-    setPanel(id);
-    setControls({});
-    setDestination(null);
-    setTravel(null);
-    const locationId = id;
-    if (LOCATIONS.some((l) => l.id === locationId))
-      setVisited((v) => (v.includes(locationId) ? v : [...v, locationId]));
-  }, []);
+  const visit = useCallback(
+    (id) => {
+      setPanel(id);
+      if (['jekek', 'story', 'football', 'shore'].includes(id)) discover(id);
+      setControls({});
+      setDestination(null);
+      setTravel(null);
+      const locationId = id;
+      if (LOCATIONS.some((l) => l.id === locationId))
+        setVisited((v) => (v.includes(locationId) ? v : [...v, locationId]));
+    },
+    [discover],
+  );
   const tripSequence = useRef(0);
   const walkTo = useCallback((panelId, open = true) => {
     const id = panelId;
@@ -162,6 +188,21 @@ export default function App() {
     setDestination({ id, panel: panelId, open, stamp: ++tripSequence.current });
     setTimeout(() => stage.current?.focus(), 0);
   }, []);
+  const teleport = useCallback(
+    (id) => {
+      if (!gateUnlocked(discoveries)) return;
+      setPanel(null);
+      setControls({});
+      setDestination({
+        id,
+        open: false,
+        teleport: true,
+        stamp: ++tripSequence.current,
+      });
+      setTimeout(() => stage.current?.focus(), 0);
+    },
+    [discoveries],
+  );
   const doneIntro = useCallback(() => setPhase('create'), []);
   const enter = () => {
     setDestination(null);
@@ -172,7 +213,13 @@ export default function App() {
   };
   if (window.location.pathname === '/admin') return <Admin />;
   return (
-    <div className={cn('city-app', inWorldFishing && 'is-fishing')}>
+    <div
+      className={cn(
+        'city-app',
+        inWorldFishing && 'is-fishing',
+        panel === 'football' && 'is-football',
+      )}
+    >
       {phase === 'playing' && (
         <a className="skip-link" href="#city-navigation">
           Skip to portfolio navigation
@@ -222,6 +269,11 @@ export default function App() {
             onPosition={setPosition}
             destination={destination}
             onTravel={setTravel}
+            onDiscover={discover}
+            onNight={setNight}
+            kick={kick}
+            onShot={onShot}
+            footballActive={panel === 'football'}
           />
         </Suspense>
       </main>
@@ -289,6 +341,14 @@ export default function App() {
               <small>— PORTFOLIO —</small>
             </button>
             <div className="hud-tools">
+              <button
+                className="hud-icon"
+                aria-label={`Discovery notebook, ${discoveries.length} found`}
+                title={`${discoveries.length} / 5 discoveries`}
+                onClick={() => setPanel('notebook')}
+              >
+                <BookOpen size={20} />
+              </button>
               <span
                 className="hud-coins"
                 aria-label={`${fishing.state.coins} fishing coins`}
@@ -587,8 +647,25 @@ export default function App() {
           Your character and discoveries are saved on this device.
         </small>
       </Modal>
+      {phase === 'playing' && panel === 'football' && (
+        <FootballChallenge
+          results={shots}
+          busy={shotBusy}
+          reduced={reduced}
+          onClose={() => setPanel(null)}
+          onReset={() => {
+            setShots([]);
+            setShotBusy(false);
+          }}
+          onKick={(aim) => {
+            if (shotBusy || shots.length >= 3) return;
+            setShotBusy(true);
+            setKick({ aim, stamp: ++tripSequence.current });
+          }}
+        />
+      )}
       <Modal
-        open={!!panel && !inWorldFishing}
+        open={!!panel && !inWorldFishing && panel !== 'football'}
         onOpenChange={(v) => {
           if (!v) setPanel(null);
         }}
@@ -616,6 +693,21 @@ export default function App() {
             position={position}
             visited={visited}
             onTravel={(id) => walkTo(id)}
+          />
+        ) : [
+            'notebook',
+            'jekek',
+            'dream',
+            'story',
+            'shortcut',
+            'shore',
+          ].includes(panel) ? (
+          <ExplorationPanel
+            view={panel}
+            discoveries={discoveries}
+            night={night}
+            onTravel={walkTo}
+            onTeleport={teleport}
           />
         ) : panel === 'settings' ? (
           <div className="settings-list">

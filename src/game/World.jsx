@@ -8,6 +8,7 @@ import {
   WORLD_SIZE,
 } from './art';
 import { NPC_COUNT, NPC_ROUTES } from './layout';
+import { createExploration, updateExploration } from './explorationActors';
 import { nightAmount } from './daylight';
 import { drawFish } from '../fishing/sprites';
 import { RODS } from '../fishing/catalog';
@@ -25,6 +26,11 @@ export default function World({
   onPosition,
   destination,
   onTravel,
+  onDiscover,
+  onNight,
+  kick,
+  onShot,
+  footballActive,
 }) {
   const root = useRef(null),
     live = useRef({
@@ -36,6 +42,11 @@ export default function World({
       onPosition,
       destination,
       onTravel,
+      onDiscover,
+      onNight,
+      kick,
+      onShot,
+      footballActive,
     });
   useEffect(() => {
     live.current = {
@@ -47,6 +58,11 @@ export default function World({
       onPosition,
       destination,
       onTravel,
+      onDiscover,
+      onNight,
+      kick,
+      onShot,
+      footballActive,
     };
   }, [
     paused,
@@ -57,6 +73,11 @@ export default function World({
     onPosition,
     destination,
     onTravel,
+    onDiscover,
+    onNight,
+    kick,
+    onShot,
+    footballActive,
   ]);
   useEffect(() => {
     let game,
@@ -181,6 +202,7 @@ export default function World({
                 .rectangle(p.x + 13, p.y - 72, 10, 13, 0xffecb0)
                 .setDepth(2002),
             }));
+            this.exploration = createExploration(this);
             this.dayElapsed = 0;
             this.wasFishing = false;
             this.water = this.add.graphics().setDepth(1);
@@ -323,6 +345,15 @@ export default function World({
           update(time, delta) {
             if (!document.hidden) this.dayElapsed += Math.min(delta, 100);
             const darkness = nightAmount(this.dayElapsed);
+            updateExploration(
+              this,
+              this.exploration,
+              time,
+              delta,
+              darkness,
+              live.current,
+              reducedMotion,
+            );
             this.night.setAlpha(darkness * 0.42);
             this.lamps.forEach(({ halo, bulb }) => {
               halo.setAlpha(darkness * 0.6);
@@ -401,7 +432,11 @@ export default function World({
             if (dest && dest.stamp !== this.lastDestination) {
               this.lastDestination = dest.stamp;
               const l = DESTINATIONS.find((l) => l.id === dest.id);
-              if (l) {
+              if (l && dest.teleport) {
+                this.cancelTravel();
+                this.player.image.setPosition(l.doorX, l.doorY + 45);
+                this.cameras.main.fadeIn(reducedMotion ? 0 : 350, 24, 49, 44);
+              } else if (l) {
                 this.player.path = findPath(this.player.image, {
                   x: l.doorX,
                   y: l.doorY + 45,

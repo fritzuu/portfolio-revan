@@ -23,7 +23,7 @@ To enable the admin dashboard, copy `.env.example` to `.env`, replace `ADMIN_TOK
 
 1. Enter the world through a fullscreen three-act story: a late-night idea, a portal, and arrival in the city (skippable).
 2. Choose a masculine/feminine character, three skin tones, and four outfits.
-3. Explore a compact, full-screen city using WASD/arrows, click-to-walk, or the mobile direction pad.
+3. Explore a full-screen city with connected garden, grove, pitch and lakeshore districts using WASD/arrows, click-to-walk, or the mobile direction pad.
 4. Approach a doorway and press **E** or **Enter**, or use the interaction button.
 5. Select a HUD menu, quest, or atlas destination to automatically walk around scenery to its building. The corresponding content opens only after arrival. WASD/arrows, a new click, or Escape cancels the trip. The right-hand quest journal can be collapsed; enter all five locations to finish it.
 
@@ -72,7 +72,7 @@ The visitor navigation has five destinations; guestbook is removed from the publ
 
 ## Moonwater fishing
 
-The hand-authored town has a northern portfolio district, central Curiosity Square, an eastern reading garden, and a western lake with a walkable wooden dock. Fifteen residents follow six long circuits, pause at destinations, yield to the traveler, and sometimes sit on benches. Mira keeps the tackle stall open.
+The hand-authored town has a northern portfolio district, central Curiosity Square, an eastern reading garden, and a western lake with a walkable wooden dock. Twenty-one residents follow nine long circuits, pause at destinations, yield to the traveler, and sometimes sit on benches. Mira keeps the tackle stall open.
 
 Use **Go fishing** to walk to Moonwater Dock. Fishing happens directly in the world: your traveler casts into the actual lake, while a larger HUD at the bottom center of the screen handles reeling without a window frame; Cast and Strike buttons are centered within it. Map, settings and other panels leave NPCs, water and the day/night cycle running. New species display **NEW** on the catch result. Cast a line, watch for the dipping float, then **Space / tap** to strike. During reeling, hold Space or the on-screen button to raise the net; release to lower it. Left/right arrow keys and tap buttons make small adjustments. Keep the creature marker inside the net until the catch meter fills. Rare creatures move faster and need more precise tracking. OS reduced-motion settings slow the tracking and widen the net. Switching tabs pauses the fishing timer.
 
@@ -137,3 +137,11 @@ npm start
 Express serves the built website and API together on `PORT` (default 3001). Deploy the Node service with a **persistent disk** mounted at the configured database location and HTTPS provided by your hosting/reverse proxy. This SQLite architecture is intended for one server instance; filesystem storage on ephemeral/serverless hosting will not preserve your data. For multiple instances or a serverless deployment, migrate the storage layer to PostgreSQL/Supabase first.
 
 A Dockerfile is included. Mount `/app/server/data` as a persistent volume and provide `ADMIN_TOKEN` as a runtime environment variable. The submission limiter uses the direct connection IP; behind a reverse proxy it may group visitors under the proxy’s IP. Configure an explicitly trusted proxy only after identifying the deployment topology.
+
+## Personal discoveries
+
+The expanded map is 2600 × 1600. Use the atlas to walk to Jekek’s Garden, Dream Grove, Story Bench, Football Park or Angler’s Shore. Jekek’s golden/brown pixel pattern follows Revan’s reference photo; a sampled body trail follows his head with rest and tongue animations. Darkrai appears in Dream Grove only when the two-minute day cycle reaches night. Three decorative anglers cast and reel at the eastern lake. Messi (Argentina 10), Yamal (Barcelona 19) and four teammates move, pass, shoot and celebrate on the pitch.
+
+The book button in the header opens a separate discovery notebook. Five personal field notes are validated and stored under `revan-field-notes` in localStorage; no new backend setup is required. Two discoveries unlock Garden Gate fast travel between the old town and the garden. The Story Bench only includes facts supplied by Revan. Football Park offers a three-shot timing challenge directly over the world: tap KICK when the marker enters the golden center. Reduced motion uses a manual aim slider and still allows the challenge. Ambient movement continues behind map, settings and field-note panels.
+
+Implementation: `src/game/explorationArt.js` (district backgrounds), `src/game/explorationActors.js` (activities), `src/game/exploration.js` (discovery/shot rules), `src/hooks/useExploration.js` (local saves), and the exploration/challenge HTML components.
