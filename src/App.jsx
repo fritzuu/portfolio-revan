@@ -425,8 +425,21 @@ export default function App() {
                 onClick={() => walkTo(id)}
                 className={travel?.id === id ? 'travelling' : ''}
               >
-                {label}
-                {visited.includes(id) && <span>✓</span>}
+                <span className="nav-label-desktop">{label}</span>
+                <span className="nav-label-mobile">
+                  {
+                    {
+                      about: 'About',
+                      experience: 'CV',
+                      projects: 'Work',
+                      skills: 'Tech',
+                      contact: 'Contact',
+                    }[id]
+                  }
+                </span>
+                {visited.includes(id) && (
+                  <span className="nav-complete">✓</span>
+                )}
               </button>
             ))}
           </nav>

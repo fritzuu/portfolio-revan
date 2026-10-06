@@ -3224,3 +3224,198 @@ textarea::placeholder {
     padding: 8px 3px;
   }
 }
+
+.city-navigation > button > .nav-label-desktop {
+  font-size: inherit;
+  color: inherit;
+}
+.city-navigation > button > .nav-label-mobile {
+  display: none;
+}
+@media (max-width: 760px) {
+  .city-app {
+    --hud-label: 19px;
+    --hud-body: 13px;
+    --hud-caption: 12px;
+    --hud-target: 44px;
+  }
+  .city-header {
+    top: max(12px, env(safe-area-inset-top));
+  }
+  .game-logo {
+    font-size: 24px;
+  }
+  .game-logo > span {
+    font-size: 18px;
+  }
+  .game-logo > small {
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  .hud-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  .hud-coins {
+    font-size: 22px;
+    padding: 4px 7px;
+    gap: 4px;
+  }
+  .hud-coins svg {
+    width: 17px;
+    height: 17px;
+  }
+  .city-navigation {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 4px;
+    gap: 3px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .city-navigation > button {
+    font-size: 18px;
+    min-height: 44px;
+    padding: 6px 2px;
+    gap: 2px;
+  }
+  .city-navigation > button > .nav-label-desktop {
+    display: none;
+  }
+  .city-navigation > button > .nav-label-mobile {
+    display: inline;
+    font-size: inherit;
+    color: inherit;
+  }
+  .city-navigation > button > .nav-complete {
+    display: none;
+  }
+  .angler-tools {
+    bottom: 78px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 3px;
+    gap: 3px;
+  }
+  .angler-tools button {
+    font-size: 17px;
+    min-height: 44px;
+    padding: 4px 2px;
+    gap: 3px;
+  }
+  .angler-tools button svg {
+    display: none;
+  }
+  .angler-tools button > span {
+    font-size: 14px;
+  }
+  .quest-panel,
+  .quest-panel.collapsed {
+    top: 74px;
+    width: 228px;
+  }
+  .quest-toggle {
+    font-size: 19px;
+    min-height: 40px;
+    padding: 7px 10px;
+  }
+  .quest-toggle small {
+    font-size: 16px;
+    margin-left: 6px;
+  }
+  #quest-list {
+    max-height: min(24dvh, calc(100dvh - 390px));
+    padding: 8px;
+  }
+  #quest-list > button {
+    font-size: 20px;
+    min-height: 48px;
+    padding: 7px;
+    gap: 7px;
+  }
+  #quest-list button small {
+    font-size: 11px;
+  }
+  .city-dpad {
+    bottom: 152px;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(2, 44px);
+    gap: 3px;
+  }
+  .city-dpad > button {
+    font-size: 27px;
+  }
+  .minimap-button {
+    width: 96px;
+    bottom: 152px;
+  }
+  .minimap-button > span {
+    font-size: 16px;
+    padding: 4px 2px;
+    gap: 3px;
+  }
+  .minimap-button > span > svg {
+    display: none;
+  }
+  .city-interaction {
+    bottom: 258px;
+  }
+  .city-interaction > button {
+    font-size: 20px;
+    min-height: 44px;
+    padding: 8px 12px;
+    gap: 7px;
+  }
+  .city-interaction kbd {
+    font-size: 13px;
+  }
+  .travel-status {
+    top: 124px;
+    font-size: 20px;
+    padding: 8px 12px;
+  }
+  .travel-status small {
+    font-size: 11px;
+  }
+  .world-fishing-controls {
+    width: min(340px, calc(100vw - 24px));
+    padding: 8px 15px;
+    max-height: 44dvh;
+  }
+  .world-fishing-controls .fishing-caption h3,
+  .world-fishing-controls h3 {
+    font-size: 25px;
+  }
+  .world-fishing-controls .fishing-hint {
+    font-size: 13px;
+  }
+  .world-fishing-controls .button {
+    font-size: 16px;
+    padding: 9px 16px;
+    min-height: 44px;
+  }
+  .world-fishing-controls .fishing-actions {
+    margin-top: 10px;
+    gap: 6px;
+  }
+  .world-fishing-controls .fishing-actions .button:not(.primary) {
+    font-size: 14px;
+    min-height: 40px;
+    padding: 6px 12px;
+  }
+  .world-fishing-controls .fishing-exit {
+    width: 36px;
+    height: 36px;
+  }
+  .world-fishing-controls .reeling-track {
+    height: 30px;
+  }
+  .world-fishing-controls .reel-controls .button {
+    min-width: 44px;
+    padding: 7px;
+  }
+  .world-fishing-controls .catch-result small {
+    font-size: 12px;
+  }
+  .world-fishing-controls .rarity-tag,
+  .world-fishing-controls .new-discovery {
+    font-size: 18px;
+  }
+}
