@@ -2677,3 +2677,100 @@ textarea::placeholder {
     object-fit: contain;
   }
 }
+
+/* Fishing takes place on the actual dock; only the controls sit above the map. */
+.world-fishing-controls {
+  color: #2d4437;
+  position: fixed;
+  z-index: 25;
+  right: 24px;
+  bottom: 28px;
+  width: min(370px, calc(100vw - 32px));
+  max-height: calc(100dvh - 110px);
+  overflow-y: auto;
+  background: #f7f1dded;
+  border: 3px solid #354f56;
+  box-shadow: 5px 5px 0 #233a3d50;
+  padding: 16px;
+}
+.fishing-exit {
+  float: right;
+  margin: -5px -5px 8px 8px;
+}
+.world-fishing-controls .fishing-location {
+  display: block;
+  padding-right: 30px;
+  font-size: 13px;
+}
+.world-fishing-controls .fishing-location span {
+  display: block;
+  margin-bottom: 5px;
+}
+.world-fishing-controls .fishing-caption {
+  margin: 12px 0;
+}
+.world-fishing-controls h3 {
+  font-size: 25px;
+}
+.world-fishing-controls .fishing-instructions,
+.world-fishing-controls .fishing-footnote {
+  display: none;
+}
+.world-fishing-controls .fishing-actions {
+  flex-wrap: wrap;
+}
+.world-fishing-controls .fishing-actions .button {
+  flex: 1;
+  white-space: nowrap;
+  padding: 10px;
+}
+.world-fishing-controls .catch-result {
+  display: block;
+  padding: 10px;
+}
+.world-fishing-controls .catch-result p {
+  display: none;
+}
+.world-fishing-controls .catch-result canvas {
+  width: 100px;
+  height: 80px;
+  float: left;
+  margin-right: 10px;
+}
+.new-discovery {
+  display: inline-block;
+  background: #f2cb6e;
+  color: #263d47;
+  padding: 3px 8px;
+  font:
+    700 19px 'VT323',
+    monospace;
+  margin-left: 8px;
+  border: 1px solid #ab8133;
+}
+.is-fishing .city-navigation,
+.is-fishing .city-dpad,
+.is-fishing .city-interaction,
+.is-fishing .city-help,
+.is-fishing .quest-panel,
+.is-fishing .minimap-button {
+  display: none;
+}
+.is-fishing .angler-tools {
+  display: none;
+}
+@media (max-width: 760px) {
+  .world-fishing-controls {
+    right: 12px;
+    bottom: 12px;
+    width: calc(100vw - 24px);
+    max-height: 45dvh;
+    padding: 12px;
+  }
+  .world-fishing-controls .fishing-caption h3 {
+    font-size: 22px;
+  }
+  .world-fishing-controls .reeling-game small {
+    display: none;
+  }
+}

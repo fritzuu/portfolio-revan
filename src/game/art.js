@@ -47,6 +47,30 @@ export function drawCharacter(
   r(19, 28, 5, 4, '#35475a');
   r(9, 31 + swing * 2, 7, 3, '#3c302c');
   r(19, 31 - swing * 2, 7, 3, '#3c302c');
+  if (config.revan) {
+    // Blue hoodie with cuffed sleeves, pocket and drawstrings.
+    r(8, 17, 17, 11, '#3675bf');
+    r(7, 18 + swing * 2, 3, 7, '#2c5fa3');
+    r(24, 18 - swing * 2, 3, 7, '#2c5fa3');
+    r(12, 24, 10, 3, '#285890');
+    if (direction === 'up') {
+      r(10, 16, 13, 7, '#285890');
+      r(12, 17, 9, 4, '#508ed4');
+    } else {
+      r(13, 18, 2, 5, '#c7dced');
+      r(20, 18, 2, 5, '#c7dced');
+    }
+    if (direction === 'down') {
+      r(11, 9, 7, 6, '#202735');
+      r(19, 9, 7, 6, '#202735');
+      r(13, 11, 3, 2, '#b4ccdc');
+      r(21, 11, 3, 2, '#b4ccdc');
+      r(18, 10, 2, 2, '#202735');
+    } else if (direction !== 'up') {
+      r(direction === 'right' ? 19 : 7, 9, 8, 6, '#202735');
+      r(direction === 'right' ? 21 : 9, 11, 4, 2, '#b4ccdc');
+    }
+  }
 }
 export {
   WORLD_SIZE,

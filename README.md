@@ -68,11 +68,13 @@ server/app.js                     API, validation, authentication, SQLite schema
 server/index.js                   Production/development server entry point
 ```
 
+The visitor navigation has five destinations; guestbook is removed from the public UI. Revan wears a blue hoodie and thick square black glasses. The nearby tackle stand has been removed. A smooth two-minute morning → night → morning cycle dims the world and brings up warm light halos around street lamps.
+
 ## Moonwater fishing
 
 The hand-authored town has a northern portfolio district, central Curiosity Square, an eastern reading garden, and a western lake with a walkable wooden dock. Fifteen residents follow six long circuits, pause at destinations, yield to the traveler, and sometimes sit on benches. Mira keeps the tackle stall open.
 
-Use **Go fishing** to walk to Moonwater Dock. Cast a line, watch for the dipping float, then **Space / tap** to strike. During reeling, hold Space or the on-screen button to raise the net; release to lower it. Left/right arrow keys and tap buttons make small adjustments. Keep the creature marker inside the net until the catch meter fills. Rare creatures move faster and need more precise tracking. OS reduced-motion settings slow the tracking and widen the net. Switching tabs pauses the fishing timer.
+Use **Go fishing** to walk to Moonwater Dock. Fishing happens directly in the world: your traveler casts into the actual lake, while a small control HUD handles reeling. New species display **NEW** on the catch result. Cast a line, watch for the dipping float, then **Space / tap** to strike. During reeling, hold Space or the on-screen button to raise the net; release to lower it. Left/right arrow keys and tap buttons make small adjustments. Keep the creature marker inside the net until the catch meter fills. Rare creatures move faster and need more precise tracking. OS reduced-motion settings slow the tracking and widen the net. Switching tabs pauses the fishing timer.
 
 Catches enter the backpack. Select sale quantities and review the total before confirming, or review all unlocked catches together. Inspect individual catches to lock favorites. Selling never removes journal discoveries. Mira’s Tackle Shop sells rod upgrades and lets you equip owned rods.
 
@@ -93,7 +95,7 @@ Catches enter the backpack. Select sale quantities and review the total before c
 
 There are 20 individually drawn fantasy creatures. Discover 12 species to unlock **Astral Crossing**, the only spot where The Unwritten can appear. An eligible crossing cast with Twigline has a 0.01% Mythic selection chance; a successful minigame is still required. Luck multiplies Rare-and-above weights by 1.15 or 1.4, then normalizes all weights. The regular dock excludes Mythic and normalizes the remaining weights. There is no guaranteed catch or pity counter.
 
-All fishing progress is stored **only in this browser** under localStorage key `revan-fishing-v1`: coins, individual catches, favorite locks, journal records, rods and equipped rod. No fishing API, database migration, login, or server setup is needed. Corrupt saves reset safely. If storage is blocked or full, the interface explains that progress is temporary. The backpack is capped at 3,000 catches. Settings offers an explicitly confirmed fishing reset; portfolio progress remains separate. Clearing browser storage removes fishing progress. Closing a fishing panel ends its unfinished cast.
+All fishing progress is stored **only in this browser** under localStorage key `revan-fishing-v1`: coins, individual catches, favorite locks, journal records, rods and equipped rod. No fishing API, database migration, login, or server setup is needed. Corrupt saves reset safely. If storage is blocked or full, the interface explains that progress is temporary. The backpack is capped at 3,000 catches. Settings offers an explicitly confirmed fishing reset; portfolio progress remains separate. Clearing browser storage removes fishing progress. Stopping fishing or opening the backpack ends an unfinished cast.
 
 ## Backend
 

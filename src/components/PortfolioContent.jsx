@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ArrowUpRight, Download, Mail } from 'lucide-react';
 export async function api(url, options = {}) {
   const response = await fetch(url, {
@@ -97,51 +97,7 @@ function MessageForm({ type, onSubmitted }) {
     </form>
   );
 }
-function Guestbook() {
-  const [entries, setEntries] = useState([]),
-    [error, setError] = useState('');
-  useEffect(() => {
-    let active = true;
-    api('/api/guestbook')
-      .then((v) => {
-        if (active) setEntries(v);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-  return (
-    <>
-      <p>
-        Sepatah kata sebelum melanjutkan perjalanan. Pesan ditinjau sebelum
-        dipublikasikan.
-      </p>
-      <MessageForm type="guestbook" />
-      <div className="guest-entries">
-        {error ? (
-          <p className="form-error">{error}</p>
-        ) : entries.length ? (
-          entries.map((v) => (
-            <article key={v.id}>
-              <strong>{v.name}</strong>
-              <p>{v.message}</p>
-              <small>{v.created_at} UTC</small>
-            </article>
-          ))
-        ) : (
-          <p className="muted">
-            Belum ada pesan publik. Jadilah pengunjung pertama yang menulis.
-          </p>
-        )}
-      </div>
-    </>
-  );
-}
 export default function PortfolioContent({ section, data }) {
-  if (section === 'guestbook') return <Guestbook />;
   if (section === 'about')
     return (
       <>

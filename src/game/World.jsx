@@ -8,12 +8,16 @@ import {
   WORLD_SIZE,
 } from './art';
 import { NPC_COUNT, NPC_ROUTES } from './layout';
+import { nightAmount } from './daylight';
+import { drawFish } from '../fishing/sprites';
+import { RODS } from '../fishing/catalog';
 import { findPath, isBlocked } from './navigation';
 
 export default function World({
   character,
   playing,
   paused,
+  fishing,
   controls,
   onNear,
   onVisit,
@@ -25,6 +29,7 @@ export default function World({
   const root = useRef(null),
     live = useRef({
       paused,
+      fishing,
       controls,
       onNear,
       onVisit,
@@ -35,6 +40,7 @@ export default function World({
   useEffect(() => {
     live.current = {
       paused,
+      fishing,
       controls,
       onNear,
       onVisit,
@@ -42,7 +48,16 @@ export default function World({
       destination,
       onTravel,
     };
-  }, [paused, controls, onNear, onVisit, onPosition, destination, onTravel]);
+  }, [
+    paused,
+    fishing,
+    controls,
+    onNear,
+    onVisit,
+    onPosition,
+    destination,
+    onTravel,
+  ]);
   useEffect(() => {
     let game,
       cancelled = false;
@@ -81,6 +96,7 @@ export default function World({
                   outfit: i % 4,
                   skin: i % 3,
                   gender: i % 2 ? 'female' : 'male',
+                  revan: i === 0,
                 },
                 1.1,
               );
@@ -134,6 +150,38 @@ export default function World({
                   repeat: -1,
                 });
             });
+            this.fishingArt = this.add.graphics().setDepth(1900);
+            this.night = this.add
+              .rectangle(0, 0, WORLD_SIZE.width, WORLD_SIZE.height, 0x101b3c, 1)
+              .setAlpha(0)
+              .setOrigin(0)
+              .setDepth(2000);
+            const glow = this.textures.createCanvas('lamp-glow', 160, 160);
+            const gradient = glow.context.createRadialGradient(
+              80,
+              80,
+              0,
+              80,
+              80,
+              80,
+            );
+            gradient.addColorStop(0, '#fff0aecc');
+            gradient.addColorStop(0.3, '#ffc87966');
+            gradient.addColorStop(1, '#ffc87900');
+            glow.context.fillStyle = gradient;
+            glow.context.fillRect(0, 0, 160, 160);
+            glow.refresh();
+            this.lamps = PROPS.filter((p) => p.type === 'lamp').map((p) => ({
+              halo: this.add
+                .image(p.x + 13, p.y - 72, 'lamp-glow')
+                .setDepth(2001)
+                .setBlendMode(Phaser.BlendModes.ADD),
+              bulb: this.add
+                .rectangle(p.x + 13, p.y - 72, 10, 13, 0xffecb0)
+                .setDepth(2002),
+            }));
+            this.dayElapsed = 0;
+            this.wasFishing = false;
             this.water = this.add.graphics().setDepth(1);
             const cam = this.cameras.main;
             cam.setBounds(0, 0, WORLD_SIZE.width, WORLD_SIZE.height);
@@ -151,7 +199,7 @@ export default function World({
             );
             this.input.keyboard.disableGlobalCapture();
             this.input.on('pointerdown', (p) => {
-              if (playing && !live.current.paused) {
+              if (playing && !live.current.paused && !live.current.fishing) {
                 this.cancelTravel();
                 this.player.path = findPath(
                   this.player.image,
@@ -272,6 +320,78 @@ export default function World({
             this.move(actor, sx, sy, Math.min(delta, d / speed), speed);
           }
           update(time, delta) {
+            if (!document.hidden) this.dayElapsed += Math.min(delta, 100);
+            const darkness = nightAmount(this.dayElapsed);
+            this.night.setAlpha(darkness * 0.64);
+            this.lamps.forEach(({ halo, bulb }) => {
+              halo.setAlpha(darkness * 0.9);
+              bulb.setAlpha(darkness);
+            });
+            const f = live.current.fishing;
+            this.fishingArt.clear();
+            if (f) {
+              const x = this.player.image.x,
+                y = this.player.image.y;
+              this.player.direction = f.spot === 'rift' ? 'right' : 'left';
+              this.move(this.player, 0, 0, delta, 0);
+              const sign = f.spot === 'rift' ? 1 : -1;
+              const tipX = x + sign * 27,
+                tipY = y - 55;
+              this.fishingArt.lineStyle(
+                3,
+                Phaser.Display.Color.HexStringToColor(
+                  RODS.find((r) => r.id === f.rod)?.color || '#9cbe69',
+                ).color,
+              );
+              this.fishingArt.lineBetween(x + sign * 8, y - 20, tipX, tipY);
+              if (
+                ['casting', 'waiting', 'bite', 'reeling', 'caught'].includes(
+                  f.phase,
+                )
+              ) {
+                const cast = f.phase === 'casting' ? Math.min(f.t / 0.8, 1) : 1;
+                const bx = tipX + sign * 85 * cast;
+                const by = tipY - 5 * cast - Math.sin(cast * Math.PI) * 50;
+                const bob =
+                  f.phase === 'bite'
+                    ? Math.sin(time * 0.015) * 3
+                    : Math.sin(time * 0.003);
+                this.fishingArt.lineStyle(1, 0xeee5c6, 0.9);
+                this.fishingArt.lineBetween(tipX, tipY, bx, by + bob);
+                this.fishingArt.fillStyle(0xf28f77);
+                this.fishingArt.fillRect(bx - 2, by - 4 + bob, 5, 4);
+                this.fishingArt.fillStyle(0xffe8bd);
+                this.fishingArt.fillRect(bx - 2, by + bob, 5, 3);
+                this.fishingArt.lineStyle(1, 0xb1e0de, 0.6);
+                this.fishingArt.strokeEllipse(bx, by + 5, 23, 6);
+                if (f.phase === 'bite') {
+                  this.fishingArt.fillStyle(0xffde85);
+                  this.fishingArt.fillRect(bx - 1, by - 28, 3, 12);
+                  this.fishingArt.fillRect(bx - 1, by - 13, 3, 3);
+                }
+                if (f.phase === 'caught' && f.fish) {
+                  if (this.catchId !== f.id) {
+                    this.catchSprite?.destroy();
+                    const texture = !this.textures.exists('world-catch')
+                      ? this.textures.createCanvas('world-catch', 80, 64)
+                      : this.textures.get('world-catch');
+                    drawFish(texture.context, f.fish);
+                    texture.refresh();
+                    this.catchSprite = this.add
+                      .image(bx, by - 30, 'world-catch')
+                      .setScale(0.8)
+                      .setDepth(2003);
+                    this.catchId = f.id;
+                  }
+                } else this.catchSprite?.setVisible(false);
+              }
+            } else if (this.wasFishing) {
+              this.catchSprite?.destroy();
+              this.catchSprite = null;
+              this.catchId = null;
+              this.player.path = [];
+            }
+            this.wasFishing = !!f;
             const dest = live.current.destination;
             if (!dest && this.lastDestination !== null) {
               this.cancelTravel();
@@ -366,7 +486,7 @@ export default function World({
                 this.water.fillRect(749 + i * 13, y, 5, 1);
               }
             }
-            if (!playing) return;
+            if (!playing || f) return;
             const k = this.keys,
               c = live.current.controls || {};
             const dx =

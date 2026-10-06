@@ -30,6 +30,7 @@ import useFishing from './hooks/useFishing';
 import WorldMap from './components/WorldMap';
 import PortfolioContent, { api } from './components/PortfolioContent';
 import Admin from './components/Admin';
+const FishingGame = lazy(() => import('./components/FishingGame'));
 const FishingHub = lazy(() => import('./components/FishingHub'));
 const FISHING_PANELS = ['fishing', 'rift', 'backpack', 'journal', 'shop'];
 const World = lazy(() => import('./game/World'));
@@ -47,7 +48,6 @@ const TITLES = {
   skills: 'My inventory.',
   experience: 'The journey so far.',
   contact: 'A letter to Revan.',
-  guestbook: 'The guestbook.',
   settings: 'Make yourself at home.',
 };
 function readSave() {
@@ -97,6 +97,7 @@ export default function App() {
     [character, setCharacter] = useState(saved?.character || DEFAULT),
     [visited, setVisited] = useState(saved?.visited || []);
   const fishing = useFishing();
+  const [worldFishing, setWorldFishing] = useState(null);
   const [resetFishing, setResetFishing] = useState(false);
   const [position, setPosition] = useState({ x: 800, y: 545 });
   const [destination, setDestination] = useState(null);
@@ -112,6 +113,7 @@ export default function App() {
     [offline, setOffline] = useState(false),
     [music, setMusic] = useState(false),
     [manualReduced, setManualReduced] = useState(false);
+  const inWorldFishing = ['fishing', 'rift'].includes(panel);
   const preferredReduced = useReducedMotion(),
     reduced = manualReduced || preferredReduced,
     stage = useRef(null);
@@ -148,13 +150,13 @@ export default function App() {
     setControls({});
     setDestination(null);
     setTravel(null);
-    const locationId = id === 'guestbook' ? 'contact' : id;
+    const locationId = id;
     if (LOCATIONS.some((l) => l.id === locationId))
       setVisited((v) => (v.includes(locationId) ? v : [...v, locationId]));
   }, []);
   const tripSequence = useRef(0);
   const walkTo = useCallback((panelId, open = true) => {
-    const id = panelId === 'guestbook' ? 'contact' : panelId;
+    const id = panelId;
     setPanel(null);
     setControls({});
     setDestination({ id, panel: panelId, open, stamp: ++tripSequence.current });
@@ -170,7 +172,7 @@ export default function App() {
   };
   if (window.location.pathname === '/admin') return <Admin />;
   return (
-    <div className="city-app">
+    <div className={cn('city-app', inWorldFishing && 'is-fishing')}>
       {phase === 'playing' && (
         <a className="skip-link" href="#city-navigation">
           Skip to portfolio navigation
@@ -207,7 +209,12 @@ export default function App() {
           <World
             character={character}
             playing={phase === 'playing'}
-            paused={!!panel || phase !== 'playing'}
+            paused={(!!panel && !inWorldFishing) || phase !== 'playing'}
+            fishing={
+              inWorldFishing
+                ? { ...worldFishing, spot: panel, rod: fishing.state.equipped }
+                : null
+            }
             controls={controls}
             onNear={setNear}
             onVisit={visit}
@@ -411,17 +418,12 @@ export default function App() {
               ['experience', 'Resume'],
               ['projects', 'Projects'],
               ['skills', 'Technologies'],
-              ['guestbook', 'Guestbook'],
               ['contact', 'Contact'],
             ].map(([id, label]) => (
               <button
                 key={id}
                 onClick={() => walkTo(id)}
-                className={
-                  travel?.id === (id === 'guestbook' ? 'contact' : id)
-                    ? 'travelling'
-                    : ''
-                }
+                className={travel?.id === id ? 'travelling' : ''}
               >
                 {label}
                 {visited.includes(id) && <span>✓</span>}
@@ -455,6 +457,36 @@ export default function App() {
           music={music}
           onMusic={setMusic}
         />
+      )}
+      {phase === 'playing' && inWorldFishing && (
+        <section
+          className="world-fishing-controls"
+          aria-label="Fishing at the water"
+        >
+          <button
+            className="icon-button fishing-exit"
+            aria-label="Stop fishing"
+            onClick={() => {
+              setPanel(null);
+              stage.current?.focus();
+            }}
+          >
+            <X size={18} />
+          </button>
+          <Suspense fallback={<p>Preparing your line…</p>}>
+            <FishingGame
+              key={panel}
+              fishing={fishing}
+              character={character}
+              reduced={reduced}
+              spot={panel === 'rift' ? 'rift' : 'pond'}
+              onView={setPanel}
+              onGoFishing={walkTo}
+              embedded
+              onGameChange={setWorldFishing}
+            />
+          </Suspense>
+        </section>
       )}
       <Modal
         open={phase === 'create'}
@@ -543,7 +575,7 @@ export default function App() {
         </small>
       </Modal>
       <Modal
-        open={!!panel}
+        open={!!panel && !inWorldFishing}
         onOpenChange={(v) => {
           if (!v) setPanel(null);
         }}

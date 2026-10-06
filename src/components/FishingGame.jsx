@@ -151,6 +151,8 @@ export default function FishingGame({
   spot = 'pond',
   onView,
   onGoFishing,
+  embedded = false,
+  onGameChange,
 }) {
   const [view, setView] = useState(DEFAULT_GAME),
     sim = useRef({ ...DEFAULT_GAME }),
@@ -170,6 +172,7 @@ export default function FishingGame({
       fish,
       id: crypto.randomUUID(),
       seed: Math.random() * 3,
+      isNew: !state.discovered[fish.id],
       biteAt: 1.5 + Math.random() * 2,
     };
     held.current = false;
@@ -250,6 +253,9 @@ export default function FishingGame({
         behavior: reduced ? 'instant' : 'smooth',
       });
   }, [view.phase, reduced]);
+  useEffect(() => {
+    onGameChange?.(view);
+  }, [view, onGameChange]);
   const phase = view.phase;
   const titles = {
     idle: 'A little patience. A little possibility.',
@@ -298,12 +304,14 @@ export default function FishingGame({
           {rod.name} · +{Math.round(rod.luck * 100)}% luck
         </span>
       </div>
-      <FishingScene
-        game={view}
-        character={character}
-        rod={rod}
-        reduced={reduced}
-      />
+      {!embedded && (
+        <FishingScene
+          game={view}
+          character={character}
+          rod={rod}
+          reduced={reduced}
+        />
+      )}
       {locked ? (
         <div className="fishing-message">
           <Sparkles />
@@ -429,6 +437,7 @@ export default function FishingGame({
                 <span className="rarity-tag">
                   {RARITIES[view.fish.rarity].label}
                 </span>
+                {view.isNew && <span className="new-discovery">NEW ✦</span>}
                 <h3>{view.fish.name}</h3>
                 <p>{view.fish.lore}</p>
                 <small>
