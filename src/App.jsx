@@ -176,10 +176,34 @@ export default function App() {
     [offline, setOffline] = useState(false),
     [music, setMusic] = useState(false),
     [manualReduced, setManualReduced] = useState(false);
+  useEffect(() => {
+    const release = () => setControls({});
+    const hidden = () => {
+      if (document.hidden) release();
+    };
+    window.addEventListener('blur', release);
+    document.addEventListener('visibilitychange', hidden);
+    return () => {
+      window.removeEventListener('blur', release);
+      document.removeEventListener('visibilitychange', hidden);
+    };
+  }, []);
   const inWorldFishing = ['fishing', 'rift'].includes(panel);
   const preferredReduced = useReducedMotion(),
     reduced = manualReduced || preferredReduced,
     stage = useRef(null);
+  useEffect(() => {
+    if (panel !== 'football') return;
+    const exit = (event) => {
+      if (event.code !== 'Escape') return;
+      setPanel(null);
+      setFootballMode('watch');
+      setControls({});
+      setTimeout(() => stage.current?.focus(), 0);
+    };
+    window.addEventListener('keydown', exit);
+    return () => window.removeEventListener('keydown', exit);
+  }, [panel]);
   const district = getDistrict(position);
   const playSound = useMusic(music, district);
   const [notice, setNotice] = useState(null);
@@ -322,22 +346,9 @@ export default function App() {
         tabIndex={phase === 'intro' ? -1 : 0}
         aria-hidden={phase === 'intro' ? true : undefined}
         aria-label="Game world. Walk with arrow keys or WASD. Press E to interact."
-        onBlur={() => setControls({})}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape' && panel === 'football') {
-            setPanel(null);
-            setFootballMode('watch');
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget))
             setControls({});
-          }
-
-          if (
-            phase === 'playing' &&
-            (!panel || panel === 'football') &&
-            ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(
-              e.key,
-            )
-          )
-            e.preventDefault();
         }}
       >
         <Suspense
@@ -646,6 +657,9 @@ export default function App() {
                   setControls((previous) => ({ ...previous, [d]: false }))
                 }
                 onPointerCancel={() =>
+                  setControls((previous) => ({ ...previous, [d]: false }))
+                }
+                onLostPointerCapture={() =>
                   setControls((previous) => ({ ...previous, [d]: false }))
                 }
               >

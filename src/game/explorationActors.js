@@ -1,3 +1,4 @@
+import { readMovement } from './keyboard';
 import { drawGardenGateLeaves } from './gardenArt.js';
 import { gateUnlocked } from './exploration.js';
 import { createCreatures, updateCreatures } from './creatureSprites.js';
@@ -110,6 +111,7 @@ export function updateExploration(
     live.footballDifficulty === 'sengit' ? 'sengit' : 'santai';
   const mode = live.footballActive ? live.footballMode || 'watch' : null;
   if (mode !== state.mode) {
+    scene.gameKeyboard.clear();
     const cam = scene.cameras.main;
     if (!state.mode && mode)
       state.returnPosition = {
@@ -339,36 +341,19 @@ export function updateExploration(
     discover('football');
   const keys = scene.keys,
     c = live.controls || {};
-  const keyboardAllowed = !document.activeElement?.closest(
-    'button,input,select,textarea',
-  );
-  const dx =
-    Number(
-      !!((keyboardAllowed && (keys.D.isDown || keys.RIGHT.isDown)) || c.right),
-    ) -
-    Number(
-      !!((keyboardAllowed && (keys.A.isDown || keys.LEFT.isDown)) || c.left),
-    );
-  const dy =
-    Number(
-      !!((keyboardAllowed && (keys.S.isDown || keys.DOWN.isDown)) || c.down),
-    ) -
-    Number(!!((keyboardAllowed && (keys.W.isDown || keys.UP.isDown)) || c.up));
+  const { dx, dy } = readMovement(keys, c);
   const participating = mode === 'messi' || mode === 'yamal';
   let action = null,
     through = false,
     power;
-  if ((!keyboardAllowed || !keys.Q.isDown) && state.qDown) {
+  if (!keys.Q.isDown && state.qDown) {
     action = 'pass';
     through = time - (state.passStarted || time) > 0.35 * 1000;
   }
-  if (keyboardAllowed && keys.Q.isDown && !state.qDown)
-    state.passStarted = time;
-  if (participating && keyboardAllowed && keys.E.isDown && !state.tackleDown)
-    action = 'tackle';
-  if (participating && keyboardAllowed && keys.F.isDown && !state.skillDown)
-    action = 'skill';
-  state.qDown = keyboardAllowed && keys.Q.isDown;
+  if (keys.Q.isDown && !state.qDown) state.passStarted = time;
+  if (participating && keys.E.isDown && !state.tackleDown) action = 'tackle';
+  if (participating && keys.F.isDown && !state.skillDown) action = 'skill';
+  state.qDown = keys.Q.isDown;
   state.tackleDown = keys.E.isDown;
   state.skillDown = keys.F.isDown;
   const kick = live.kick;
@@ -396,10 +381,8 @@ export function updateExploration(
     action: participating ? action : null,
     through,
     power,
-    shootHeld:
-      participating && !!((keyboardAllowed && keys.SPACE.isDown) || c.shoot),
-    sprint:
-      participating && !!((keyboardAllowed && keys.SHIFT.isDown) || c.sprint),
+    shootHeld: participating && !!(keys.SPACE.isDown || c.shoot),
+    sprint: participating && !!(keys.SHIFT.isDown || c.sprint),
     hidden: document.hidden,
   });
   const roundKey = `${state.match.matchNumber}:${state.match.half}:${state.match.status}:${state.match.kickoffNumber}`;

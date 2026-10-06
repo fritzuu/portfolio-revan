@@ -13,6 +13,7 @@ import { nightAmount } from './daylight';
 import { drawFish } from '../fishing/sprites';
 import { RODS } from '../fishing/catalog';
 import { findPath, isBlocked } from './navigation';
+import { createGameKeyboard, justPressed, readMovement } from './keyboard';
 
 export default function World({
   character,
@@ -108,9 +109,6 @@ export default function World({
     import('phaser')
       .then(({ default: Phaser }) => {
         if (cancelled) return;
-        // Receive native keys inside the stage before React prevents scrolling
-        // on its ancestor root. Phaser ignores already-prevented events.
-        const keyboardTarget = root.current.closest('.city-stage');
         class City extends Phaser.Scene {
           preload() {
             this.load.image('town-atlas', '/assets/tiny-town/tiles.png');
@@ -251,23 +249,31 @@ export default function World({
                 live.current.reducedMotion ? 1 : 0.09,
               );
             else cam.centerOn(650, 410);
-            this.keys = this.input.keyboard.addKeys(
-              'W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER,ESC,SPACE,Q,SHIFT,F',
-            );
-            this.input.keyboard.disableGlobalCapture();
-            const clearStageKeys = (event) => {
-              if (keyboardTarget.contains(event.relatedTarget)) return;
-              this.input.keyboard.resetKeys();
-              const match = this.exploration?.match;
-              if (match) {
-                match.charge = null;
-                match.mustReleaseShoot = true;
-              }
-            };
-            keyboardTarget.addEventListener('focusout', clearStageKeys);
-            this.events.once('shutdown', () =>
-              keyboardTarget.removeEventListener('focusout', clearStageKeys),
-            );
+            this.gameKeyboard = createGameKeyboard({
+              target: window,
+              document,
+              onMovement: () =>
+                root.current
+                  ?.closest('.city-stage')
+                  ?.focus({ preventScroll: true }),
+              canPlay: () =>
+                playing &&
+                !live.current.fishing &&
+                (!live.current.paused ||
+                  (live.current.footballActive &&
+                    ['messi', 'yamal'].includes(live.current.footballMode))),
+              onReset: ({ shootHeld }) => {
+                const state = this.exploration;
+                if (shootHeld || state.match.charge)
+                  state.match.mustReleaseShoot = true;
+                state.match.charge = null;
+                state.qDown = false;
+                state.tackleDown = false;
+                state.skillDown = false;
+              },
+            });
+            this.keys = this.gameKeyboard.keys;
+            this.events.once('shutdown', () => this.gameKeyboard.destroy());
             this.input.on('pointerdown', (p) => {
               if (playing && !live.current.paused && !live.current.fishing) {
                 this.cancelTravel();
@@ -426,6 +432,7 @@ export default function World({
             this.move(actor, sx, sy, Math.min(delta, d / speed), speed);
           }
           update(time, delta) {
+            this.gameKeyboard.sync();
             if (!document.hidden) this.dayElapsed += Math.min(delta, 100);
             const darkness = nightAmount(this.dayElapsed);
             updateExploration(
@@ -625,13 +632,19 @@ export default function World({
               return;
             const k = this.keys,
               c = live.current.controls || {};
-            const dx =
-              Number(!!(k.D.isDown || k.RIGHT.isDown || c.right)) -
-              Number(!!(k.A.isDown || k.LEFT.isDown || c.left));
-            const dy =
-              Number(!!(k.S.isDown || k.DOWN.isDown || c.down)) -
-              Number(!!(k.W.isDown || k.UP.isDown || c.up));
-            if (dx || dy || Phaser.Input.Keyboard.JustDown(k.ESC)) {
+            const { dx, dy } = readMovement(k, c);
+            const escape = justPressed(k.ESC),
+              interactE = justPressed(k.E),
+              interactEnter = justPressed(k.ENTER);
+            const steering =
+              ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].some(
+                (name) => k[name].isDown,
+              ) ||
+              c.up ||
+              c.down ||
+              c.left ||
+              c.right;
+            if (steering || escape) {
               this.cancelTravel();
               this.move(this.player, dx, dy, delta, 0.185);
             } else this.followPath(this.player, delta, 0.185);
@@ -653,11 +666,7 @@ export default function World({
               if (near?.id === trip.id && trip.open)
                 live.current.onVisit?.(trip.panel || trip.id);
             }
-            if (
-              near &&
-              (Phaser.Input.Keyboard.JustDown(k.E) ||
-                Phaser.Input.Keyboard.JustDown(k.ENTER))
-            ) {
+            if (near && (interactE || interactEnter)) {
               this.cancelTravel();
               live.current.onVisit?.(near.id);
             }
@@ -673,7 +682,7 @@ export default function World({
         game = new Phaser.Game({
           type: Phaser.CANVAS,
           parent: root.current,
-          input: { keyboard: { target: keyboardTarget } },
+          input: { keyboard: false },
           width: root.current.clientWidth,
           height: root.current.clientHeight,
           backgroundColor: '#c0bbaa',
