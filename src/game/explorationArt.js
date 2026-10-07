@@ -1,3 +1,4 @@
+import { drawGroveGround } from './groveArt.js';
 import { drawGardenGround } from './gardenArt.js';
 // District art shares the navigation layout; flat paths remain walkable.
 export function drawExtension(c) {
@@ -24,37 +25,7 @@ export function drawExtension(c) {
   }
   drawGardenGround(c);
   label('JEKEK’S GARDEN', 2060, 635);
-  // A quiet grove with a moon-shaped stone mosaic and dim violet vegetation.
-  c.fillStyle = '#527f78';
-  c.beginPath();
-  c.roundRect(1720, 750, 720, 350, 70);
-  c.fill();
-  c.strokeStyle = '#8aa59a';
-  c.lineWidth = 40;
-  c.lineJoin = 'round';
-  c.beginPath();
-  c.moveTo(1730, 955);
-  c.lineTo(1940, 955);
-  c.lineTo(2005, 890);
-  c.lineTo(2125, 890);
-  c.lineTo(2290, 1030);
-  c.stroke();
-  c.fillStyle = '#718898';
-  c.beginPath();
-  c.ellipse(2050, 865, 100, 85, 0, 0, Math.PI * 2);
-  c.fill();
-  c.fillStyle = '#b1bfbb';
-  c.beginPath();
-  c.ellipse(2050, 865, 74, 62, 0, 0, Math.PI * 2);
-  c.fill();
-  c.fillStyle = '#e1d8bb';
-  c.beginPath();
-  c.arc(2040, 861, 30, 0, Math.PI * 2);
-  c.fill();
-  c.fillStyle = '#b1bfbb';
-  c.beginPath();
-  c.arc(2053, 850, 27, 0, Math.PI * 2);
-  c.fill();
+  drawGroveGround(c);
   label('DREAM GROVE', 2080, 1135);
   // Football lines, goals and benches are legible even in the minimap.
   r(120, 1150, 1200, 370, '#3c9768');

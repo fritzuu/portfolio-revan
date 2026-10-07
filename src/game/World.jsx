@@ -111,7 +111,6 @@ export default function World({
         if (cancelled) return;
         class City extends Phaser.Scene {
           preload() {
-            this.load.image('town-atlas', '/assets/tiny-town/tiles.png');
             this.load.image('jekek-source', '/sprites/jekek.png');
             this.load.image('darkrai-source', '/sprites/darkrai.png');
           }
@@ -121,15 +120,12 @@ export default function World({
               WORLD_SIZE.width,
               WORLD_SIZE.height,
             );
-            this.artAssets = {
-              town: this.textures.get('town-atlas').getSourceImage(),
-            };
-            drawWorld(map.context, { baseOnly: true, assets: this.artAssets });
+            drawWorld(map.context, { baseOnly: true });
             map.refresh();
             this.add.image(0, 0, 'city').setOrigin(0);
             PROPS.forEach((p, i) => {
               const t = this.textures.createCanvas(`prop-${i}`, 192, 160);
-              drawProp(t.context, { ...p, x: 80, y: 110 }, this.artAssets);
+              drawProp(t.context, { ...p, x: 80, y: 110 });
               t.refresh();
               this.add
                 .image(p.x - 80, p.y - 110, `prop-${i}`)

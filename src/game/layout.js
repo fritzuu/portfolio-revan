@@ -1,5 +1,5 @@
 import { GARDEN_PROPS } from './gardenArt.js';
-import { DISTRICT_PROPS } from './townAssets.js';
+import { GROVE_PROPS } from './groveArt.js';
 // Hand-authored districts: broad connecting streets and decorations anchored to gardens.
 export const WORLD_SIZE = { width: 2600, height: 1600 };
 export const LOCATIONS = [
@@ -142,7 +142,7 @@ export const GARDENS = [
   { x: 1110, y: 535, w: 310, h: 200 },
 ];
 export const PROPS = [
-  ...DISTRICT_PROPS,
+  ...GROVE_PROPS,
   ...GARDEN_PROPS,
   ...[
     [107, 335, 0.7],
@@ -220,6 +220,12 @@ export const propBounds = (p) => {
   if (type === 'gatePillar') return { x: x - 12, y: y - 6, w: 24, h: 18 };
   if (type === 'assetTree' || type === 'assetPine')
     return { x: x - 5 * s, y: y - 3 * s, w: 10 * s, h: 10 * s };
+  if (type === 'groveTree') return { x: x - 8, y: y - 5, w: 16, h: 19 };
+  if (type === 'groveHollow') return { x: x - 13, y: y - 5, w: 26, h: 19 };
+  if (type === 'groveStump') return { x: x - 12, y: y - 8, w: 25, h: 16 };
+  if (type === 'groveLog') return { x: x - 37, y: y - 8, w: 76, h: 20 };
+  if (type === 'groveRock') return { x: x - 19, y: y - 10, w: 38, h: 16 };
+  if (type === 'groveLantern') return { x: x - 3, y: y - 3, w: 6, h: 10 };
   if (type === 'tree')
     return { x: x - 13 * s, y: y - 8 * s, w: 27 * s, h: 30 * s };
   if (type === 'bench') return { x, y: y + 2, w: 72, h: 29 };

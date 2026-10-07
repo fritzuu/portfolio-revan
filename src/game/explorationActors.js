@@ -1,3 +1,4 @@
+import { drawGroveAtmosphere } from './groveArt.js';
 import { readMovement } from './keyboard';
 import { drawGardenGateLeaves } from './gardenArt.js';
 import { gateUnlocked } from './exploration.js';
@@ -88,6 +89,8 @@ export function createExploration(scene) {
     cheer,
     water,
     ambiance: scene.add.graphics().setDepth(1105),
+    groveFog: scene.add.graphics().setDepth(740),
+    groveRunes: scene.add.graphics().setDepth(2),
     gate: scene.add.graphics().setDepth(514),
     gateOpen: 0,
     ball: { x: 570, y: 1295 },
@@ -203,28 +206,14 @@ export function updateExploration(
         by - Math.abs(Math.sin(time * 0.007 + i)) * 4,
       );
     }
-    for (let i = 0; i < 10; i++) {
-      const x = 1820 + i * 49 + Math.sin(time * 0.0005 + i) * 8,
-        y = 830 + (i % 4) * 52 + Math.cos(time * 0.0008 + i) * 6;
-      state.ambiance.fillStyle(
-        0xd1d6a0,
-        darkness * 0.6 * (0.5 + 0.5 * Math.sin(time * 0.002 + i)),
-      );
-      state.ambiance.fillCircle(x, y, 1.5);
-    }
-    if (darkness > 0.5) {
-      state.ambiance.lineStyle(2, 0xb3a4d2, darkness * 0.35);
-      for (let i = 0; i < 3; i++) {
-        const phase = time * 0.001 + i * 2;
-        state.ambiance.strokeEllipse(
-          2050 + Math.sin(phase) * 45,
-          890 + Math.cos(phase) * 12,
-          9,
-          3,
-        );
-      }
-    }
   }
+  drawGroveAtmosphere(
+    { fog: state.groveFog, runes: state.groveRunes, ash: state.ambiance },
+    time,
+    darkness,
+    scene.player.image,
+    reduced,
+  );
   const discover = (id) => {
     if (!state.seen.has(id)) {
       state.seen.add(id);

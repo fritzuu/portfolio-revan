@@ -1,3 +1,4 @@
+import { drawGroveProp } from './groveArt.js';
 import { drawGardenProp } from './gardenArt.js';
 import { drawTownProp } from './townAssets.js';
 // Procedural town/avatar art. Reference creature sprites are bundled locally.
@@ -171,6 +172,10 @@ export {
 import { drawExtension } from './explorationArt.js';
 import { WORLD_SIZE, LOCATIONS, GARDENS, PROPS } from './layout.js';
 export function drawProp(ctx, p, assets = {}) {
+  if (p.type.startsWith('grove')) {
+    drawGroveProp(ctx, p);
+    return;
+  }
   if (p.type.startsWith('asset')) {
     drawTownProp(ctx, p, assets.town);
     return;
