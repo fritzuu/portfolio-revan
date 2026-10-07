@@ -578,7 +578,12 @@ export default function App() {
           {travel && (
             <div className="travel-status" role="status">
               <span className="walking-icon">↟</span>{' '}
-              {travel.entering ? 'Entering' : 'Walking to'} {travel.name}
+              {travel.exiting
+                ? 'Leaving'
+                : travel.entering
+                  ? 'Entering'
+                  : 'Walking to'}{' '}
+              {travel.name}
               <small>WASD / arrows / Esc to cancel</small>
             </div>
           )}

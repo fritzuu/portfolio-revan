@@ -17,6 +17,8 @@ import { findPath, isBlocked } from './navigation';
 import {
   createBuildingEntry,
   advanceBuildingEntry,
+  createBuildingExit,
+  advanceBuildingExit,
   drawEntrance,
 } from './buildingEntry';
 import { createGameKeyboard, justPressed, readMovement } from './keyboard';
@@ -347,6 +349,18 @@ export default function World({
             );
             live.current.onTravel?.({ ...building, entering: true });
           }
+          beginExit() {
+            const building = this.insideBuilding.building;
+            this.insideBuilding = null;
+            this.gameKeyboard.clear();
+            this.player.path = [];
+            this.entrance = createBuildingExit(
+              building,
+              live.current.reducedMotion,
+            );
+            live.current.onTravel?.({ ...building, exiting: true });
+            live.current.onSound?.('door');
+          }
           cancelTravel() {
             if (this.entrance) this.restoreEntrance();
             this.trip = null;
@@ -553,7 +567,7 @@ export default function World({
             this.wasFishing = !!f;
             if (this.insideBuilding) {
               if (live.current.paused) this.insideBuilding.presented = true;
-              else if (this.insideBuilding.presented) this.restoreEntrance();
+              else if (this.insideBuilding.presented) this.beginExit();
             }
             const dest = live.current.destination;
             if (!dest && this.lastDestination !== null) {
@@ -561,6 +575,7 @@ export default function World({
               this.lastDestination = null;
             }
             if (dest && dest.stamp !== this.lastDestination) {
+              if (this.entrance) this.cancelTravel();
               this.lastDestination = dest.stamp;
               const l = DESTINATIONS.find((l) => l.id === dest.id);
               if (l && dest.teleport) {
@@ -670,15 +685,15 @@ export default function World({
                 this.cancelTravel();
                 return;
               }
-              const frame = advanceBuildingEntry(
-                this.entrance,
-                delta / 1000,
-                document.hidden,
-              );
+              const exiting = this.entrance.kind === 'exit';
+              const direction = exiting ? 'down' : 'up';
+              const frame = (
+                exiting ? advanceBuildingExit : advanceBuildingEntry
+              )(this.entrance, delta / 1000, document.hidden);
               drawEntrance(this.entryArt, this.entrance.building, frame.open);
               const old = this.player.image;
               const distance = Math.hypot(old.x - frame.x, old.y - frame.y);
-              this.player.direction = 'up';
+              this.player.direction = direction;
               this.player.distance += distance;
               this.move(this.player, 0, 0, delta, 0);
               const pose = frame.moving
@@ -692,7 +707,7 @@ export default function World({
                   0,
                   this.player.config,
                   pose,
-                  'up',
+                  direction,
                 );
                 this.player.texture.refresh();
                 this.player.frame = pose;
@@ -702,6 +717,12 @@ export default function World({
                 .setAlpha(frame.alpha)
                 .setDepth(2002);
               if (frame.done) {
+                if (exiting) {
+                  this.restoreEntrance();
+                  this.gameKeyboard.clear();
+                  live.current.onTravel?.(null);
+                  return;
+                }
                 const entry = this.entrance;
                 this.entrance = null;
                 this.gameKeyboard.clear();

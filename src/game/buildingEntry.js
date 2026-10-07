@@ -35,6 +35,32 @@ export function advanceBuildingEntry(entry, delta, hidden = false) {
     done: t >= entry.duration,
   };
 }
+export function createBuildingExit(building, reduced = false) {
+  return {
+    building,
+    kind: 'exit',
+    elapsed: 0,
+    reduced,
+    duration: reduced ? 0.15 : 0.85,
+  };
+}
+export function advanceBuildingExit(exit, delta, hidden = false) {
+  if (!hidden)
+    exit.elapsed = Math.min(
+      exit.duration,
+      exit.elapsed + Math.max(0, Math.min(delta, 0.1)),
+    );
+  const t = exit.elapsed;
+  const walk = exit.reduced ? 1 : clamp(t / 0.55);
+  return {
+    x: exit.building.doorX,
+    y: exit.building.doorY - 26 + walk * 71,
+    alpha: exit.reduced ? 1 : clamp(t / 0.18),
+    open: exit.reduced ? 0 : 1 - clamp((t - 0.55) / 0.25),
+    moving: !exit.reduced && walk > 0 && walk < 1,
+    done: t >= exit.duration,
+  };
+}
 export function drawEntrance(g, building, open) {
   const x = building.doorX,
     y = building.doorY;

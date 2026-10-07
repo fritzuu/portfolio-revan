@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {
   createBuildingEntry,
   advanceBuildingEntry,
+  createBuildingExit,
+  advanceBuildingExit,
 } from '../src/game/buildingEntry.js';
 const building = { id: 'projects', doorX: 800, doorY: 410 };
 test('entry approaches the door, opens it before walking through, then fades the visitor before completing', () => {
@@ -40,4 +42,37 @@ test('reduced motion skips movement and fading but still completes entry into th
   assert.equal(f.alpha, 1);
   assert.equal(f.open, 1);
   assert.equal(advanceBuildingEntry(e, 0.1).done, true);
+});
+
+test('exit reveals the visitor, walks outside before closing the door, and finishes at the original approach point', () => {
+  const e = createBuildingExit(building);
+  let f = advanceBuildingExit(e, 0);
+  assert.equal(f.alpha, 0);
+  assert.equal(f.open, 1);
+  assert.equal(f.y, building.doorY - 26);
+  for (let i = 0; i < 12; i++) f = advanceBuildingExit(e, 1 / 60);
+  assert.equal(f.alpha, 1);
+  assert.equal(f.open, 1);
+  assert.equal(f.moving, true);
+  for (let i = 0; i < 23; i++) f = advanceBuildingExit(e, 1 / 60);
+  assert.equal(f.y, building.doorY + 45);
+  assert.equal(f.moving, false);
+  assert.ok(f.open < 1 && f.open > 0);
+  for (let i = 0; i < 17; i++) f = advanceBuildingExit(e, 1 / 60);
+  assert.equal(f.done, true);
+  assert.equal(f.open, 0);
+  assert.equal(f.alpha, 1);
+});
+test('exit freezes in hidden tabs and reduced motion returns outside without fading or walking', () => {
+  const e = createBuildingExit(building);
+  advanceBuildingExit(e, 10, true);
+  assert.equal(e.elapsed, 0);
+  const r = createBuildingExit(building, true);
+  let f = advanceBuildingExit(r, 0.1);
+  assert.equal(f.y, building.doorY + 45);
+  assert.equal(f.moving, false);
+  assert.equal(f.open, 0);
+  assert.equal(f.alpha, 1);
+  f = advanceBuildingExit(r, 0.1);
+  assert.equal(f.done, true);
 });
