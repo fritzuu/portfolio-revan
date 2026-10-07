@@ -6,6 +6,7 @@ import {
   DESTINATIONS,
   PROPS,
   WORLD_SIZE,
+  LOCATIONS,
 } from './art';
 import { NPC_COUNT, NPC_ROUTES } from './layout';
 import { createExploration, updateExploration } from './explorationActors';
@@ -13,6 +14,11 @@ import { nightAmount } from './daylight';
 import { drawFish } from '../fishing/sprites';
 import { RODS } from '../fishing/catalog';
 import { findPath, isBlocked } from './navigation';
+import {
+  createBuildingEntry,
+  advanceBuildingEntry,
+  drawEntrance,
+} from './buildingEntry';
 import { createGameKeyboard, justPressed, readMovement } from './keyboard';
 
 export default function World({
@@ -231,6 +237,7 @@ export default function World({
                 .setDepth(2002),
             }));
             this.exploration = createExploration(this);
+            this.entryArt = this.add.graphics().setDepth(2001);
             this.dayElapsed = 0;
             this.wasFishing = false;
             this.water = this.add.graphics().setDepth(1);
@@ -271,7 +278,12 @@ export default function World({
             this.keys = this.gameKeyboard.keys;
             this.events.once('shutdown', () => this.gameKeyboard.destroy());
             this.input.on('pointerdown', (p) => {
-              if (playing && !live.current.paused && !live.current.fishing) {
+              if (
+                playing &&
+                !this.entrance &&
+                !live.current.paused &&
+                !live.current.fishing
+              ) {
                 this.cancelTravel();
                 this.player.path = findPath(
                   this.player.image,
@@ -307,7 +319,36 @@ export default function World({
           routeTo(start, target) {
             return findPath(start, target);
           }
+          restoreEntrance() {
+            const entry = this.entrance || this.insideBuilding;
+            if (entry)
+              this.player.image
+                .setPosition(entry.building.doorX, entry.building.doorY + 45)
+                .setAlpha(1)
+                .setDepth(entry.building.doorY + 57);
+            this.entrance = null;
+            this.insideBuilding = null;
+            this.entryArt.clear();
+          }
+          beginEntrance(building, panel = building.id) {
+            if (this.entrance) return;
+            if (!LOCATIONS.some((l) => l.id === building.id)) {
+              live.current.onVisit?.(panel);
+              return;
+            }
+            this.gameKeyboard.clear();
+            this.player.path = [];
+            live.current.onSound?.('door');
+            this.entrance = createBuildingEntry(
+              building,
+              this.player.image,
+              live.current.reducedMotion,
+              panel,
+            );
+            live.current.onTravel?.({ ...building, entering: true });
+          }
           cancelTravel() {
+            if (this.entrance) this.restoreEntrance();
             this.trip = null;
             live.current.onTravel?.(null);
             this.player.path = [];
@@ -510,6 +551,10 @@ export default function World({
               this.player.path = [];
             }
             this.wasFishing = !!f;
+            if (this.insideBuilding) {
+              if (live.current.paused) this.insideBuilding.presented = true;
+              else if (this.insideBuilding.presented) this.restoreEntrance();
+            }
             const dest = live.current.destination;
             if (!dest && this.lastDestination !== null) {
               this.cancelTravel();
@@ -619,6 +664,54 @@ export default function World({
               });
               this.lastPositionTime = time;
             }
+            if (this.entrance) {
+              if (live.current.paused) return;
+              if (justPressed(this.keys.ESC)) {
+                this.cancelTravel();
+                return;
+              }
+              const frame = advanceBuildingEntry(
+                this.entrance,
+                delta / 1000,
+                document.hidden,
+              );
+              drawEntrance(this.entryArt, this.entrance.building, frame.open);
+              const old = this.player.image;
+              const distance = Math.hypot(old.x - frame.x, old.y - frame.y);
+              this.player.direction = 'up';
+              this.player.distance += distance;
+              this.move(this.player, 0, 0, delta, 0);
+              const pose = frame.moving
+                ? Math.floor(this.player.distance / this.player.stride) % 8
+                : 0;
+              if (this.player.frame !== pose) {
+                this.player.texture.context.clearRect(0, 0, 32, 36);
+                drawCharacter(
+                  this.player.texture.context,
+                  0,
+                  0,
+                  this.player.config,
+                  pose,
+                  'up',
+                );
+                this.player.texture.refresh();
+                this.player.frame = pose;
+              }
+              this.player.image
+                .setPosition(frame.x, frame.y)
+                .setAlpha(frame.alpha)
+                .setDepth(2002);
+              if (frame.done) {
+                const entry = this.entrance;
+                this.entrance = null;
+                this.gameKeyboard.clear();
+                this.insideBuilding = entry;
+                this.player.image.setAlpha(0);
+                live.current.onTravel?.(null);
+                live.current.onVisit?.(entry.panel);
+              }
+              return;
+            }
             if (
               !playing ||
               f ||
@@ -660,11 +753,11 @@ export default function World({
               this.trip = null;
               live.current.onTravel?.(null);
               if (near?.id === trip.id && trip.open)
-                live.current.onVisit?.(trip.panel || trip.id);
+                this.beginEntrance(near, trip.panel || trip.id);
             }
             if (near && (interactE || interactEnter)) {
               this.cancelTravel();
-              live.current.onVisit?.(near.id);
+              this.beginEntrance(near);
             }
             if (time - this.lastPositionTime > 100) {
               live.current.onPosition?.({

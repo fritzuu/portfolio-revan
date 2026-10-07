@@ -23,6 +23,7 @@ import {
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import seed from './data/portfolio.json';
+import './buildingRoom.css';
 import { LOCATIONS, OUTFITS, SKINS } from './game/art';
 import PixelCharacter from './components/PixelCharacter';
 import Cutscene from './components/Cutscene';
@@ -576,7 +577,8 @@ export default function App() {
           </aside>
           {travel && (
             <div className="travel-status" role="status">
-              <span className="walking-icon">↟</span> Walking to {travel.name}
+              <span className="walking-icon">↟</span>{' '}
+              {travel.entering ? 'Entering' : 'Walking to'} {travel.name}
               <small>WASD / arrows / Esc to cancel</small>
             </div>
           )}
@@ -602,7 +604,13 @@ export default function App() {
           </button>
           {near && (
             <div className="city-interaction">
-              <button onClick={() => visit(near.id)}>
+              <button
+                onClick={() =>
+                  LOCATIONS.some((l) => l.id === near.id)
+                    ? walkTo(near.id)
+                    : visit(near.id)
+                }
+              >
                 <kbd>E</kbd> Explore {near.name} <ArrowRight size={15} />
               </button>
             </div>
@@ -850,10 +858,17 @@ export default function App() {
       <Modal
         open={!!panel && !inWorldFishing && panel !== 'football'}
         onOpenChange={(v) => {
-          if (!v) setPanel(null);
+          if (!v) {
+            setPanel(null);
+            setTimeout(() => stage.current?.focus(), 0);
+          }
         }}
         title={TITLES[panel] || 'Field notes'}
-        className={FISHING_PANELS.includes(panel) ? 'fishing-modal' : undefined}
+        className={cn(
+          FISHING_PANELS.includes(panel) && 'fishing-modal',
+          LOCATIONS.some((l) => l.id === panel) &&
+            `portfolio-room room-${panel}`,
+        )}
       >
         {FISHING_PANELS.includes(panel) ? (
           <Suspense

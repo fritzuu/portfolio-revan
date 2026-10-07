@@ -74,6 +74,10 @@ export default function useMusic(enabled, district = 'town') {
           0.045,
           'triangle',
         );
+      if (event === 'door') {
+        tone(45, now, 0.14, 0.065, 'triangle');
+        tone(52, now + 0.14, 0.12, 0.05, 'triangle');
+      }
       if (event === 'tackle') tone(38, now, 0.09, 0.16, 'triangle');
       if (event === 'save') {
         tone(52, now, 0.07, 0.16, 'triangle');

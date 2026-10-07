@@ -1,0 +1,87 @@
+.portfolio-room.dialog-content {
+  background: #f4ead2;
+  border: 3px solid #a5885c;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 5px #e4d2ae,
+    0 18px 70px #172f4260;
+  background-image: linear-gradient(
+    90deg,
+    #d2bb91 0,
+    #ead8b8 14px,
+    transparent 32px
+  );
+  animation: room-arrival 240ms ease-out;
+}
+.portfolio-room .dialog-head {
+  border-bottom: 2px solid #c8b18a;
+  background: #f4ead2;
+}
+.portfolio-room .dialog-head .eyebrow {
+  color: #766140;
+}
+.portfolio-room .dialog-body {
+  padding-left: 30px;
+}
+.room-projects.dialog-content,
+.room-skills.dialog-content {
+  border: 6px solid #876345;
+  box-shadow:
+    0 0 0 3px #c29d70,
+    0 18px 70px #172f4260;
+  background: #e4e7d8;
+}
+.room-projects .dialog-head,
+.room-skills .dialog-head {
+  background: #e4e7d8;
+  border-color: #acb59f;
+}
+.room-projects .dialog-body,
+.room-skills .dialog-body {
+  padding-left: 24px;
+}
+@keyframes room-arrival {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@media (max-width: 760px) {
+  .portfolio-room .dialog-body {
+    padding-left: 18px;
+  }
+  .portfolio-room.dialog-content {
+    box-shadow:
+      0 0 0 2px #e4d2ae,
+      0 12px 40px #172f4260;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-room.dialog-content {
+    animation: none;
+  }
+}
+.room-projects .project-card,
+.room-skills .skill-card {
+  position: relative;
+  border-color: #bbc1ad;
+  box-shadow: 2px 4px 0 #66775c25;
+}
+.room-projects .project-card::before,
+.room-skills .skill-card::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #976b51;
+  border-radius: 50%;
+  background: #d09371;
+  z-index: 1;
+  pointer-events: none;
+}
