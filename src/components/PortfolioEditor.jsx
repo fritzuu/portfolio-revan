@@ -1,3 +1,4 @@
+import { Localized } from '../i18n';
 import { useId, useState } from 'react';
 import { Plus, ArrowUp, ArrowDown, Undo2 } from 'lucide-react';
 
@@ -154,57 +155,61 @@ function Field({ field, value, onChange, onUpload }) {
         : undefined),
   };
   return (
-    <div className={`admin-field${multiline ? ' admin-field-wide' : ''}`}>
-      <label htmlFor={id}>
-        {label}
-        {optional && <small> · opsional</small>}
-      </label>
-      {multiline ? (
-        <textarea {...control} rows={4} />
-      ) : (
-        <input {...control} type={type || 'text'} />
-      )}
-      {list && (
-        <small id={`${id}-help`}>
-          {multiline
-            ? 'Satu pencapaian per baris.'
-            : 'Pisahkan dengan koma. Contoh: React, Node.js, Supabase'}
-        </small>
-      )}
-      {field.key === 'img' && onUpload && (
-        <div className="admin-image-upload">
-          <label htmlFor={`${id}-file`}>Atau pilih gambar dari perangkat</label>
-          <input
-            id={`${id}-file`}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            aria-describedby={`${id}-upload-help`}
-            onChange={async (event) => {
-              const file = event.target.files?.[0];
-              event.target.value = '';
-              if (!file) return;
-              setUploadError('');
-              setUploadStatus('Mengunggah gambar…');
-              try {
-                onChange(await onUpload(file));
-                setUploadStatus(
-                  'Gambar siap. Simpan perubahan untuk menampilkannya di website.',
-                );
-              } catch (error) {
-                setUploadStatus('');
-                setUploadError(error.message);
-              }
-            }}
-          />
-          <small id={`${id}-upload-help`}>
-            JPG, PNG, WebP, atau GIF · maksimal 2 MB. Gambar yang diunggah dapat
-            diakses publik.
+    <Localized>
+      <div className={`admin-field${multiline ? ' admin-field-wide' : ''}`}>
+        <label htmlFor={id}>
+          {label}
+          {optional && <small> · opsional</small>}
+        </label>
+        {multiline ? (
+          <textarea {...control} rows={4} />
+        ) : (
+          <input {...control} type={type || 'text'} />
+        )}
+        {list && (
+          <small id={`${id}-help`}>
+            {multiline
+              ? 'Satu pencapaian per baris.'
+              : 'Pisahkan dengan koma. Contoh: React, Node.js, Supabase'}
           </small>
-          {uploadStatus && <small role="status">{uploadStatus}</small>}
-          {uploadError && <small role="alert">{uploadError}</small>}
-        </div>
-      )}
-    </div>
+        )}
+        {field.key === 'img' && onUpload && (
+          <div className="admin-image-upload">
+            <label htmlFor={`${id}-file`}>
+              Atau pilih gambar dari perangkat
+            </label>
+            <input
+              id={`${id}-file`}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              aria-describedby={`${id}-upload-help`}
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                event.target.value = '';
+                if (!file) return;
+                setUploadError('');
+                setUploadStatus('Mengunggah gambar…');
+                try {
+                  onChange(await onUpload(file));
+                  setUploadStatus(
+                    'Gambar siap. Simpan perubahan untuk menampilkannya di website.',
+                  );
+                } catch (error) {
+                  setUploadStatus('');
+                  setUploadError(error.message);
+                }
+              }}
+            />
+            <small id={`${id}-upload-help`}>
+              JPG, PNG, WebP, atau GIF · maksimal 2 MB. Gambar yang diunggah
+              dapat diakses publik.
+            </small>
+            {uploadStatus && <small role="status">{uploadStatus}</small>}
+            {uploadError && <small role="alert">{uploadError}</small>}
+          </div>
+        )}
+      </div>
+    </Localized>
   );
 }
 function prepare(value) {
@@ -327,139 +332,142 @@ export default function PortfolioEditor({
   const fields = active === 'profile' ? PROFILE_FIELDS : section.fields;
   const items = active === 'profile' ? [value.profile] : value[active];
   return (
-    <form className="portfolio-editor" onSubmit={submit}>
-      <div className="admin-category-nav" aria-label="Bagian portfolio">
-        {SECTIONS.map((item) => (
-          <button
-            type="button"
-            disabled={busy}
-            aria-pressed={active === item.key}
-            key={item.key}
-            onClick={() => {
-              setActive(item.key);
-              setError(null);
-            }}
-          >
-            {item.label}
-            {item.key !== 'profile' && <span>{value[item.key].length}</span>}
-          </button>
-        ))}
-      </div>
-      <div className="admin-section-heading">
-        <div>
-          <h2>{section.label}</h2>
-          <p>{section.description}</p>
+    <Localized>
+      <form className="portfolio-editor" onSubmit={submit}>
+        <div className="admin-category-nav" aria-label="Bagian portfolio">
+          {SECTIONS.map((item) => (
+            <button
+              type="button"
+              disabled={busy}
+              aria-pressed={active === item.key}
+              key={item.key}
+              onClick={() => {
+                setActive(item.key);
+                setError(null);
+              }}
+            >
+              {item.label}
+              {item.key !== 'profile' && <span>{value[item.key].length}</span>}
+            </button>
+          ))}
         </div>
-        {active !== 'profile' && (
-          <button
-            type="button"
-            className="button"
-            disabled={busy || items.length >= section.max}
-            onClick={() => {
-              setUndo(null);
-              onChange({
-                ...value,
-                [active]: [...items, structuredClone(section.empty)],
-              });
-            }}
-          >
-            <Plus size={16} /> Tambah {section.label.toLowerCase()}
-          </button>
+        <div className="admin-section-heading">
+          <div>
+            <h2>{section.label}</h2>
+            <p>{section.description}</p>
+          </div>
+          {active !== 'profile' && (
+            <button
+              type="button"
+              className="button"
+              disabled={busy || items.length >= section.max}
+              onClick={() => {
+                setUndo(null);
+                onChange({
+                  ...value,
+                  [active]: [...items, structuredClone(section.empty)],
+                });
+              }}
+            >
+              <Plus size={16} /> Tambah {section.label.toLowerCase()}
+            </button>
+          )}
+        </div>
+        {error && (
+          <p className="admin-form-error" role="alert">
+            {error.message}
+          </p>
         )}
-      </div>
-      {error && (
-        <p className="admin-form-error" role="alert">
-          {error.message}
-        </p>
-      )}
-      {undo && (
-        <div className="admin-undo" role="status">
-          <span>Item dikeluarkan dari draft.</span>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              onChange({ ...value, [undo.key]: undo.items });
-              setUndo(null);
-            }}
-          >
-            <Undo2 size={14} /> Urungkan
-          </button>
-        </div>
-      )}
-      <fieldset disabled={busy} className="admin-fields-container">
-        {!items.length && (
-          <div className="admin-empty">
-            <h3>Belum ada {section.label.toLowerCase()}.</h3>
-            <p>Gunakan tombol Tambah untuk membuat item pertama.</p>
+        {undo && (
+          <div className="admin-undo" role="status">
+            <span>Item dikeluarkan dari draft.</span>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                onChange({ ...value, [undo.key]: undo.items });
+                setUndo(null);
+              }}
+            >
+              <Undo2 size={14} /> Urungkan
+            </button>
           </div>
         )}
-        {items.map((item, index) => (
-          <article className="admin-edit-card" key={`${active}-${index}`}>
-            {active !== 'profile' && (
-              <div className="admin-card-heading">
-                <h3>
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  {item.title || item.role || `${section.label} baru`}
-                </h3>
-                <div className="admin-card-actions">
-                  <button
-                    type="button"
-                    aria-label={`Pindahkan ${section.label.toLowerCase()} ${index + 1} ke atas`}
-                    disabled={index === 0}
-                    onClick={() => move(index, -1)}
-                  >
-                    <ArrowUp size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Pindahkan ${section.label.toLowerCase()} ${index + 1} ke bawah`}
-                    disabled={index === items.length - 1}
-                    onClick={() => move(index, 1)}
-                  >
-                    <ArrowDown size={16} />
-                  </button>
-                  <button type="button" onClick={() => remove(index)}>
-                    Keluarkan
-                  </button>
-                </div>
-              </div>
-            )}
-            <div className="admin-field-grid">
-              {fields.map((field) => (
-                <Field
-                  key={field.key}
-                  field={field}
-                  value={item[field.key]}
-                  onChange={(next) => updateItem(index, field.key, next)}
-                  onUpload={onUpload}
-                />
-              ))}
+        <fieldset disabled={busy} className="admin-fields-container">
+          {!items.length && (
+            <div className="admin-empty">
+              <h3>Belum ada {section.label.toLowerCase()}.</h3>
+              <p>Gunakan tombol Tambah untuk membuat item pertama.</p>
             </div>
-            {active === 'projects' &&
-              item.img &&
-              (/^\/(?!\/)/.test(item.img) || /^https:\/\//.test(item.img)) && (
-                <div className="admin-image-preview">
-                  <img
-                    src={item.img}
-                    alt={item.imgAlt || 'Pratinjau gambar proyek'}
-                    loading="lazy"
-                  />
-                  <span>Pratinjau gambar</span>
+          )}
+          {items.map((item, index) => (
+            <article className="admin-edit-card" key={`${active}-${index}`}>
+              {active !== 'profile' && (
+                <div className="admin-card-heading">
+                  <h3>
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    {item.title || item.role || `${section.label} baru`}
+                  </h3>
+                  <div className="admin-card-actions">
+                    <button
+                      type="button"
+                      aria-label={`Pindahkan ${section.label.toLowerCase()} ${index + 1} ke atas`}
+                      disabled={index === 0}
+                      onClick={() => move(index, -1)}
+                    >
+                      <ArrowUp size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Pindahkan ${section.label.toLowerCase()} ${index + 1} ke bawah`}
+                      disabled={index === items.length - 1}
+                      onClick={() => move(index, 1)}
+                    >
+                      <ArrowDown size={16} />
+                    </button>
+                    <button type="button" onClick={() => remove(index)}>
+                      Keluarkan
+                    </button>
+                  </div>
                 </div>
               )}
-          </article>
-        ))}
-      </fieldset>
-      <div className="admin-save-bar">
-        <span>
-          {dirty ? 'Ada perubahan yang belum disimpan' : 'Konten tersimpan'}
-          <small>Perubahan tampil di website setelah disimpan.</small>
-        </span>
-        <button className="button primary" disabled={busy || !dirty}>
-          {busy ? 'Menyimpan…' : 'Simpan perubahan'}
-        </button>
-      </div>
-    </form>
+              <div className="admin-field-grid">
+                {fields.map((field) => (
+                  <Field
+                    key={field.key}
+                    field={field}
+                    value={item[field.key]}
+                    onChange={(next) => updateItem(index, field.key, next)}
+                    onUpload={onUpload}
+                  />
+                ))}
+              </div>
+              {active === 'projects' &&
+                item.img &&
+                (/^\/(?!\/)/.test(item.img) ||
+                  /^https:\/\//.test(item.img)) && (
+                  <div className="admin-image-preview">
+                    <img
+                      src={item.img}
+                      alt={item.imgAlt || 'Pratinjau gambar proyek'}
+                      loading="lazy"
+                    />
+                    <span>Pratinjau gambar</span>
+                  </div>
+                )}
+            </article>
+          ))}
+        </fieldset>
+        <div className="admin-save-bar">
+          <span>
+            {dirty ? 'Ada perubahan yang belum disimpan' : 'Konten tersimpan'}
+            <small>Perubahan tampil di website setelah disimpan.</small>
+          </span>
+          <button className="button primary" disabled={busy || !dirty}>
+            {busy ? 'Menyimpan…' : 'Simpan perubahan'}
+          </button>
+        </div>
+      </form>
+    </Localized>
   );
 }

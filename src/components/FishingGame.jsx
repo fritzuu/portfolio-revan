@@ -1,3 +1,4 @@
+import { Localized } from '../i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Fish, Sparkles, ArrowRight } from 'lucide-react';
 import {
@@ -126,14 +127,16 @@ function FishingScene({ game, character, rod, reduced }) {
     return () => cancelAnimationFrame(frame);
   }, [character, rod, reduced]);
   return (
-    <canvas
-      ref={canvas}
-      width={760}
-      height={290}
-      className="fishing-scene"
-      role="img"
-      aria-label="A moonlit pixel lake, lantern-lit dock, traveler and fishing line"
-    />
+    <Localized>
+      <canvas
+        ref={canvas}
+        width={760}
+        height={290}
+        className="fishing-scene"
+        role="img"
+        aria-label="A moonlit pixel lake, lantern-lit dock, traveler and fishing line"
+      />
+    </Localized>
   );
 }
 const DEFAULT_GAME = {
@@ -267,234 +270,244 @@ export default function FishingGame({
     escaped: 'The lake keeps a little mystery.',
   };
   return (
-    <div
-      className="fishing-game"
-      ref={root}
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-          e.preventDefault();
-          sim.current.bar = Math.max(
-            4,
-            Math.min(96, sim.current.bar + (e.code === 'ArrowRight' ? 8 : -8)),
-          );
-          setView({ ...sim.current });
-          return;
-        }
-        if (e.code === 'Space') {
-          e.preventDefault();
-          if (e.repeat) return;
-          if (sim.current.phase === 'bite') strike();
-          else if (sim.current.phase === 'reeling') held.current = true;
-        }
-      }}
-      onKeyUp={(e) => {
-        if (e.code === 'Space') {
-          e.preventDefault();
-          held.current = false;
-        }
-      }}
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) held.current = false;
-      }}
-    >
-      <div className="fishing-location">
-        <span>✦ {spot === 'rift' ? 'ASTRAL CROSSING' : 'MOONWATER DOCK'}</span>
-        <span>
-          {rod.name} · +{Math.round(rod.luck * 100)}% luck
-        </span>
-      </div>
-      {!embedded && (
-        <FishingScene
-          game={view}
-          character={character}
-          rod={rod}
-          reduced={reduced}
-        />
-      )}
-      {locked ? (
-        <div className="fishing-message">
-          <Sparkles />
-          <h3>The crossing is still asleep.</h3>
-          <p>
-            Discover 12 different species to wake this fishing spot.{' '}
-            {Object.keys(state.discovered).length} / 12 found.
-          </p>
-          <button
-            className="button primary"
-            onClick={() => onGoFishing('fishing')}
-          >
-            Visit Moonwater Dock <ArrowRight size={16} />
-          </button>
+    <Localized>
+      <div
+        className="fishing-game"
+        ref={root}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+            e.preventDefault();
+            sim.current.bar = Math.max(
+              4,
+              Math.min(
+                96,
+                sim.current.bar + (e.code === 'ArrowRight' ? 8 : -8),
+              ),
+            );
+            setView({ ...sim.current });
+            return;
+          }
+          if (e.code === 'Space') {
+            e.preventDefault();
+            if (e.repeat) return;
+            if (sim.current.phase === 'bite') strike();
+            else if (sim.current.phase === 'reeling') held.current = true;
+          }
+        }}
+        onKeyUp={(e) => {
+          if (e.code === 'Space') {
+            e.preventDefault();
+            held.current = false;
+          }
+        }}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) held.current = false;
+        }}
+      >
+        <div className="fishing-location">
+          <span>
+            ✦ {spot === 'rift' ? 'ASTRAL CROSSING' : 'MOONWATER DOCK'}
+          </span>
+          <span>
+            {rod.name} · +{Math.round(rod.luck * 100)}% luck
+          </span>
         </div>
-      ) : (
-        <>
-          <div className="fishing-caption">
-            <span className="eyebrow">
-              {phase === 'caught'
-                ? RARITIES[view.fish.rarity].label.toUpperCase()
-                : phase.toUpperCase()}
-            </span>
-            <h3>{titles[phase]}</h3>
-          </div>
-          {phase === 'waiting' && (
-            <p className="fishing-hint" role="status">
-              Watch the float. A dipping bobber means it’s time to strike.
+        {!embedded && (
+          <FishingScene
+            game={view}
+            character={character}
+            rod={rod}
+            reduced={reduced}
+          />
+        )}
+        {locked ? (
+          <div className="fishing-message">
+            <Sparkles />
+            <h3>The crossing is still asleep.</h3>
+            <p>
+              Discover 12 different species to wake this fishing spot.{' '}
+              {Object.keys(state.discovered).length} / 12 found.
             </p>
-          )}
-          {phase === 'bite' && (
             <button
-              className="button primary full strike-button"
-              onPointerDown={strike}
-              onPointerUp={() => {
-                held.current = false;
-              }}
-              onClick={strike}
+              className="button primary"
+              onClick={() => onGoFishing('fishing')}
             >
-              STRIKE! · Space / tap
+              Visit Moonwater Dock <ArrowRight size={16} />
             </button>
-          )}
-          {phase === 'reeling' && (
-            <div className="reeling-game">
-              <div className="reeling-track" aria-label="Fishing net position">
-                <div
-                  className="catch-net"
-                  style={{ left: `${view.bar}%`, width: `${view.window}%` }}
-                />
-                <span
-                  className="fish-marker"
-                  style={{ left: `${view.fishX}%` }}
-                >
-                  ◆
-                </span>
-              </div>
-              <div className="reeling-labels">
-                <span>RELEASE ←</span>
-                <span>→ HOLD</span>
-              </div>
-              <div
-                className="catch-progress"
-                role="progressbar"
-                aria-label="Catch progress"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={Math.round(view.progress)}
-              >
-                <span style={{ width: `${view.progress}%` }} />
-              </div>
-              <div className="reel-controls">
-                <button
-                  className="button"
-                  aria-label="Move net left"
-                  onClick={() => {
-                    sim.current.bar = Math.max(4, sim.current.bar - 8);
-                    setView({ ...sim.current });
-                  }}
-                >
-                  ←
-                </button>
-                <button
-                  className="button primary full reel-button"
-                  onPointerDown={(e) => {
-                    e.currentTarget.setPointerCapture(e.pointerId);
-                    held.current = true;
-                  }}
-                  onPointerUp={() => {
-                    held.current = false;
-                  }}
-                  onPointerCancel={() => {
-                    held.current = false;
-                  }}
-                >
-                  Hold to raise · release to lower
-                </button>
-                <button
-                  className="button"
-                  aria-label="Move net right"
-                  onClick={() => {
-                    sim.current.bar = Math.min(96, sim.current.bar + 8);
-                    setView({ ...sim.current });
-                  }}
-                >
-                  →
-                </button>
-              </div>
-              <small>
-                Space also works. Keep ◆ inside the highlighted net to fill the
-                catch meter.
-              </small>
+          </div>
+        ) : (
+          <>
+            <div className="fishing-caption">
+              <span className="eyebrow">
+                {phase === 'caught'
+                  ? RARITIES[view.fish.rarity].label.toUpperCase()
+                  : phase.toUpperCase()}
+              </span>
+              <h3>{titles[phase]}</h3>
             </div>
-          )}
-          {phase === 'caught' && (
-            <div
-              className="catch-result"
-              ref={result}
-              role="status"
-              style={{ '--fish-color': RARITIES[view.fish.rarity].color }}
-            >
-              <FishArt fish={view.fish} large />
-              <div>
-                <span className="rarity-tag">
-                  {RARITIES[view.fish.rarity].label}
-                </span>
-                {view.isNew && <span className="new-discovery">NEW ✦</span>}
-                <h3>{view.fish.name}</h3>
-                <p>{view.fish.lore}</p>
+            {phase === 'waiting' && (
+              <p className="fishing-hint" role="status">
+                Watch the float. A dipping bobber means it’s time to strike.
+              </p>
+            )}
+            {phase === 'bite' && (
+              <button
+                className="button primary full strike-button"
+                onPointerDown={strike}
+                onPointerUp={() => {
+                  held.current = false;
+                }}
+                onClick={strike}
+              >
+                STRIKE! · Space / tap
+              </button>
+            )}
+            {phase === 'reeling' && (
+              <div className="reeling-game">
+                <div
+                  className="reeling-track"
+                  aria-label="Fishing net position"
+                >
+                  <div
+                    className="catch-net"
+                    style={{ left: `${view.bar}%`, width: `${view.window}%` }}
+                  />
+                  <span
+                    className="fish-marker"
+                    style={{ left: `${view.fishX}%` }}
+                  >
+                    ◆
+                  </span>
+                </div>
+                <div className="reeling-labels">
+                  <span>RELEASE ←</span>
+                  <span>→ HOLD</span>
+                </div>
+                <div
+                  className="catch-progress"
+                  role="progressbar"
+                  aria-label="Catch progress"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(view.progress)}
+                >
+                  <span style={{ width: `${view.progress}%` }} />
+                </div>
+                <div className="reel-controls">
+                  <button
+                    className="button"
+                    aria-label="Move net left"
+                    onClick={() => {
+                      sim.current.bar = Math.max(4, sim.current.bar - 8);
+                      setView({ ...sim.current });
+                    }}
+                  >
+                    ←
+                  </button>
+                  <button
+                    className="button primary full reel-button"
+                    onPointerDown={(e) => {
+                      e.currentTarget.setPointerCapture(e.pointerId);
+                      held.current = true;
+                    }}
+                    onPointerUp={() => {
+                      held.current = false;
+                    }}
+                    onPointerCancel={() => {
+                      held.current = false;
+                    }}
+                  >
+                    Hold to raise · release to lower
+                  </button>
+                  <button
+                    className="button"
+                    aria-label="Move net right"
+                    onClick={() => {
+                      sim.current.bar = Math.min(96, sim.current.bar + 8);
+                      setView({ ...sim.current });
+                    }}
+                  >
+                    →
+                  </button>
+                </div>
                 <small>
-                  {view.item.size} cm · {view.item.value} coins · Added to
-                  backpack
+                  Space also works. Keep ◆ inside the highlighted net to fill
+                  the catch meter.
                 </small>
               </div>
-            </div>
-          )}
-          {phase === 'escaped' && (
-            <p className="fishing-hint" role="status">
-              {view.reason}
-            </p>
-          )}
-          {['idle', 'caught', 'escaped'].includes(phase) && (
-            <div className="fishing-actions">
-              <button
-                className="button primary"
-                disabled={state.items.length >= 3000}
-                onClick={cast}
+            )}
+            {phase === 'caught' && (
+              <div
+                className="catch-result"
+                ref={result}
+                role="status"
+                style={{ '--fish-color': RARITIES[view.fish.rarity].color }}
               >
-                <Fish size={18} />
-                {phase === 'idle' ? 'Cast a line' : 'Cast again'}
-              </button>
-              <button className="button" onClick={() => onView('backpack')}>
-                Open backpack ↗
-              </button>
-            </div>
-          )}
-          {state.items.length >= 3000 && (
-            <p className="fishing-hint">
-              Backpack full. Sell a few catches before casting again.
-            </p>
-          )}
-          {phase === 'idle' && (
-            <div className="fishing-instructions">
-              <span>
-                01 <strong>Cast a line</strong>
-              </span>
-              <span>
-                02 <strong>Strike on a bite</strong>
-              </span>
-              <span>
-                03 <strong>Hold to raise your net, release to lower</strong>
-              </span>
-            </div>
-          )}
-          {phase === 'idle' && (
-            <p className="fishing-footnote">
-              Twenty curious creatures. One very unlikely encounter.{' '}
-              {spot === 'rift'
-                ? 'Mythic chance starts at 0.01% before rod luck.'
-                : 'The rarest creature lives at Astral Crossing, unlocked after 12 species.'}
-            </p>
-          )}
-        </>
-      )}
-    </div>
+                <FishArt fish={view.fish} large />
+                <div>
+                  <span className="rarity-tag">
+                    {RARITIES[view.fish.rarity].label}
+                  </span>
+                  {view.isNew && <span className="new-discovery">NEW ✦</span>}
+                  <h3>{view.fish.name}</h3>
+                  <p>{view.fish.lore}</p>
+                  <small>
+                    {view.item.size} cm · {view.item.value} coins · Added to
+                    backpack
+                  </small>
+                </div>
+              </div>
+            )}
+            {phase === 'escaped' && (
+              <p className="fishing-hint" role="status">
+                {view.reason}
+              </p>
+            )}
+            {['idle', 'caught', 'escaped'].includes(phase) && (
+              <div className="fishing-actions">
+                <button
+                  className="button primary"
+                  disabled={state.items.length >= 3000}
+                  onClick={cast}
+                >
+                  <Fish size={18} />
+                  {phase === 'idle' ? 'Cast a line' : 'Cast again'}
+                </button>
+                <button className="button" onClick={() => onView('backpack')}>
+                  Open backpack ↗
+                </button>
+              </div>
+            )}
+            {state.items.length >= 3000 && (
+              <p className="fishing-hint">
+                Backpack full. Sell a few catches before casting again.
+              </p>
+            )}
+            {phase === 'idle' && (
+              <div className="fishing-instructions">
+                <span>
+                  01 <strong>Cast a line</strong>
+                </span>
+                <span>
+                  02 <strong>Strike on a bite</strong>
+                </span>
+                <span>
+                  03 <strong>Hold to raise your net, release to lower</strong>
+                </span>
+              </div>
+            )}
+            {phase === 'idle' && (
+              <p className="fishing-footnote">
+                Twenty curious creatures. One very unlikely encounter.{' '}
+                {spot === 'rift'
+                  ? 'Mythic chance starts at 0.01% before rod luck.'
+                  : 'The rarest creature lives at Astral Crossing, unlocked after 12 species.'}
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    </Localized>
   );
 }

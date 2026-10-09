@@ -1,3 +1,4 @@
+import { Localized } from '../i18n';
 import { useEffect, useRef } from 'react';
 import { drawCharacter } from '../game/art';
 export default function PixelCharacter({
@@ -19,13 +20,15 @@ export default function PixelCharacter({
     return () => cancelAnimationFrame(animation);
   }, [character, animated]);
   return (
-    <canvas
-      ref={ref}
-      width="32"
-      height="36"
-      style={{ width: size, height: (size * 36) / 32 }}
-      aria-label={label}
-      role="img"
-    />
+    <Localized>
+      <canvas
+        ref={ref}
+        width="32"
+        height="36"
+        style={{ width: size, height: (size * 36) / 32 }}
+        aria-label={label}
+        role="img"
+      />
+    </Localized>
   );
 }

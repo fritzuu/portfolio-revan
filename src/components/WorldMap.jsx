@@ -1,3 +1,4 @@
+import { Localized } from '../i18n';
 import { useEffect, useRef, useState } from 'react';
 import { drawWorld, DESTINATIONS, WORLD_SIZE } from '../game/art';
 const WIDTH = 400,
@@ -70,34 +71,36 @@ export default function WorldMap({
     c.stroke();
   }, [position, visited, ready]);
   return (
-    <div className={large ? 'atlas-large' : 'minimap-art'}>
-      <canvas
-        ref={canvas}
-        width={WIDTH}
-        height={HEIGHT}
-        role="img"
-        aria-label="City map: orange visitor, cream portfolio, blue fishing, violet discoveries"
-      />
-      {large && (
-        <>
-          <p className="map-legend">
-            ● You · Cream: portfolio · Blue: fishing · Violet: discoveries ·
-            Green border: visited
-          </p>
-          <div className="atlas-locations">
-            {DESTINATIONS.map((l) => (
-              <button
-                key={l.id}
-                className="button"
-                onClick={() => onTravel(l.id)}
-              >
-                {l.name}
-                <span>{visited.includes(l.id) ? '✓' : '→'}</span>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+    <Localized>
+      <div className={large ? 'atlas-large' : 'minimap-art'}>
+        <canvas
+          ref={canvas}
+          width={WIDTH}
+          height={HEIGHT}
+          role="img"
+          aria-label="City map: orange visitor, cream portfolio, blue fishing, violet discoveries"
+        />
+        {large && (
+          <>
+            <p className="map-legend">
+              ● You · Cream: portfolio · Blue: fishing · Violet: discoveries ·
+              Green border: visited
+            </p>
+            <div className="atlas-locations">
+              {DESTINATIONS.map((l) => (
+                <button
+                  key={l.id}
+                  className="button"
+                  onClick={() => onTravel(l.id)}
+                >
+                  {l.name}
+                  <span>{visited.includes(l.id) ? '✓' : '→'}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </Localized>
   );
 }

@@ -1,3 +1,6 @@
+import { Localized } from '../i18n';
+import { useLanguage } from '../i18n/hooks';
+import { t } from '../i18n/core';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
 import { drawCharacter, drawWorld } from '../game/art';
@@ -25,6 +28,7 @@ export default function Cutscene({
   music,
   onMusic,
 }) {
+  const language = useLanguage();
   const [step, setStep] = useState(0),
     [revealed, setRevealed] = useState(0),
     canvas = useRef(null),
@@ -147,7 +151,7 @@ export default function Cutscene({
       }
       if (now - lastText > 60) {
         setRevealed(
-          reduced ? STORY[step].line.length : Math.floor(elapsed * 35),
+          reduced ? t(STORY[step].line).length : Math.floor(elapsed * 35),
         );
         lastText = now;
       }
@@ -167,7 +171,7 @@ export default function Cutscene({
       cancelAnimationFrame(frame);
       clearTimeout(timer);
     };
-  }, [step, reduced, character, onDone]);
+  }, [step, reduced, character, onDone, language]);
   const next = () => {
     if (step === 2) onDone();
     else {
@@ -176,53 +180,55 @@ export default function Cutscene({
     }
   };
   return (
-    <section
-      className="cinematic"
-      ref={root}
-      tabIndex={-1}
-      aria-label="Opening story"
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onDone();
-      }}
-    >
-      <canvas
-        ref={canvas}
-        width={640}
-        height={360}
-        aria-label={STORY[step].chapter}
-      />
-      <div className="cinema-top">
-        <span>
-          REVAN’S WORLD <small>{STORY[step].chapter}</small>
-        </span>
-        <div>
-          <button
-            aria-label={music ? 'Mute soundtrack' : 'Enable soundtrack'}
-            onClick={() => onMusic(!music)}
-          >
-            {music ? <Volume2 size={20} /> : <VolumeX size={20} />}
-          </button>
-          <button onClick={onDone}>Skip story ↗</button>
-        </div>
-      </div>
-      <div className="cinema-dialogue">
-        <span className="cinema-speaker">{STORY[step].speaker}</span>
-        <p aria-label={STORY[step].line}>
-          {STORY[step].line.slice(0, revealed)}
-          <span className="typing-caret">▌</span>
-        </p>
-        <div className="cinema-footer">
+    <Localized>
+      <section
+        className="cinematic"
+        ref={root}
+        tabIndex={-1}
+        aria-label="Opening story"
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') onDone();
+        }}
+      >
+        <canvas
+          ref={canvas}
+          width={640}
+          height={360}
+          aria-label={STORY[step].chapter}
+        />
+        <div className="cinema-top">
           <span>
-            {STORY.map((_, i) => (
-              <i key={i} className={i === step ? 'active' : ''} />
-            ))}
+            REVAN’S WORLD <small>{STORY[step].chapter}</small>
           </span>
-          <button onClick={next}>
-            {step === 2 ? 'Enter the world' : 'Continue'}{' '}
-            <ArrowRight size={18} />
-          </button>
+          <div>
+            <button
+              aria-label={music ? 'Mute soundtrack' : 'Enable soundtrack'}
+              onClick={() => onMusic(!music)}
+            >
+              {music ? <Volume2 size={20} /> : <VolumeX size={20} />}
+            </button>
+            <button onClick={onDone}>Skip story ↗</button>
+          </div>
         </div>
-      </div>
-    </section>
+        <div className="cinema-dialogue">
+          <span className="cinema-speaker">{STORY[step].speaker}</span>
+          <p aria-label={STORY[step].line}>
+            {t(STORY[step].line).slice(0, revealed)}
+            <span className="typing-caret">▌</span>
+          </p>
+          <div className="cinema-footer">
+            <span>
+              {STORY.map((_, i) => (
+                <i key={i} className={i === step ? 'active' : ''} />
+              ))}
+            </span>
+            <button onClick={next}>
+              {step === 2 ? 'Enter the world' : 'Continue'}{' '}
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
+      </section>
+    </Localized>
   );
 }

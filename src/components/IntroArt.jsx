@@ -1,3 +1,4 @@
+import { Localized } from '../i18n';
 import { useEffect, useRef } from 'react';
 import { drawCharacter } from '../game/art';
 export default function IntroArt({ step }) {
@@ -57,19 +58,21 @@ export default function IntroArt({ step }) {
     r(202, 44, 10, 12, '#8da574');
   }, [step]);
   return (
-    <canvas
-      ref={canvas}
-      width={240}
-      height={105}
-      className="intro-art"
-      role="img"
-      aria-label={
-        [
-          'A traveler finds a computer in a quiet room.',
-          'A pixel portal opens beside the computer.',
-          'The traveler steps into Revan’s world.',
-        ][step]
-      }
-    />
+    <Localized>
+      <canvas
+        ref={canvas}
+        width={240}
+        height={105}
+        className="intro-art"
+        role="img"
+        aria-label={
+          [
+            'A traveler finds a computer in a quiet room.',
+            'A pixel portal opens beside the computer.',
+            'The traveler steps into Revan’s world.',
+          ][step]
+        }
+      />
+    </Localized>
   );
 }

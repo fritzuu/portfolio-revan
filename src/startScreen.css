@@ -596,3 +596,52 @@
     font-size: 14px;
   }
 }
+.language-picker {
+  position: absolute;
+  top: max(28px, env(safe-area-inset-top));
+  right: 28px;
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  background: #203b42ee;
+  border: 2px solid #99ad9d;
+  pointer-events: auto;
+}
+.language-picker button {
+  min-height: 44px;
+  padding: 8px 14px;
+  background: transparent;
+  color: #f4e8c8;
+  border: 1px solid transparent;
+  font-size: 22px;
+}
+.language-picker button[aria-pressed='true'] {
+  background: #e7d5a4;
+  color: #273e3c;
+  border-color: #f6e7c5;
+}
+.language-picker button:hover {
+  background: #557a68;
+  color: #fff4d8;
+}
+@media (max-width: 1000px) {
+  .is-start-screen .title-kicker {
+    left: 24px;
+    text-align: left;
+    font-size: 24px;
+  }
+}
+@media (max-width: 760px) {
+  .language-picker {
+    position: static;
+    align-self: center;
+    margin: -12px 0 -8px;
+  }
+  .language-picker button {
+    font-size: 21px;
+  }
+  .is-start-screen .title-kicker {
+    align-self: center;
+    text-align: center;
+  }
+}

@@ -1,3 +1,5 @@
+import { Localized } from '../i18n';
+import { getLanguage } from '../i18n/core';
 import { useEffect, useState } from 'react';
 import { api } from './PortfolioContent';
 import PortfolioEditor from './PortfolioEditor';
@@ -6,7 +8,7 @@ function messageDate(value) {
   const date = new Date(iso);
   return Number.isNaN(date.getTime())
     ? value
-    : new Intl.DateTimeFormat('id-ID', {
+    : new Intl.DateTimeFormat(getLanguage() === 'id' ? 'id-ID' : 'en-GB', {
         dateStyle: 'medium',
         timeStyle: 'short',
         timeZone: 'Asia/Jakarta',
@@ -161,197 +163,199 @@ export default function Admin() {
     }
   }
   return (
-    <main className="admin-shell">
-      <a className="back-link" href="/">
-        ← Back to the village
-      </a>
-      <span className="eyebrow">WORLD MANAGEMENT</span>
-      <h1>Revan’s desk.</h1>
-      <p>Ruang kecil untuk merawat portfolio dan membaca pesan masuk.</p>
-      {!data ? (
-        <form className="message-form" onSubmit={load}>
-          {mode === 'supabase' ? (
-            <>
+    <Localized>
+      <main className="admin-shell">
+        <a className="back-link" href="/">
+          ← Back to the village
+        </a>
+        <span className="eyebrow">WORLD MANAGEMENT</span>
+        <h1>Revan’s desk.</h1>
+        <p>Ruang kecil untuk merawat portfolio dan membaca pesan masuk.</p>
+        {!data ? (
+          <form className="message-form" onSubmit={load}>
+            {mode === 'supabase' ? (
+              <>
+                <label>
+                  Email admin
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="username"
+                  />
+                </label>
+                <label>
+                  Password
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                  />
+                </label>
+              </>
+            ) : mode === 'token' ? (
               <label>
-                Email admin
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="username"
-                />
-              </label>
-              <label>
-                Password
+                Admin token
                 <input
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
                   required
-                  autoComplete="current-password"
+                  autoComplete="off"
                 />
               </label>
-            </>
-          ) : mode === 'token' ? (
-            <label>
-              Admin token
-              <input
-                type="password"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                required
-                autoComplete="off"
-              />
-            </label>
-          ) : (
-            <p>Menyiapkan login…</p>
-          )}
-          <button className="button primary" disabled={busy || !mode}>
-            Buka dashboard
-          </button>
-          <small>
-            {mode === 'supabase'
-              ? 'Gunakan akun Supabase Auth yang diberi akses admin. Muat ulang halaman untuk login kembali.'
-              : 'Gunakan ADMIN_TOKEN dari konfigurasi server.'}
-          </small>
-        </form>
-      ) : (
-        <>
-          <button
-            className="button"
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                await api('/api/auth/logout', { method: 'POST', headers });
-                setNotice('');
-              } catch {
-                setNotice(
-                  'Sesi lokal ditutup. Logout server belum terkonfirmasi.',
-                );
-              } finally {
-                setBusy(false);
-              }
-              setData(null);
-              setToken('');
-              setDraft(null);
-              setPassword('');
-            }}
-          >
-            Keluar
-          </button>
-          <nav className="admin-workspace-nav" aria-label="Kelola website">
-            <button
-              aria-pressed={view === 'content'}
-              disabled={busy}
-              onClick={() => setView('content')}
-            >
-              Konten portfolio
+            ) : (
+              <p>Menyiapkan login…</p>
+            )}
+            <button className="button primary" disabled={busy || !mode}>
+              Buka dashboard
             </button>
+            <small>
+              {mode === 'supabase'
+                ? 'Gunakan akun Supabase Auth yang diberi akses admin. Muat ulang halaman untuk login kembali.'
+                : 'Gunakan ADMIN_TOKEN dari konfigurasi server.'}
+            </small>
+          </form>
+        ) : (
+          <>
             <button
-              aria-pressed={view === 'messages'}
+              className="button"
               disabled={busy}
-              onClick={() => setView('messages')}
-            >
-              Inbox <span>{data.messages.length}</span>
-            </button>
-            <button
-              aria-pressed={view === 'guestbook'}
-              disabled={busy}
-              onClick={() => setView('guestbook')}
-            >
-              Buku tamu{' '}
-              <span>
-                {data.guestbook.filter((item) => !item.approved).length}
-              </span>
-            </button>
-          </nav>
-          {view === 'content' && draft && (
-            <PortfolioEditor
-              value={draft}
-              onChange={(next) => {
-                setDraft(next);
-                setNotice('');
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await api('/api/auth/logout', { method: 'POST', headers });
+                  setNotice('');
+                } catch {
+                  setNotice(
+                    'Sesi lokal ditutup. Logout server belum terkonfirmasi.',
+                  );
+                } finally {
+                  setBusy(false);
+                }
+                setData(null);
+                setToken('');
+                setDraft(null);
+                setPassword('');
               }}
-              onSave={save}
-              onUpload={uploadImage}
-              busy={busy}
-              dirty={dirty}
-            />
-          )}
-          {view === 'guestbook' && (
-            <section>
-              <h2>Buku tamu</h2>
-              {data.guestbook.length ? (
-                data.guestbook.map((v) => (
-                  <article className="admin-entry" key={v.id}>
-                    <strong>{v.name}</strong>
-                    <p>{v.message}</p>
-                    <small>
-                      {messageDate(v.created_at)} ·{' '}
-                      {v.approved ? 'Publik' : 'Menunggu moderasi'}
-                    </small>
-                    <button
-                      className="button"
-                      disabled={busy}
-                      onClick={() => moderate(v.id, !v.approved)}
-                    >
-                      {v.approved ? 'Sembunyikan' : 'Setujui'}
+            >
+              Keluar
+            </button>
+            <nav className="admin-workspace-nav" aria-label="Kelola website">
+              <button
+                aria-pressed={view === 'content'}
+                disabled={busy}
+                onClick={() => setView('content')}
+              >
+                Konten portfolio
+              </button>
+              <button
+                aria-pressed={view === 'messages'}
+                disabled={busy}
+                onClick={() => setView('messages')}
+              >
+                Inbox <span>{data.messages.length}</span>
+              </button>
+              <button
+                aria-pressed={view === 'guestbook'}
+                disabled={busy}
+                onClick={() => setView('guestbook')}
+              >
+                Buku tamu{' '}
+                <span>
+                  {data.guestbook.filter((item) => !item.approved).length}
+                </span>
+              </button>
+            </nav>
+            {view === 'content' && draft && (
+              <PortfolioEditor
+                value={draft}
+                onChange={(next) => {
+                  setDraft(next);
+                  setNotice('');
+                }}
+                onSave={save}
+                onUpload={uploadImage}
+                busy={busy}
+                dirty={dirty}
+              />
+            )}
+            {view === 'guestbook' && (
+              <section>
+                <h2>Buku tamu</h2>
+                {data.guestbook.length ? (
+                  data.guestbook.map((v) => (
+                    <article className="admin-entry" key={v.id}>
+                      <strong>{v.name}</strong>
+                      <p>{v.message}</p>
+                      <small>
+                        {messageDate(v.created_at)} ·{' '}
+                        {v.approved ? 'Publik' : 'Menunggu moderasi'}
+                      </small>
+                      <button
+                        className="button"
+                        disabled={busy}
+                        onClick={() => moderate(v.id, !v.approved)}
+                      >
+                        {v.approved ? 'Sembunyikan' : 'Setujui'}
+                      </button>
+                    </article>
+                  ))
+                ) : (
+                  <div className="admin-empty">
+                    <h3>Belum ada pesan buku tamu.</h3>
+                    <p>
+                      Pesan yang masuk bisa kamu setujui sebelum dipublikasikan.
+                    </p>
+                    <button className="button" disabled={busy} onClick={load}>
+                      Muat ulang
                     </button>
-                  </article>
-                ))
-              ) : (
-                <div className="admin-empty">
-                  <h3>Belum ada pesan buku tamu.</h3>
-                  <p>
-                    Pesan yang masuk bisa kamu setujui sebelum dipublikasikan.
-                  </p>
-                  <button className="button" disabled={busy} onClick={load}>
-                    Muat ulang
-                  </button>
-                </div>
-              )}
-            </section>
-          )}
-          {view === 'messages' && (
-            <section>
-              <h2>Inbox pribadi</h2>
-              <p className="admin-section-note">
-                Pesan ini hanya terlihat olehmu.
-              </p>
-              {data.messages.length ? (
-                data.messages.map((v) => (
-                  <article className="admin-entry" key={v.id}>
-                    <strong>{v.name}</strong>
-                    <p>{v.email}</p>
-                    <p className="preserve-lines">{v.message}</p>
-                    <small>{messageDate(v.created_at)}</small>
-                  </article>
-                ))
-              ) : (
-                <div className="admin-empty">
-                  <h3>Inbox masih kosong.</h3>
-                  <p>Pesan dari form kontak website akan muncul di sini.</p>
-                  <a
-                    className="button"
-                    href="/"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Lihat website
-                  </a>
-                </div>
-              )}
-            </section>
-          )}
-        </>
-      )}
-      {notice && (
-        <p role="status" className="admin-notice">
-          {notice}
-        </p>
-      )}
-    </main>
+                  </div>
+                )}
+              </section>
+            )}
+            {view === 'messages' && (
+              <section>
+                <h2>Inbox pribadi</h2>
+                <p className="admin-section-note">
+                  Pesan ini hanya terlihat olehmu.
+                </p>
+                {data.messages.length ? (
+                  data.messages.map((v) => (
+                    <article className="admin-entry" key={v.id}>
+                      <strong>{v.name}</strong>
+                      <p>{v.email}</p>
+                      <p className="preserve-lines">{v.message}</p>
+                      <small>{messageDate(v.created_at)}</small>
+                    </article>
+                  ))
+                ) : (
+                  <div className="admin-empty">
+                    <h3>Inbox masih kosong.</h3>
+                    <p>Pesan dari form kontak website akan muncul di sini.</p>
+                    <a
+                      className="button"
+                      href="/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Lihat website
+                    </a>
+                  </div>
+                )}
+              </section>
+            )}
+          </>
+        )}
+        {notice && (
+          <p role="status" className="admin-notice">
+            {notice}
+          </p>
+        )}
+      </main>
+    </Localized>
   );
 }
