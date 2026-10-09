@@ -36,6 +36,7 @@ export default function World({
   onPosition,
   destination,
   onTravel,
+  onArrival,
   onDiscover,
   onNight,
   kick,
@@ -57,6 +58,7 @@ export default function World({
       onPosition,
       destination,
       onTravel,
+      onArrival,
       onDiscover,
       onNight,
       kick,
@@ -79,6 +81,7 @@ export default function World({
       onPosition,
       destination,
       onTravel,
+      onArrival,
       onDiscover,
       onNight,
       kick,
@@ -100,6 +103,7 @@ export default function World({
     onPosition,
     destination,
     onTravel,
+    onArrival,
     onDiscover,
     onNight,
     kick,
@@ -597,6 +601,14 @@ export default function World({
                 });
                 this.trip = this.player.path.length ? dest : null;
                 live.current.onTravel?.(this.trip ? l : null);
+                if (
+                  !this.trip &&
+                  Math.hypot(
+                    this.player.image.x - l.doorX,
+                    this.player.image.y - (l.doorY + 45),
+                  ) < 67
+                )
+                  live.current.onArrival?.(l.id);
               }
             }
             this.npcs.forEach((npc, i) => {
@@ -828,6 +840,7 @@ export default function World({
               const trip = this.trip;
               this.trip = null;
               live.current.onTravel?.(null);
+              if (near?.id === trip.id) live.current.onArrival?.(trip.id);
               if (near?.id === trip.id && trip.open)
                 this.beginEntrance(near, trip.panel || trip.id);
             }

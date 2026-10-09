@@ -41,6 +41,8 @@ import WorldMap from './components/WorldMap';
 import PortfolioContent, { api } from './components/PortfolioContent';
 import Admin from './components/Admin';
 import WorldInsights from './components/WorldInsights';
+import GuidedTour from './components/GuidedTour';
+const TOUR_STOPS = ['projects', 'skills', 'about'];
 const FishingGame = lazy(() => import('./components/FishingGame'));
 const FishingHub = lazy(() => import('./components/FishingHub'));
 const FISHING_PANELS = ['fishing', 'rift', 'backpack', 'journal', 'shop'];
@@ -177,6 +179,7 @@ export default function App() {
   const [worldFishing, setWorldFishing] = useState(null);
   const [resetFishing, setResetFishing] = useState(false);
   const [position, setPosition] = useState({ x: 800, y: 545 });
+  const [tour, setTour] = useState(null);
   const [destination, setDestination] = useState(null);
   const [travel, setTravel] = useState(null);
   const [questsOpen, setQuestsOpen] = useState(
@@ -312,6 +315,40 @@ export default function App() {
     setDestination({ id, panel: panelId, open, stamp: ++tripSequence.current });
     setTimeout(() => stage.current?.focus(), 0);
   }, []);
+  const finishTour = () => {
+    setTour(null);
+    setDestination(null);
+    setTravel(null);
+    setControls({});
+    try {
+      localStorage.setItem('revan-tour-seen', '1');
+    } catch {
+      /* Optional preference. */
+    }
+    setTimeout(() => stage.current?.focus(), 0);
+  };
+  const startTour = () => {
+    setToolsOpen(false);
+    setQuestsOpen(false);
+    setTour({ status: 'walking', step: 0 });
+    walkTo(TOUR_STOPS[0], false);
+  };
+  const tourArrival = useCallback((id) => {
+    setTour((current) =>
+      current?.status === 'walking' && TOUR_STOPS[current.step] === id
+        ? { ...current, status: 'stop' }
+        : current,
+    );
+  }, []);
+  const nextTourStop = () => {
+    if (tour.step === 2) {
+      setTour({ status: 'done', step: 2 });
+      return;
+    }
+    const step = tour.step + 1;
+    setTour({ status: 'walking', step });
+    walkTo(TOUR_STOPS[step], false);
+  };
   const teleport = useCallback(
     (id) => {
       if (!gateUnlocked(discoveries)) return;
@@ -332,6 +369,13 @@ export default function App() {
     setDestination(null);
     setTravel(null);
     setPhase('playing');
+    let seen = false;
+    try {
+      seen = localStorage.getItem('revan-tour-seen') === '1';
+    } catch {
+      /* Offer without storage. */
+    }
+    setTour(seen ? null : { status: 'offer', step: 0 });
     setControls({});
     setTimeout(() => stage.current?.focus(), 0);
   }, []);
@@ -406,6 +450,7 @@ export default function App() {
                 onPosition={reportPosition}
                 destination={destination}
                 onTravel={setTravel}
+                onArrival={tourArrival}
                 onDiscover={reportDiscovery}
                 onNight={setNight}
                 kick={kick}
@@ -566,13 +611,18 @@ export default function App() {
                     ['journal', 'Fish journal', BookOpen],
                     ['shop', 'Tackle shop', ShoppingBag],
                     ['worldinfo', 'About this world', BookOpen],
+                    ['tour', 'Tur bersama Revan', Map],
                   ].map(([id, label, Icon]) => (
                     <button
                       key={id}
                       onClick={() => {
                         setToolsOpen(false);
-                        if (['fishing', 'shop'].includes(id)) walkTo(id);
-                        else visit(id);
+                        if (id === 'tour') startTour();
+                        else {
+                          setTour(null);
+                          if (['fishing', 'shop'].includes(id)) walkTo(id);
+                          else visit(id);
+                        }
                       }}
                     >
                       <Icon size={17} />
@@ -736,6 +786,22 @@ export default function App() {
               ))}
             </div>
           </>
+        )}
+        {phase === 'playing' && tour && !panel && (
+          <GuidedTour
+            tour={tour}
+            moving={Boolean(travel)}
+            onStart={startTour}
+            onSkip={finishTour}
+            onNext={nextTourStop}
+            onResume={() => walkTo(TOUR_STOPS[tour.step], false)}
+            onOpen={() => {
+              if (tour.status === 'done') {
+                finishTour();
+                walkTo('contact');
+              } else walkTo(TOUR_STOPS[tour.step]);
+            }}
+          />
         )}
         {phase === 'intro' && (
           <Cutscene

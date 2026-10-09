@@ -1,4 +1,46 @@
 export default [
+  ['Tour with Revan', 'Tur bersama Revan'],
+  ['Revan, your tour guide', 'Revan, pemandu tur'],
+  ['Your world guide', 'Pemandu duniamu'],
+  ['Tour complete', 'Tur selesai'],
+  ['Portfolio tour {n}/3', 'Tur portfolio {n}/3'],
+  ['Want me to show you around?', 'Mau kuantar keliling?'],
+  ['Now, this world is yours.', 'Sekarang, dunia ini milikmu.'],
+  [
+    'Get to know my work, skills, and profile through a short tour. You can skip it anytime.',
+    'Kenali karya, skill, dan profilku lewat tur singkat. Kamu bisa melewatinya kapan saja.',
+  ],
+  [
+    'Want to talk about a project? Meet me at Contact. Or try fishing, football, and finding the village secrets.',
+    'Mau ngobrol soal proyek? Temui aku di Contact. Atau coba mancing, main bola, dan cari rahasia desa.',
+  ],
+  [
+    'Follow me to our next stop.',
+    'Yuk, ikuti aku ke pemberhentian berikutnya.',
+  ],
+  [
+    'Here you can explore my projects, the technologies behind them, and their results.',
+    'Di sini kamu bisa melihat karya yang kubangun, teknologi yang dipakai, dan hasilnya.',
+  ],
+  [
+    'Here is my toolkit: technical skills and services I can help you with.',
+    'Ini bekal kerjaku: kemampuan teknis dan layanan yang bisa kubantu kerjakan.',
+  ],
+  [
+    'Get to know me here. You can also read and download my CV.',
+    'Kenalan lebih dekat denganku di sini. Kamu juga bisa membaca dan mengunduh CV-ku.',
+  ],
+  ['Join the tour', 'Ikut tur'],
+  ['Contact Revan', 'Hubungi Revan'],
+  ['Walking…', 'Sedang berjalan…'],
+  ['Resume the journey', 'Lanjutkan perjalanan'],
+  ['Take a look inside ↗', 'Lihat isinya ↗'],
+  ['Finish tour', 'Selesaikan tur'],
+  ['Next →', 'Lanjut →'],
+  ['Explore on my own', 'Jelajah sendiri'],
+  ['Start exploring', 'Mulai menjelajah'],
+  ['Skip tour', 'Lewati tur'],
+
   ['Profile photo', 'Foto profil'],
   ['CV file', 'File CV'],
   ['Certificate file', 'File sertifikat'],
