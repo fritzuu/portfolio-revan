@@ -1,18 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PixelCharacter from './PixelCharacter';
+import { drawTitleVillage, titleTime } from '../game/titleVillage';
 
 const REVAN = { gender: 'male', outfit: 1, skin: 0, revan: true };
 
 export function StartBackdrop() {
+  const canvas = useRef(null);
+  const [time, setTime] = useState(() => titleTime(new Date().getHours()));
+  useEffect(() => {
+    const update = () => setTime(titleTime(new Date().getHours()));
+    const interval = setInterval(update, 60000);
+    document.addEventListener('visibilitychange', update);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', update);
+    };
+  }, []);
+  useEffect(() => {
+    const c = canvas.current.getContext('2d');
+    c.imageSmoothingEnabled = false;
+    drawTitleVillage(c, time);
+  }, [time]);
   return (
-    <div className="start-backdrop" aria-hidden="true">
-      <div className="start-grid" />
-      <div className="start-orbit orbit-one" />
-      <div className="start-orbit orbit-two" />
-      <div className="start-pixel pixel-one" />
-      <div className="start-pixel pixel-two" />
-      <div className="start-pixel pixel-three" />
-      <div className="start-horizon" />
+    <div className={`start-backdrop village-${time}`} aria-hidden="true">
+      <canvas ref={canvas} width={640} height={360} />
+      <div className="village-shade" />
     </div>
   );
 }

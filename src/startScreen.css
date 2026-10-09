@@ -4,90 +4,18 @@
   z-index: 1;
   overflow: hidden;
   pointer-events: none;
-  background: radial-gradient(
-    ellipse at 50% 40%,
-    #354451,
-    #202f3e 65%,
-    #172632
-  );
+  background: #354860;
 }
-.start-grid {
+.start-backdrop canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+.village-shade {
   position: absolute;
   inset: 0;
-  opacity: 0.08;
-  background-image:
-    linear-gradient(#c8d9d1 1px, transparent 1px),
-    linear-gradient(90deg, #c8d9d1 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: linear-gradient(transparent, black);
-}
-.start-orbit {
-  position: absolute;
-  width: min(68vw, 850px);
-  aspect-ratio: 1;
-  border: 1px solid #b2c5bd12;
-  border-radius: 50%;
-  left: 50%;
-  top: 46%;
-  transform: translate(-50%, -50%);
-}
-.orbit-two {
-  width: min(92vw, 1200px);
-}
-.start-pixel {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: #d4bc85;
-  box-shadow:
-    10px 0 #d4bc8540,
-    0 10px #d4bc8540;
-  opacity: 0.5;
-}
-.pixel-one {
-  top: 27%;
-  left: 15%;
-}
-.pixel-two {
-  top: 38%;
-  right: 17%;
-  width: 6px;
-  height: 6px;
-}
-.pixel-three {
-  bottom: 28%;
-  left: 25%;
-  background: #90b8ae;
-}
-.start-horizon {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 17%;
-  background: #172831;
-  clip-path: polygon(
-    0 50%,
-    8% 50%,
-    8% 34%,
-    17% 34%,
-    17% 62%,
-    27% 62%,
-    27% 77%,
-    42% 77%,
-    42% 88%,
-    61% 88%,
-    61% 72%,
-    73% 72%,
-    73% 54%,
-    85% 54%,
-    85% 35%,
-    94% 35%,
-    94% 52%,
-    100% 52%,
-    100% 100%,
-    0 100%
-  );
+  background: linear-gradient(#13293255, #13293266 60%, #132932aa);
 }
 .is-start-screen .title-screen {
   z-index: 2;
@@ -289,12 +217,6 @@
   .is-start-screen .world-credit {
     font-size: 11px;
   }
-  .start-orbit {
-    width: 110vw;
-  }
-  .orbit-two {
-    width: 150vw;
-  }
   .settings-modal .settings-list strong {
     font-size: 17px;
   }
@@ -370,4 +292,151 @@
 .adventure-loading.motion-reduced .loading-trail,
 .adventure-loading.motion-reduced .loading-dots i {
   animation: none;
+}
+
+/* Use readable pixel text throughout the title and character setup. */
+.is-start-screen .title-edition {
+  font-family: 'VT323', monospace;
+  font-size: 26px;
+  line-height: 1.25;
+  max-width: 540px;
+  background: #203b42d9;
+  border: 2px solid #99ad9d;
+  color: #f4e8c8;
+  padding: 10px 18px;
+}
+.is-start-screen .title-kicker {
+  color: #f1e6ca;
+  font-size: 28px;
+  text-shadow: 2px 2px #243b43;
+}
+.is-start-screen .title-bottom,
+.is-start-screen .title-bottom button,
+.is-start-screen .title-bottom a {
+  font-size: 26px;
+  line-height: 1.2;
+}
+.is-start-screen .title-bottom > span {
+  background: #203b42d9;
+  padding: 10px 14px;
+}
+.is-start-screen .title-bottom button,
+.is-start-screen .title-bottom a {
+  min-height: 48px;
+  padding: 10px 17px;
+}
+.is-start-screen .continue-button {
+  font-size: 24px;
+  min-height: 48px;
+}
+.is-start-screen .world-credit {
+  font-size: 17px;
+  color: #f0e6cc;
+  text-shadow: 2px 2px #243b43;
+}
+.character-modal {
+  max-width: 780px;
+}
+.character-modal .dialog-head .eyebrow {
+  font-size: 15px;
+}
+.character-modal .dialog-head h2 {
+  font-size: 42px;
+}
+.character-modal .dialog-body > p {
+  font-size: 18px;
+}
+.character-modal .character-preview > span {
+  font-family: 'VT323', monospace;
+  font-size: 24px;
+  text-align: center;
+}
+.character-modal .character-preview > small {
+  font-size: 16px;
+  text-align: center;
+}
+.character-modal legend {
+  font-size: 19px;
+  margin-bottom: 12px;
+}
+.character-modal .option {
+  font-size: 17px;
+  min-height: 48px;
+  padding: 12px 15px;
+}
+.character-modal .option-row {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.character-modal .swatch {
+  width: 48px;
+  height: 48px;
+  font-size: 22px;
+}
+.character-modal .button.full {
+  font-size: 19px;
+  min-height: 52px;
+}
+.character-modal .save-note {
+  font-size: 16px;
+}
+@media (max-width: 760px) {
+  .is-start-screen .title-screen {
+    justify-content: flex-start;
+    padding: max(30px, env(safe-area-inset-top)) 18px 30px;
+    gap: 28px;
+  }
+  .is-start-screen .title-kicker {
+    position: static;
+    font-size: 24px;
+  }
+  .is-start-screen .title-center {
+    margin: 0;
+  }
+  .is-start-screen .title-edition {
+    font-size: 22px;
+    max-width: 340px;
+  }
+  .is-start-screen .title-bottom {
+    position: static;
+    margin-top: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .is-start-screen .title-bottom,
+  .is-start-screen .title-bottom button,
+  .is-start-screen .title-bottom a {
+    font-size: 22px;
+  }
+  .is-start-screen .title-bottom > span {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  .is-start-screen .continue-button {
+    font-size: 22px;
+  }
+  .is-start-screen .world-credit {
+    position: static;
+    font-size: 16px;
+    text-align: center;
+  }
+  .character-modal .dialog-head h2 {
+    font-size: 36px;
+  }
+  .character-modal .dialog-body > p {
+    font-size: 17px;
+  }
+  .character-modal .character-preview > span {
+    font-size: 23px;
+  }
+  .character-modal .character-preview > small {
+    font-size: 16px;
+  }
+  .character-modal legend {
+    font-size: 18px;
+  }
+  .character-modal .save-note {
+    font-size: 15px;
+  }
 }
