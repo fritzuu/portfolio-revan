@@ -1,4 +1,66 @@
 export default [
+  ['Behind this little world.', 'Di balik dunia kecil ini.'],
+  ['About this world', 'Tentang dunia ini'],
+  [
+    'A portfolio you can walk through. The little games and personal details lead you to the work and the person behind it.',
+    'Portfolio yang bisa kamu jelajahi. Minigame dan detail pribadi mengantarmu mengenal karya serta orang di baliknya.',
+  ],
+  ['What’s inside?', 'Ada apa di dalamnya?'],
+  ['How was this world built?', 'Dunia ini dibangun dengan apa?'],
+  ['The interface', 'Antarmuka'],
+  [
+    'Menus, portfolio rooms and character selection are built with React. Vite bundles the website.',
+    'Menu, ruangan portfolio, dan pemilihan karakter dibuat dengan React. Vite menyiapkan bundle website.',
+  ],
+  ['The living world', 'Dunia yang hidup'],
+  [
+    'Phaser draws the pixel world on canvas and handles movement, collisions, NPCs, fishing and football.',
+    'Phaser menggambar dunia pixel di canvas dan mengatur gerakan, tabrakan, NPC, memancing, serta sepak bola.',
+  ],
+  ['The artwork', 'Artwork'],
+  [
+    'Trees, buildings and scenery use original pixel artwork. Jekek and Darkrai also use reference sprites.',
+    'Pohon, bangunan, dan pemandangan memakai artwork pixel orisinal. Jekek dan Darkrai juga menggunakan sprite referensi.',
+  ],
+  ['The backend', 'Backend'],
+  [
+    'Express connects the website to Supabase for portfolio content, private contact messages and authenticated admin access.',
+    'Express menghubungkan website ke Supabase untuk konten portfolio, pesan kontak pribadi, dan akses admin dengan autentikasi.',
+  ],
+  ['Project images', 'Gambar proyek'],
+  [
+    'Images uploaded through the admin editor are hosted on ImgBB. Their links are stored with the portfolio content.',
+    'Gambar yang diunggah lewat editor admin disimpan di ImgBB. Tautannya disimpan bersama konten portfolio.',
+  ],
+  ['Your adventure', 'Petualanganmu'],
+  [
+    'Your character, discoveries, fish, coins, rods and language choice stay in this browser. No player account is needed.',
+    'Karakter, penemuan, ikan, koin, pancing, dan pilihan bahasa tersimpan di browser ini. Tidak perlu akun pemain.',
+  ],
+  ['Portfolio rooms', 'Ruangan portfolio'],
+  [
+    'Five buildings introduce Revan, his projects, tools and services, experience and certificates, and contact details.',
+    'Lima bangunan memperkenalkan Revan, proyek, alat dan layanan, pengalaman serta sertifikat, dan cara menghubunginya.',
+  ],
+  ['Visit the project studio', 'Kunjungi studio proyek'],
+  ['Moonwater fishing', 'Memancing di Moonwater'],
+  [
+    'Catch 20 fantasy creatures, keep a fish journal, sell catches and buy three rods with different luck bonuses. Discover 12 species to open Astral Crossing.',
+    'Tangkap 20 makhluk fantasi, isi jurnal ikan, jual tangkapan, dan beli tiga pancing dengan bonus keberuntungan berbeda. Temukan 12 spesies untuk membuka Penyeberangan Astral.',
+  ],
+  ['Head to the water', 'Jalan ke dermaga'],
+  ['Football with friends', 'Sepak bola bersama teman'],
+  [
+    'Play with Messi, Lamine Yamal and the residents. Dribble, tackle, pass and charge your shots while keepers try to save. Each match has two one-minute halves.',
+    'Main bersama Messi, Lamine Yamal, dan warga. Giring, tekel, umpan, dan isi tenaga tendangan saat kiper berusaha menyelamatkan bola. Setiap laga terdiri dari dua babak, masing-masing satu menit.',
+  ],
+  ['Visit the football park', 'Kunjungi lapangan bola'],
+  ['Personal discoveries', 'Penemuan pribadi'],
+  [
+    'Meet Jekek the python, find Darkrai in Dream Grove, read Revan’s field notes and watch resident anglers. Morning and night alternate every two minutes inside the game.',
+    'Kenalan dengan ular Jekek, temukan Darkrai di Hutan Mimpi, baca catatan Revan, dan lihat warga memancing. Pagi dan malam berganti setiap dua menit di dalam game.',
+  ],
+  ['Explore the map', 'Jelajahi peta'],
   ['Mira’s Tackle', 'Pancing Mira'],
   [
     'WELCOME TO MY LITTLE CORNER OF THE INTERNET',

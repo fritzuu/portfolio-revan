@@ -40,6 +40,7 @@ import useFishing from './hooks/useFishing';
 import WorldMap from './components/WorldMap';
 import PortfolioContent, { api } from './components/PortfolioContent';
 import Admin from './components/Admin';
+import WorldInsights from './components/WorldInsights';
 const FishingGame = lazy(() => import('./components/FishingGame'));
 const FishingHub = lazy(() => import('./components/FishingHub'));
 const FISHING_PANELS = ['fishing', 'rift', 'backpack', 'journal', 'shop'];
@@ -66,6 +67,7 @@ const TITLES = {
   experience: 'The journey so far.',
   contact: 'A letter to Revan.',
   settings: 'Make yourself at home.',
+  worldinfo: 'Behind this little world.',
 };
 function getDistrict(p) {
   return p.x > 1700 && p.y > 720 && p.y < 1120
@@ -563,6 +565,7 @@ export default function App() {
                     ['backpack', 'Backpack', Backpack],
                     ['journal', 'Fish journal', BookOpen],
                     ['shop', 'Tackle shop', ShoppingBag],
+                    ['worldinfo', 'About this world', BookOpen],
                   ].map(([id, label, Icon]) => (
                     <button
                       key={id}
@@ -928,6 +931,7 @@ export default function App() {
           className={cn(
             FISHING_PANELS.includes(panel) && 'fishing-modal',
             panel === 'settings' && 'settings-modal',
+            panel === 'worldinfo' && 'world-insights-modal',
             LOCATIONS.some((l) => l.id === panel) &&
               `portfolio-room room-${panel}`,
           )}
@@ -972,6 +976,8 @@ export default function App() {
               onTravel={walkTo}
               onTeleport={teleport}
             />
+          ) : panel === 'worldinfo' ? (
+            <WorldInsights onTravel={walkTo} onView={setPanel} />
           ) : panel === 'settings' ? (
             <div className="settings-list">
               <label>
