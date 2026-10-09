@@ -1,3 +1,4 @@
+import { t } from '../i18n/core.js';
 // Original garden pixel art. Palette, stepped silhouettes and wood details match town art.
 const COLORS = ['#f28daa', '#ffd184', '#b9a7e3', '#f3b5a0'];
 function rect(c, x, y, w, h, color) {
@@ -94,7 +95,7 @@ export function drawGardenProp(c, p) {
     c.fillStyle = '#52664c';
     c.font = 'bold 9px monospace';
     c.textAlign = 'center';
-    c.fillText('JEKEK’S GARDEN', x, y - 61);
+    c.fillText(t('JEKEK’S GARDEN'), x, y - 61);
     c.textAlign = 'left';
     for (let i = 0; i < 10; i++) {
       const xx = x - 67 + i * 14,
@@ -167,7 +168,6 @@ export const GARDEN_PROPS = [
     [1970, 365],
     [1960, 430],
     [2090, 370],
-    [2190, 425],
   ].map(([x, y], i) => ({
     type: 'gardenFlowers',
     x,
@@ -259,14 +259,18 @@ export function drawGardenGround(c) {
     r(x + 8, y - 4, w - 16, h + 8, '#70ac7e');
     r(x, y, w, h, '#70ac7e');
     r(x + 4, y + 3, w - 8, h - 6, '#89c68f');
-    for (let i = 0; i < 12; i++)
-      bloom(
-        c,
-        x + 12 + ((i * 19) % (w - 24)),
-        y + 12 + ((i * 13) % (h - 18)),
-        COLORS[i % 4],
-        1,
-      );
+    for (let i = 0; i < 12; i++) {
+      const flowerX = x + 12 + ((i * 19) % (w - 24));
+      const flowerY = y + 12 + ((i * 13) % (h - 18));
+      if (
+        flowerX >= 2105 &&
+        flowerX <= 2200 &&
+        flowerY >= 395 &&
+        flowerY <= 450
+      )
+        continue;
+      bloom(c, flowerX, flowerY, COLORS[i % 4], 1);
+    }
   }
   // Existing resting rock keeps its exact solid footprint, now shaded and textured.
   r(1994, 413, 75, 8, '#345d4933');

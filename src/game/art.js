@@ -1,3 +1,5 @@
+import { drawRoads } from './roads.js';
+import { t } from '../i18n/core.js';
 import { drawGroveProp } from './groveArt.js';
 import { drawGardenProp } from './gardenArt.js';
 import { drawTownProp } from './townAssets.js';
@@ -333,7 +335,7 @@ export function drawWorld(ctx, { baseOnly = false, assets = {} } = {}) {
     ctx.fillStyle = color;
     ctx.font = `bold ${size}px monospace`;
     ctx.textAlign = 'center';
-    ctx.fillText(text, x, y);
+    ctx.fillText(t(text), x, y);
     ctx.textAlign = 'left';
   };
   r(0, 0, WORLD_SIZE.width, WORLD_SIZE.height, '#9bd7a0');
@@ -363,18 +365,9 @@ export function drawWorld(ctx, { baseOnly = false, assets = {} } = {}) {
         r(xx, yy, 1, 17, '#d9bca3');
       }
   }
-  // Consistent street borders define the main circulation loop.
-  for (const [x, y, w, h] of [
-    [55, 435, 1490, 85],
-    [505, 510, 80, 490],
-    [1015, 510, 80, 490],
-    [55, 995, 1490, 55],
-  ]) {
-    r(x - 3, y - 3, w + 6, h + 6, '#bb987a');
-    r(x, y, w, h, '#ffe0af');
-    for (let yy = y + 8; yy < y + h; yy += 20)
-      r(x + 6, yy, w - 12, 1, '#edc490');
-  }
+  drawExtension(ctx, assets);
+  // Paint the road union in two passes so junctions have no crossing borders.
+  drawRoads(ctx);
   function water(x, y, w, h) {
     r(x, y, w, h, '#218eac');
     for (let yy = y + 4; yy < y + h - 4; yy += 12)
@@ -411,6 +404,17 @@ export function drawWorld(ctx, { baseOnly = false, assets = {} } = {}) {
     r(g.x + 4, g.y + 4, g.w - 8, g.h - 8, '#79cc92');
     for (let yy = g.y + 10; yy < g.y + g.h - 5; yy += 17)
       for (let xx = g.x + 9; xx < g.x + g.w - 5; xx += 19) {
+        if (
+          PROPS.some(
+            (p) =>
+              p.type === 'bench' &&
+              xx >= p.x - 8 &&
+              xx <= p.x + 82 &&
+              yy >= p.y - 8 &&
+              yy <= p.y + 38,
+          )
+        )
+          continue;
         r(xx, yy, 2, 3, '#4b9f70');
         if ((Math.floor(xx / 19) + Math.floor(yy / 17)) % 3 === 0) {
           const petal = ['#ffe071', '#ff87b0', '#a99ce9'][
@@ -460,8 +464,7 @@ export function drawWorld(ctx, { baseOnly = false, assets = {} } = {}) {
   r(790, 612, 20, 33, '#bee4de');
   r(777, 608, 46, 7, '#edf8de');
   r(788, 601, 24, 7, '#96d7d9');
-  label('CURIOSITY SQUARE', 800, 775, 13);
-  label('A LITTLE CITY OF IDEAS', 800, 793, 9);
+
   label('THE READING GARDEN', 1260, 770, 12);
   const themes = {
     about: {
@@ -641,9 +644,7 @@ export function drawWorld(ctx, { baseOnly = false, assets = {} } = {}) {
       r(xx + 11, y + h - 24, 5, 5, '#e8c17f');
     }
   }
-  label('MIRA’S TACKLE', 550, 958, 12);
-  label('A GOOD CATCH HAS A GOOD STORY', 550, 973, 8);
-  drawExtension(ctx, assets);
+
   if (!baseOnly)
     [...PROPS]
       .sort((a, b) => a.y - b.y)

@@ -1,3 +1,4 @@
+import { t } from '../i18n/core.js';
 import { drawGroveAtmosphere } from './groveArt.js';
 import { readMovement } from './keyboard';
 import { drawGardenGateLeaves } from './gardenArt.js';
@@ -458,7 +459,7 @@ export function updateExploration(
     state.water.lineStyle(2, p.team === 0 ? 0x81c6ff : 0xffb5a1);
     state.water.strokeEllipse(p.x, p.y + 5, 24, 7);
   }
-  state.cheer.setText(state.match.event).setVisible(state.match.goal);
+  state.cheer.setText(t(state.match.event)).setVisible(state.match.goal);
   if (participating && state.match.charge) {
     const p = state.match.players[state.match.controlled],
       x = p.x - 19,

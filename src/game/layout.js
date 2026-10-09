@@ -196,7 +196,7 @@ export const PROPS = [
   ].map(([x, y]) => ({ type: 'crate', x, y })),
   { type: 'stall', x: 560, y: 870 },
   ...[
-    [80, 1180],
+    [24, 1180],
     [1360, 1450],
   ].map(([x, y], i) => ({
     type: 'tree',

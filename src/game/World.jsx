@@ -1,3 +1,4 @@
+import { getLanguage, t } from '../i18n/core.js';
 import { useEffect, useRef } from 'react';
 import {
   drawWorld,
@@ -128,6 +129,7 @@ export default function World({
               WORLD_SIZE.width,
               WORLD_SIZE.height,
             );
+            this.currentLanguage = getLanguage();
             drawWorld(map.context, { baseOnly: true });
             map.refresh();
             this.add.image(0, 0, 'city').setOrigin(0);
@@ -183,9 +185,9 @@ export default function World({
               1.15,
             );
             this.merchant.label = this.add
-              .text(565, 866, 'Mira · Tackle', {
+              .text(560, 850, t('Mira’s Tackle'), {
                 fontFamily: 'monospace',
-                fontSize: '9px',
+                fontSize: '10px',
                 color: '#fff5d7',
                 backgroundColor: '#384a43',
                 padding: { x: 4, y: 3 },
@@ -243,6 +245,7 @@ export default function World({
             this.dayElapsed = 0;
             this.wasFishing = false;
             this.water = this.add.graphics().setDepth(1);
+            this.jumpingFish = this.add.graphics().setDepth(3);
             const cam = this.cameras.main;
             cam.setBounds(0, 0, WORLD_SIZE.width, WORLD_SIZE.height);
             cam.setZoom(playing ? (window.innerWidth < 760 ? 1.8 : 2) : 1.65);
@@ -664,7 +667,59 @@ export default function World({
               }
               this.followPath(npc, delta, npc.speed);
             });
+            if (this.currentLanguage !== getLanguage()) {
+              this.currentLanguage = getLanguage();
+              const map = this.textures.get('city');
+              map.context.clearRect(0, 0, WORLD_SIZE.width, WORLD_SIZE.height);
+              drawWorld(map.context, { baseOnly: true });
+              map.refresh();
+              this.merchant.label.setText(t('Mira’s Tackle'));
+              PROPS.forEach((p, i) => {
+                if (p.type !== 'gardenArch') return;
+                const texture = this.textures.get(`prop-${i}`);
+                texture.context.clearRect(0, 0, 192, 160);
+                drawProp(texture.context, { ...p, x: 80, y: 110 });
+                texture.refresh();
+              });
+            }
+            this.jumpingFish.clear();
             if (!live.current.reducedMotion) {
+              const sites = [
+                [160, 640],
+                [414, 698],
+                [1960, 1385],
+                [2320, 1310],
+                [440, 80],
+                [1260, 65],
+                [2120, 90],
+              ];
+              for (let i = 0; i < sites.length; i++) {
+                const cycle = (time + i * 1790) % 12500;
+                if (cycle > 1250) continue;
+                const progress = cycle / 1250;
+                const [baseX, baseY] = sites[i];
+                const x = baseX + (progress - 0.5) * 34;
+                const y = baseY - Math.sin(progress * Math.PI) * 27;
+                const g = this.jumpingFish;
+                if (progress < 0.82) {
+                  g.fillStyle(i % 2 ? 0xf4c585 : 0xd8e9ce);
+                  g.fillRect(Math.round(x - 4), Math.round(y - 2), 8, 4);
+                  g.fillTriangle(x - 4, y, x - 8, y - 3, x - 8, y + 3);
+                  g.fillStyle(0x304c55);
+                  g.fillRect(Math.round(x + 2), Math.round(y - 1), 1, 1);
+                }
+                if (progress < 0.2 || progress > 0.8) {
+                  const splash =
+                    progress < 0.2 ? progress / 0.2 : (progress - 0.8) / 0.2;
+                  g.lineStyle(1, 0xcbece5, 1 - splash);
+                  g.strokeEllipse(
+                    baseX + (progress < 0.2 ? -17 : 17),
+                    baseY + 3,
+                    8 + splash * 22,
+                    3 + splash * 5,
+                  );
+                }
+              }
               this.water.clear();
               this.water.fillStyle(0xb3e4de, 0.65);
               for (let i = 0; i < 8; i++) {
@@ -806,13 +861,16 @@ export default function World({
         game.canvas.setAttribute('role', 'img');
         game.canvas.setAttribute(
           'aria-label',
-          'An explorable pixel city. Walk to buildings using the portfolio navigation.',
+          t(
+            'An explorable pixel city. Walk to buildings using the portfolio navigation.',
+          ),
         );
       })
       .catch(() => {
         if (root.current)
-          root.current.textContent =
-            'World failed to load. Reload to try again.';
+          root.current.textContent = t(
+            'World failed to load. Reload to try again.',
+          );
       });
     return () => {
       cancelled = true;

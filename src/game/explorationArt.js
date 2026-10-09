@@ -1,3 +1,4 @@
+import { t } from '../i18n/core.js';
 import { drawGroveGround } from './groveArt.js';
 import { drawGardenGround } from './gardenArt.js';
 // District art shares the navigation layout; flat paths remain walkable.
@@ -10,19 +11,9 @@ export function drawExtension(c) {
     c.fillStyle = '#365c57';
     c.font = 'bold 16px monospace';
     c.textAlign = 'center';
-    c.fillText(s, x, y);
+    c.fillText(t(s), x, y);
     c.textAlign = 'left';
   };
-  for (const [x, y, w, h] of [
-    [1545, 435, 1010, 85],
-    [1550, 180, 90, 1060],
-    [505, 1050, 80, 510],
-    [55, 1530, 2500, 45],
-    [1640, 1170, 900, 55],
-  ]) {
-    r(x - 3, y - 3, w + 6, h + 6, '#b9a482');
-    r(x, y, w, h, '#f7dab2');
-  }
   drawGardenGround(c);
   label('JEKEK’S GARDEN', 2060, 635);
   drawGroveGround(c);
@@ -61,8 +52,7 @@ export function drawExtension(c) {
     for (let x = 1670; x < 2510; x += 28) r(x, y, 17, 2, '#4db6ca');
   r(1632, 1280, 26, 220, '#ba9167');
   for (let y = 1283; y < 1500; y += 12) r(1635, y, 20, 2, '#e0b487');
-  label('THE ANGLER’S SHORE', 2090, 1550);
-  label('GARDEN GATE', 1590, 565);
+  label('THE ANGLER’S SHORE', 2090, 1522);
   // A separate compact practice lane keeps training out of the live match.
   r(1380, 1190, 130, 300, '#74a97a');
   c.strokeStyle = '#e2efd0';
