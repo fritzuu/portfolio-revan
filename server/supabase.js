@@ -7,13 +7,31 @@ export function createSupabaseBackend({
   adminUserId = process.env.SUPABASE_ADMIN_USER_ID,
   fetchImpl = fetch,
 } = {}) {
-  if (!url || !publishableKey || !secretKey) {
-    throw new Error(
-      'Set SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, and SUPABASE_SECRET_KEY.',
-    );
+  url = url?.trim();
+  publishableKey = publishableKey?.trim();
+  secretKey = secretKey?.trim();
+  adminUserId = adminUserId?.trim();
+  const missing = Object.entries({
+    SUPABASE_URL: url,
+    SUPABASE_PUBLISHABLE_KEY: publishableKey,
+    SUPABASE_SECRET_KEY: secretKey,
+  })
+    .filter(([, value]) => !value)
+    .map(([name]) => name);
+  if (missing.length) {
+    throw Object.assign(new Error(`Set ${missing.join(', ')}.`), {
+      code: 'BACKEND_MISSING_ENV',
+      variables: missing,
+    });
   }
-  const origin = new URL(url);
+  let origin;
+  try {
+    origin = new URL(url);
+  } catch {
+    /* Report only the variable name, never its value. */
+  }
   if (
+    !origin ||
     origin.protocol !== 'https:' ||
     origin.pathname !== '/' ||
     origin.search ||
@@ -21,7 +39,10 @@ export function createSupabaseBackend({
     origin.username ||
     origin.password
   ) {
-    throw new Error('SUPABASE_URL must be an HTTPS project origin.');
+    throw Object.assign(
+      new Error('SUPABASE_URL must be an HTTPS project origin.'),
+      { code: 'BACKEND_INVALID_CONFIG', variables: ['SUPABASE_URL'] },
+    );
   }
   if (
     adminUserId &&
@@ -29,8 +50,11 @@ export function createSupabaseBackend({
       adminUserId,
     )
   ) {
-    throw new Error(
-      'SUPABASE_ADMIN_USER_ID must be the UUID from Authentication > Users.',
+    throw Object.assign(
+      new Error(
+        'SUPABASE_ADMIN_USER_ID must be the UUID from Authentication > Users.',
+      ),
+      { code: 'BACKEND_INVALID_CONFIG', variables: ['SUPABASE_ADMIN_USER_ID'] },
     );
   }
   async function request(

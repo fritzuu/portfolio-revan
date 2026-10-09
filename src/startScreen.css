@@ -728,3 +728,41 @@
     padding: 16px;
   }
 }
+
+/* Match the title screen wordmark while keeping the mobile world visible. */
+.game-logo {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 46px;
+  line-height: 0.87;
+  color: #fff8e8;
+  -webkit-text-stroke: 0;
+  text-shadow: 4px 5px 0 #12232e;
+}
+.game-logo > span {
+  font-size: 0.68em;
+}
+.game-logo > small {
+  font-size: 22px;
+  margin-top: 12px;
+  text-shadow: 2px 2px 0 #263c43;
+}
+.angler-menu {
+  top: 132px;
+}
+@media (max-width: 700px) {
+  .game-logo {
+    font-size: 30px;
+    text-shadow: 2px 3px 0 #12232e;
+  }
+  .game-logo > span {
+    font-size: 0.68em;
+  }
+  .game-logo > small {
+    font-size: 16px;
+    margin-top: 8px;
+  }
+  .angler-menu {
+    top: 94px;
+  }
+}
