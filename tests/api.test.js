@@ -1,12 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/app.js';
+import { createSqliteStore } from '../server/sqlite.js';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 async function setup(dbPath = ':memory:', token = 'test-admin-secret') {
-  const { app, db } = createApp({ dbPath, adminToken: token });
+  const { app, db } = createApp({
+    store: createSqliteStore(dbPath),
+    adminToken: token,
+  });
   const server = app.listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
