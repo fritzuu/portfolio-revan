@@ -26,6 +26,7 @@ import seed from './data/portfolio.json';
 import './buildingRoom.css';
 import { LOCATIONS, OUTFITS, SKINS } from './game/art';
 import PixelCharacter from './components/PixelCharacter';
+import AdventureLoading, { StartBackdrop } from './components/AdventureLoading';
 import Cutscene from './components/Cutscene';
 import useMusic from './hooks/useMusic';
 import useExploration from './hooks/useExploration';
@@ -39,7 +40,8 @@ import Admin from './components/Admin';
 const FishingGame = lazy(() => import('./components/FishingGame'));
 const FishingHub = lazy(() => import('./components/FishingHub'));
 const FISHING_PANELS = ['fishing', 'rift', 'backpack', 'journal', 'shop'];
-const World = lazy(() => import('./game/World'));
+const prepareWorld = () => import('./game/World');
+const World = lazy(prepareWorld);
 const cn = (...inputs) => twMerge(clsx(inputs));
 const DEFAULT = { gender: 'male', outfit: 0, skin: 0 };
 const TITLES = {
@@ -322,11 +324,16 @@ export default function App() {
     setControls({});
     setTimeout(() => stage.current?.focus(), 0);
   }, []);
+  const finishLoading = useCallback(() => setPhase('create'), []);
+  const startScreen =
+    ['landing', 'loading'].includes(phase) ||
+    (phase === 'create' && !editingCharacter);
   if (window.location.pathname === '/admin') return <Admin />;
   return (
     <div
       className={cn(
         'city-app',
+        startScreen && 'is-start-screen',
         inWorldFishing && 'is-fishing',
         panel === 'football' && 'is-football',
         panel === 'football' &&
@@ -339,56 +346,70 @@ export default function App() {
           Skip to portfolio navigation
         </a>
       )}
-      <main
-        className="city-stage"
-        ref={stage}
-        data-player-x={position.x}
-        data-player-y={position.y}
-        tabIndex={phase === 'intro' ? -1 : 0}
-        aria-hidden={phase === 'intro' ? true : undefined}
-        aria-label="Game world. Walk with arrow keys or WASD. Press E to interact."
-        onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget))
-            setControls({});
-        }}
-      >
-        <Suspense
-          fallback={
-            <div className="city-loading">
-              <PixelCharacter character={character} />
-              <span>BUILDING YOUR WORLD…</span>
-            </div>
-          }
+      {startScreen && <StartBackdrop />}
+      {!['landing', 'loading'].includes(phase) && (
+        <main
+          className="city-stage"
+          ref={stage}
+          data-player-x={position.x}
+          data-player-y={position.y}
+          tabIndex={phase !== 'playing' ? -1 : 0}
+          aria-hidden={phase !== 'playing' ? true : undefined}
+          aria-label="Game world. Walk with arrow keys or WASD. Press E to interact."
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget))
+              setControls({});
+          }}
         >
-          <World
-            character={character}
-            playing={phase === 'playing'}
-            paused={(!!panel && !inWorldFishing) || phase !== 'playing'}
-            fishing={
-              inWorldFishing
-                ? { ...worldFishing, spot: panel, rod: fishing.state.equipped }
-                : null
+          <Suspense
+            fallback={
+              <div className="city-loading">
+                <PixelCharacter character={character} />
+                <span>BUILDING YOUR WORLD…</span>
+              </div>
             }
-            controls={controls}
-            onNear={setNear}
-            onVisit={visit}
-            reducedMotion={reduced}
-            onPosition={reportPosition}
-            destination={destination}
-            onTravel={setTravel}
-            onDiscover={reportDiscovery}
-            onNight={setNight}
-            kick={kick}
-            onShot={onShot}
-            footballMode={footballMode}
-            footballDifficulty={footballDifficulty}
-            onMatchState={setMatchState}
-            onSound={playSound}
-            discoveries={discoveries}
-            footballActive={panel === 'football'}
-          />
-        </Suspense>
-      </main>
+          >
+            <World
+              character={character}
+              playing={phase === 'playing'}
+              paused={(!!panel && !inWorldFishing) || phase !== 'playing'}
+              fishing={
+                inWorldFishing
+                  ? {
+                      ...worldFishing,
+                      spot: panel,
+                      rod: fishing.state.equipped,
+                    }
+                  : null
+              }
+              controls={controls}
+              onNear={setNear}
+              onVisit={visit}
+              reducedMotion={reduced}
+              onPosition={reportPosition}
+              destination={destination}
+              onTravel={setTravel}
+              onDiscover={reportDiscovery}
+              onNight={setNight}
+              kick={kick}
+              onShot={onShot}
+              footballMode={footballMode}
+              footballDifficulty={footballDifficulty}
+              onMatchState={setMatchState}
+              onSound={playSound}
+              discoveries={discoveries}
+              footballActive={panel === 'football'}
+            />
+          </Suspense>
+        </main>
+      )}
+      {phase === 'loading' && (
+        <AdventureLoading
+          prepare={prepareWorld}
+          onReady={finishLoading}
+          reduced={reduced}
+        />
+      )}
       {phase === 'playing' && notice && panel !== 'football' && (
         <div className="world-notice" role="status">
           {notice}
@@ -419,7 +440,7 @@ export default function App() {
               className="play-button"
               onClick={() => {
                 setEditingCharacter(false);
-                setPhase('create');
+                setPhase('loading');
                 setMusic(true);
               }}
             >
@@ -871,6 +892,7 @@ export default function App() {
         title={TITLES[panel] || 'Field notes'}
         className={cn(
           FISHING_PANELS.includes(panel) && 'fishing-modal',
+          panel === 'settings' && 'settings-modal',
           LOCATIONS.some((l) => l.id === panel) &&
             `portfolio-room room-${panel}`,
         )}
