@@ -57,3 +57,11 @@ Messages contain names, email addresses and private text. Define retention and d
 Create an API key at https://api.imgbb.com/ and set `IMGBB_API_KEY` in local `.env` and Vercel environment variables. Restart the local API or redeploy Vercel after changing it. Keep this key server-only. In admin → Proyek, select a JPG, PNG, WebP, or GIF up to 2 MB. The authenticated backend checks file signatures, limits requests, uploads to ImgBB with a 30-second timeout, and returns only a public image URL. Select **Simpan perubahan** to publish the URL. Uploads have no automatic expiration.
 
 Deleting/replacing a draft project or leaving without saving does not delete its ImgBB image. Manage those files in your ImgBB account and keep originals. These uploads are public; use portfolio screenshots rather than private documents. The 2 MB application limit keeps base64 requests below Vercel function payload limits.
+
+## Admin uploads and visibility
+
+Profile photos and image certificates upload through the existing server-side ImgBB integration. CVs and PDF certificates upload to the public Supabase Storage bucket `portfolio-files`. This project bucket has been provisioned with a 2 MB limit and `application/pdf` allowed MIME type. If moving to another Supabase project, create the same public bucket; no anonymous upload policies are needed because the authenticated admin API uploads with its server credential.
+
+Admin uploads accept files up to 2 MB. PDF signatures and end markers are checked on the server. Uploaded assets are public; save the editor draft to attach them to portfolio content. Existing CV and certificate URLs remain usable until replaced by an uploaded file. Replacing a file preserves the previous asset in storage.
+
+Each project, service, skill category, experience, and certificate has a visibility toggle. Save changes to publish the toggle. Hidden entries remain editable in the authenticated dashboard and are excluded from `/api/portfolio` responses. Visibility hides portfolio entries; it does not make previously shared public file URLs private.

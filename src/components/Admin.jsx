@@ -109,34 +109,37 @@ export default function Admin() {
     }
   }
   async function uploadImage(file) {
+    const pdf =
+      file.type === 'application/pdf' ||
+      file.name.toLowerCase().endsWith('.pdf');
     if (
-      !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(
-        file.type,
-      ) ||
+      (!pdf &&
+        !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(
+          file.type,
+        )) ||
       file.size > 2 * 1024 * 1024 ||
       !file.size
     )
-      throw new Error('Pilih gambar JPG, PNG, WebP, atau GIF maksimal 2 MB.');
+      throw new Error('Pilih PDF atau gambar maksimal 2 MB.');
     setBusy(true);
     try {
-      const image = await new Promise((resolve, reject) => {
+      const content = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = () =>
-          reject(new Error('Gambar tidak dapat dibaca. Pilih ulang filenya.'));
+        reader.onerror = () => reject(new Error('File tidak dapat dibaca.'));
         reader.readAsDataURL(file);
       });
-      const result = await api('/api/admin/images', {
+      const result = await api(pdf ? '/api/admin/files' : '/api/admin/images', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ image }),
+        body: JSON.stringify(pdf ? { file: content } : { image: content }),
       });
       return result.url;
     } catch (error) {
       if (error.status === 401) {
         setToken('');
         setData(null);
-        setNotice('Sesi berakhir. Login kembali untuk mengunggah gambar.');
+        setNotice('Sesi berakhir. Login kembali.');
       }
       throw error;
     } finally {

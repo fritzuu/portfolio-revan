@@ -1,4 +1,27 @@
 export default [
+  ['Profile photo', 'Foto profil'],
+  ['CV file', 'File CV'],
+  ['Certificate file', 'File sertifikat'],
+  ['View current file ↗', 'Lihat file saat ini ↗'],
+  ['No file yet. Choose a file below.', 'Belum ada file. Pilih file di bawah.'],
+  ['Choose a file from your device', 'Pilih file dari perangkat'],
+  ['Uploading file…', 'Mengunggah file…'],
+  [
+    'File ready. Save changes to publish it on the website.',
+    'File siap. Simpan perubahan untuk menampilkannya di website.',
+  ],
+  ['Show', 'Tampilkan'],
+  ['Hidden', 'Disembunyikan'],
+  ['Visible on website', 'Tampil di website'],
+  ['File could not be read.', 'File tidak dapat dibaca.'],
+  ['Choose a PDF or image up to 2 MB.', 'Pilih PDF atau gambar maksimal 2 MB.'],
+  ['Choose a valid PDF up to 2 MB.', 'Pilih file PDF valid maksimal 2 MB.'],
+  ['PDF upload is not configured.', 'Upload PDF belum dikonfigurasi.'],
+  [
+    'PDF upload failed. Check the portfolio-files bucket in Supabase Storage.',
+    'Upload PDF gagal. Periksa bucket portfolio-files di Supabase Storage.',
+  ],
+
   ['Behind this little world.', 'Di balik dunia kecil ini.'],
   ['About this world', 'Tentang dunia ini'],
   [

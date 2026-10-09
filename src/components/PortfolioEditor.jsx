@@ -10,7 +10,15 @@ const PROFILE_FIELDS = [
   { key: 'github', label: 'GitHub', link: true },
   { key: 'linkedin', label: 'LinkedIn', link: true },
   { key: 'whatsapp', label: 'WhatsApp', link: true },
-  { key: 'cv', label: 'Tautan CV', link: true, asset: true },
+  {
+    key: 'photo',
+    label: 'Foto profil',
+    link: true,
+    asset: true,
+    upload: 'image',
+    optional: true,
+  },
+  { key: 'cv', label: 'File CV', link: true, asset: true, upload: 'pdf' },
 ];
 const SECTIONS = [
   {
@@ -116,7 +124,13 @@ const SECTIONS = [
         max: 150,
         placeholder: 'May 2024',
       },
-      { key: 'link', label: 'Tautan sertifikat', link: true, asset: true },
+      {
+        key: 'link',
+        label: 'File sertifikat',
+        link: true,
+        asset: true,
+        upload: 'document',
+      },
     ],
   },
 ];
@@ -161,7 +175,15 @@ function Field({ field, value, onChange, onUpload }) {
           {label}
           {optional && <small> · opsional</small>}
         </label>
-        {multiline ? (
+        {field.upload ? (
+          value ? (
+            <a className="button" href={value} target="_blank" rel="noreferrer">
+              Lihat file saat ini ↗
+            </a>
+          ) : (
+            <small>Belum ada file. Pilih file di bawah.</small>
+          )
+        ) : multiline ? (
           <textarea {...control} rows={4} />
         ) : (
           <input {...control} type={type || 'text'} />
@@ -173,26 +195,30 @@ function Field({ field, value, onChange, onUpload }) {
               : 'Pisahkan dengan koma. Contoh: React, Node.js, Supabase'}
           </small>
         )}
-        {field.key === 'img' && onUpload && (
+        {(field.key === 'img' || field.upload) && onUpload && (
           <div className="admin-image-upload">
-            <label htmlFor={`${id}-file`}>
-              Atau pilih gambar dari perangkat
-            </label>
+            <label htmlFor={`${id}-file`}>Pilih file dari perangkat</label>
             <input
               id={`${id}-file`}
               type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
+              accept={
+                field.upload === 'pdf'
+                  ? 'application/pdf,.pdf'
+                  : field.upload === 'document'
+                    ? 'application/pdf,.pdf,image/jpeg,image/png,image/webp,image/gif'
+                    : 'image/jpeg,image/png,image/webp,image/gif'
+              }
               aria-describedby={`${id}-upload-help`}
               onChange={async (event) => {
                 const file = event.target.files?.[0];
                 event.target.value = '';
                 if (!file) return;
                 setUploadError('');
-                setUploadStatus('Mengunggah gambar…');
+                setUploadStatus('Mengunggah file…');
                 try {
                   onChange(await onUpload(file));
                   setUploadStatus(
-                    'Gambar siap. Simpan perubahan untuk menampilkannya di website.',
+                    'File siap. Simpan perubahan untuk menampilkannya di website.',
                   );
                 } catch (error) {
                   setUploadStatus('');
@@ -201,8 +227,12 @@ function Field({ field, value, onChange, onUpload }) {
               }}
             />
             <small id={`${id}-upload-help`}>
-              JPG, PNG, WebP, atau GIF · maksimal 2 MB. Gambar yang diunggah
-              dapat diakses publik.
+              {field.upload === 'pdf'
+                ? 'PDF'
+                : field.upload === 'document'
+                  ? 'PDF, JPG, PNG, WebP, GIF'
+                  : 'JPG, PNG, WebP, GIF'}{' '}
+              · maksimal 2 MB. File dapat diakses publik.
             </small>
             {uploadStatus && <small role="status">{uploadStatus}</small>}
             {uploadError && <small role="alert">{uploadError}</small>}
@@ -411,6 +441,18 @@ export default function PortfolioEditor({
                   <div className="admin-card-actions">
                     <button
                       type="button"
+                      aria-pressed={item.hidden === true}
+                      onClick={() =>
+                        updateItem(index, 'hidden', item.hidden !== true)
+                      }
+                    >
+                      {item.hidden ? 'Tampilkan' : 'Sembunyikan'}
+                    </button>
+                    <small>
+                      {item.hidden ? 'Disembunyikan' : 'Tampil di website'}
+                    </small>
+                    <button
+                      type="button"
                       aria-label={`Pindahkan ${section.label.toLowerCase()} ${index + 1} ke atas`}
                       disabled={index === 0}
                       onClick={() => move(index, -1)}
@@ -442,13 +484,13 @@ export default function PortfolioEditor({
                   />
                 ))}
               </div>
-              {active === 'projects' &&
-                item.img &&
-                (/^\/(?!\/)/.test(item.img) ||
-                  /^https:\/\//.test(item.img)) && (
+              {(active === 'projects' || active === 'profile') &&
+                (item.img || item.photo) &&
+                (/^\/(?!\/)/.test(item.img || item.photo) ||
+                  /^https:\/\//.test(item.img || item.photo)) && (
                   <div className="admin-image-preview">
                     <img
-                      src={item.img}
+                      src={item.img || item.photo}
                       alt={item.imgAlt || 'Pratinjau gambar proyek'}
                       loading="lazy"
                     />

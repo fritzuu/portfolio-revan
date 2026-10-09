@@ -18,6 +18,16 @@ export function validPortfolio(p) {
     ['github', 'linkedin', 'whatsapp', 'cv'].every(
       (k) => safeLink(p.profile[k]) && p.profile[k],
     ) &&
+    (p.profile.photo === undefined ||
+      (typeof p.profile.photo === 'string' && safeLink(p.profile.photo))) &&
+    ['projects', 'services', 'skills', 'experience', 'certificates'].every(
+      (key) =>
+        Array.isArray(p[key]) &&
+        p[key].every(
+          (item) =>
+            item.hidden === undefined || typeof item.hidden === 'boolean',
+        ),
+    ) &&
     Array.isArray(p.projects) &&
     p.projects.length <= 30 &&
     p.projects.every(

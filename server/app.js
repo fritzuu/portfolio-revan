@@ -1,6 +1,8 @@
 import express from 'express';
 import { timingSafeEqual } from 'node:crypto';
 import path from 'node:path';
+import { publicPortfolio } from '../src/data/visibility.js';
+import { createFileUploader, validatePdf } from './files.js';
 import { validText, validPortfolio } from './validation.js';
 import { createImageUploader, validateImage } from './images.js';
 
@@ -10,6 +12,7 @@ export function createApp({
   cloud = null,
   vercel = false,
   uploadImage = createImageUploader(),
+  uploadFile = createFileUploader(),
 } = {}) {
   if (!store) throw new Error('A persistence store is required.');
   const app = express();
@@ -89,6 +92,32 @@ export function createApp({
       }
     },
   );
+  app.post(
+    '/api/admin/files',
+    admin,
+    rateLimit,
+    express.json({ limit: '3mb' }),
+    async (req, res) => {
+      if (!uploadFile)
+        return res
+          .status(503)
+          .json({ error: 'Upload PDF belum dikonfigurasi.' });
+      if (!validatePdf(req.body?.file))
+        return res
+          .status(400)
+          .json({ error: 'Pilih file PDF valid maksimal 2 MB.' });
+      try {
+        res.status(201).json(await uploadFile(req.body.file));
+      } catch {
+        res
+          .status(502)
+          .json({
+            error:
+              'Upload PDF gagal. Periksa bucket portfolio-files di Supabase Storage.',
+          });
+      }
+    },
+  );
   app.use(express.json({ limit: '100kb' }));
   app.post('/api/auth/login', async (req, res) => {
     if (!cloud)
@@ -116,7 +145,7 @@ export function createApp({
     res.json({ status: 'ok', backend: cloud ? 'supabase' : 'sqlite' }),
   );
   app.get('/api/portfolio', async (_req, res) =>
-    res.json(await store.getPortfolio()),
+    res.json(publicPortfolio(await store.getPortfolio())),
   );
   app.get('/api/guestbook', async (_req, res) =>
     res.json(await store.getGuestbook()),

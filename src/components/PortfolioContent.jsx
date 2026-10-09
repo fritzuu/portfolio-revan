@@ -1,3 +1,4 @@
+import { publicPortfolio } from '../data/visibility';
 import { Localized } from '../i18n';
 import { useState } from 'react';
 import { ArrowUpRight, Download, Mail } from 'lucide-react';
@@ -107,12 +108,16 @@ function MessageForm({ type, onSubmitted }) {
   );
 }
 export default function PortfolioContent({ section, data }) {
+  data = publicPortfolio(data);
   if (section === 'about')
     return (
       <Localized>
         <>
           <div className="profile-intro">
-            <img src="/assets/profile.png" alt={data.profile.name} />
+            <img
+              src={data.profile.photo || '/assets/profile.png'}
+              alt={data.profile.name}
+            />
             <div>
               <span className="eyebrow">THE MAKER BEHIND THIS WORLD</span>
               <h3>{data.profile.name}</h3>
