@@ -15,9 +15,9 @@ npm run dev
 - API: http://localhost:3001/api/health
 - Admin: http://localhost:5184/admin
 
-`npm run dev` starts both Vite and Express. Frontend changes reload automatically; restart the command after changing server code. Port 5184 is deliberately separate from other local Vite projects. The frontend proxies `/api` to the backend on port 3001.
+`npm run dev` starts both Vite and Express. `BACKEND=supabase` connects the API to Supabase; `BACKEND=sqlite` keeps the local database fallback. Frontend changes reload automatically; restart the command after changing server code. Port 5184 is deliberately separate from other local Vite projects. The frontend proxies `/api` to the backend on port 3001.
 
-To enable the admin dashboard, copy `.env.example` to `.env`, replace `ADMIN_TOKEN` with a long random secret, and restart the server. Generate a token with `openssl rand -hex 32`. Never commit `.env` or put the token in a `VITE_*` variable. The dashboard keeps the entered token only in memory; refresh or log out to discard it. Without a configured token all admin endpoints reject access.
+For the SQLite fallback, to enable the admin dashboard, copy `.env.example` to `.env`, replace `ADMIN_TOKEN` with a long random secret, and restart the server. Generate a token with `openssl rand -hex 32`. Never commit `.env` or put the token in a `VITE_*` variable. The dashboard keeps the entered token only in memory; refresh or log out to discard it. Without a configured token all admin endpoints reject access.
 
 ## The adventure
 
@@ -41,7 +41,7 @@ Every location is also reachable through keyboard-accessible navigation buttons 
 
 - **React 19 + Vite** for the website and HTML interface.
 - **Phaser**, loaded separately, for the full-screen city, smooth camera follow, patrolling NPCs, animated player, input, depth-sorted props, and shared scenery collisions.
-- **Express 5 + Node SQLite** for real server-side persistence.
+- **Express 5 + Supabase PostgreSQL/Auth** for cloud persistence and admin login; Node SQLite remains available for local development.
 - **Radix Dialog** for accessible panels; OS motion preferences are respected.
 - **Local Fontsource fonts** (VT323 and DM Sans); no runtime font requests.
 - Original procedural pixel artwork in `src/game/art.js`. Existing project screenshots, PDFs, and photo remain in `public/`.
@@ -64,7 +64,12 @@ src/hooks/useFishing.js           Browser-only fishing persistence
 src/components/PortfolioContent.jsx  Portfolio panels and message forms
 src/components/Admin.jsx          Protected content editor, moderation, inbox
 src/data/portfolio.json           Original template content; initial database seed
-server/app.js                     API, validation, authentication, SQLite schema
+server/app.js                     API routes and authorization
+server/supabase.js                Supabase REST/Auth adapter, shared rate limiter
+server/sqlite.js                  Optional local SQLite persistence
+server/validation.js              Shared validation and initial portfolio data
+api/index.js                      Vercel Function entry point
+supabase/schema.sql               Locked-down tables and atomic rate-limit RPC
 server/index.js                   Production/development server entry point
 ```
 
@@ -99,7 +104,9 @@ All fishing progress is stored **only in this browser** under localStorage key `
 
 ## Backend
 
-SQLite is created automatically at `server/data/portfolio.sqlite`. Set `DB_PATH` to override it. Content is seeded only on first creation; later edits are made through `/admin`, not by overwriting the database. Back up the data directory while the server is stopped, or use a SQLite backup mechanism that includes pending WAL writes.
+The API supports Supabase and an optional local SQLite fallback. See [Supabase setup](docs/supabase-setup.md) for cloud testing and Vercel deployment. In cloud mode, `/admin` uses email/password through Supabase Auth. The server verifies the access token with Supabase on every admin request and checks its user ID against `SUPABASE_ADMIN_USER_ID`. A blank admin ID disables admin access. No API secret is sent to the browser.
+
+With `BACKEND=sqlite`, SQLite is created automatically at `server/data/portfolio.sqlite`. Set `DB_PATH` to override it. Content is seeded only on first creation; later edits are made through `/admin`, not by overwriting the database. Back up the data directory while the server is stopped, or use a SQLite backup mechanism that includes pending WAL writes.
 
 | Endpoint                         | Purpose                                                            |
 | -------------------------------- | ------------------------------------------------------------------ |
@@ -111,7 +118,7 @@ SQLite is created automatically at `server/data/portfolio.sqlite`. Set `DB_PATH`
 | `PUT /api/admin/portfolio`       | Validate and save portfolio JSON                                   |
 | `PATCH /api/admin/guestbook/:id` | Approve or hide a guestbook entry                                  |
 
-Admin requests require `Authorization: Bearer <ADMIN_TOKEN>`. Guest messages use prepared statements, length validation, a honeypot, and an in-memory limit of five submissions per IP per minute. Public responses omit private messages and unapproved guestbook entries. Admin content rejects non-HTTPS/non-local asset links. The admin content editor exposes the complete JSON document, including projects and profile; it does not upload files. Add new images/PDFs to `public/` and reference their paths.
+Admin requests use an in-memory bearer access token from Supabase Auth in cloud mode, or `ADMIN_TOKEN` in SQLite mode. Guest messages use length validation and a honeypot. SQLite uses prepared statements and a per-process limit of five submissions per IP per minute. Supabase uses PostgREST and an atomic database-backed limit shared across instances; IP identifiers are HMAC hashes, not raw IP addresses. Direct database access for `anon` and `authenticated` is revoked and all four application tables have RLS enabled. Only the server accesses them with its secret key. Public API requests do not bypass validation or the submission limiter. Public responses omit private messages and unapproved guestbook entries. Admin content rejects non-HTTPS/non-local asset links. The admin editor provides labeled forms for profile, projects, skills, services, experience, and certificates, with add/reorder/remove-and-undo controls, image previews, draft status, and a save action. Drafts are preserved while reading the inbox or moderating messages. Project images can be uploaded through the authenticated server to ImgBB when `IMGBB_API_KEY` is configured; save the draft to publish the returned image URL. Add PDFs to `public/` and reference their paths.
 
 Contact submissions are **stored in the admin inbox**, not sent as emails. Guestbook entries appear only after manual approval. Multiplayer and cross-device progress are outside this version’s scope.
 
@@ -127,6 +134,10 @@ npm run format:check
 API integration tests use isolated databases and verify moderation, private contact persistence, validation, rate limiting, protected content edits, and persistence after restart. Navigation tests check every solid prop, all portfolio/fishing routes, and every NPC circuit. Fishing tests check economy transactions, favorite locks, duplicate catches, rod ownership, corruption recovery, probability weighting, Mythic eligibility and successful/failed tracking. Browser checks cover the story/creator flow, automatic walking and arrival panels, quest collapse, and responsive layout.
 
 ## Production
+
+For Vercel, import this repository as a Vite project and set the server-only environment variables described in [Supabase setup](docs/supabase-setup.md). `vercel.json` sends `/api/*` to the function and frontend routes such as `/admin` to the SPA. Vercel always uses Supabase; it never falls back to writing a local SQLite database. Deployment routing must still be verified on the actual Vercel deployment. Vercel Hobby is restricted to personal noncommercial use; the current services/freelance content needs review against those terms before selecting Hobby.
+
+For a standalone Node server or Docker:
 
 ```sh
 npm ci

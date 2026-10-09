@@ -25,6 +25,8 @@ dist-ssr
 
 # Backend secrets and persistent data
 .env
+.env.*
+!.env.example
 server/data/
 playwright-report/
 test-results/
