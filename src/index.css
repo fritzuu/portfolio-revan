@@ -4310,3 +4310,49 @@ textarea::placeholder {
     padding: 9px 11px;
   }
 }
+
+.admin-edit-card.is-hidden {
+  background: #e9e9e7;
+  border-color: #bcbfbc;
+  color: #59605c;
+}
+.admin-edit-card.is-hidden .admin-field input,
+.admin-edit-card.is-hidden .admin-field textarea {
+  background: #f1f2f0;
+  border-color: #c5c8c5;
+  color: #59605c;
+}
+.admin-edit-card.is-hidden .admin-image-preview img {
+  filter: grayscale(1);
+}
+.admin-card-actions {
+  flex-wrap: wrap;
+  align-items: center;
+}
+.admin-card-actions .admin-visibility-toggle {
+  width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  color: #305b49;
+  background: #e9f1e7;
+  border-color: #afc5b5;
+}
+.admin-card-actions .admin-visibility-toggle[aria-pressed='true'] {
+  color: #555e59;
+  background: #d5d9d5;
+  border-color: #a8b0a9;
+}
+.admin-card-actions .admin-visibility-toggle:hover {
+  border-color: #526e5d;
+  box-shadow: inset 0 0 0 1px #526e5d;
+}
+.admin-card-actions button:focus-visible {
+  outline: 3px solid #526e5d;
+  outline-offset: 3px;
+}
+.admin-visibility-status {
+  font-size: 12px;
+  line-height: 1.4;
+  margin-right: 8px;
+  color: #59605c;
+}

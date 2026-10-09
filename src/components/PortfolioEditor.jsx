@@ -1,6 +1,6 @@
 import { Localized } from '../i18n';
 import { useId, useState } from 'react';
-import { Plus, ArrowUp, ArrowDown, Undo2 } from 'lucide-react';
+import { Plus, ArrowUp, ArrowDown, Undo2, Eye, EyeOff } from 'lucide-react';
 
 const PROFILE_FIELDS = [
   { key: 'name', label: 'Nama lengkap', max: 100 },
@@ -431,7 +431,10 @@ export default function PortfolioEditor({
             </div>
           )}
           {items.map((item, index) => (
-            <article className="admin-edit-card" key={`${active}-${index}`}>
+            <article
+              className={`admin-edit-card${item.hidden ? ' is-hidden' : ''}`}
+              key={`${active}-${index}`}
+            >
               {active !== 'profile' && (
                 <div className="admin-card-heading">
                   <h3>
@@ -441,14 +444,21 @@ export default function PortfolioEditor({
                   <div className="admin-card-actions">
                     <button
                       type="button"
+                      className="admin-visibility-toggle"
                       aria-pressed={item.hidden === true}
+                      aria-label={item.hidden ? 'Tampilkan' : 'Sembunyikan'}
+                      title={item.hidden ? 'Tampilkan' : 'Sembunyikan'}
                       onClick={() =>
                         updateItem(index, 'hidden', item.hidden !== true)
                       }
                     >
-                      {item.hidden ? 'Tampilkan' : 'Sembunyikan'}
+                      {item.hidden ? (
+                        <EyeOff size={20} aria-hidden="true" />
+                      ) : (
+                        <Eye size={20} aria-hidden="true" />
+                      )}
                     </button>
-                    <small>
+                    <small className="admin-visibility-status" role="status">
                       {item.hidden ? 'Disembunyikan' : 'Tampil di website'}
                     </small>
                     <button
