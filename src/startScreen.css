@@ -773,7 +773,7 @@
   bottom: 104px;
   left: 50%;
   transform: translateX(-50%);
-  width: min(620px, calc(100% - 32px));
+  width: min(720px, calc(100% - 32px));
   display: flex;
   gap: 18px;
   padding: 20px;
@@ -793,15 +793,15 @@
   min-width: 0;
 }
 .tour-dialogue small {
-  font-size: 12px;
+  font-size: 16px;
   color: #55725c;
 }
 .tour-dialogue h3 {
-  font-size: 22px;
+  font-size: 28px;
   margin: 5px 0 8px;
 }
 .tour-dialogue p {
-  font-size: 15px;
+  font-size: 19px;
   line-height: 1.5;
   margin: 0 0 14px;
 }
@@ -812,8 +812,8 @@
   align-items: center;
 }
 .tour-actions .button {
-  font-size: 14px;
-  min-height: 44px;
+  font-size: 18px;
+  min-height: 48px;
   padding: 9px 14px;
 }
 .tour-skip {
@@ -822,8 +822,8 @@
   color: #526657;
   text-decoration: underline;
   padding: 10px;
-  font-size: 13px;
-  min-height: 44px;
+  font-size: 17px;
+  min-height: 48px;
 }
 @media (max-width: 700px) {
   .guided-tour {
@@ -835,15 +835,18 @@
   .tour-guide-avatar {
     display: none;
   }
+  .tour-dialogue small {
+    font-size: 14px;
+  }
   .tour-dialogue h3 {
-    font-size: 18px;
+    font-size: 23px;
   }
   .tour-dialogue p {
-    font-size: 13px;
+    font-size: 16px;
     margin-bottom: 8px;
   }
   .tour-actions .button,
   .tour-skip {
-    font-size: 12px;
+    font-size: 16px;
   }
 }
