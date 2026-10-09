@@ -753,13 +753,14 @@ export default function App() {
         title="Meet your tiny alter ego."
         className="character-modal"
       >
-        <p>Pick a look. There’s no wrong way to be you.</p>
+        <p className="character-intro">
+          Pick a look. There’s no wrong way to be you.
+        </p>
         <div className="character-layout">
           <div className="character-preview">
             <div className="preview-spark">✦</div>
             <PixelCharacter character={character} size={160} />
             <span>THE CURIOUS TRAVELER</span>
-            <small>Level 01 · Ready to explore</small>
           </div>
           <div className="character-options">
             <fieldset>
@@ -835,7 +836,7 @@ export default function App() {
           <ArrowRight size={18} />
         </button>
         <small className="save-note">
-          Your character and discoveries are saved on this device.
+          Your adventure is saved on this device.
         </small>
       </Modal>
       {phase === 'playing' && panel === 'football' && (

@@ -440,3 +440,159 @@
     font-size: 15px;
   }
 }
+
+/* Compact setup keeps all choices and the start action together on phones. */
+@media (max-width: 760px) {
+  .character-modal {
+    width: calc(100% - 20px);
+    max-height: calc(
+      100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+    );
+  }
+  .character-modal .dialog-head {
+    padding: 14px 16px 12px;
+    gap: 12px;
+  }
+  .character-modal .dialog-head .eyebrow {
+    display: none;
+  }
+  .character-modal .dialog-head h2 {
+    margin: 0;
+    font-size: 32px;
+  }
+  .character-modal .dialog-head .icon-button {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+  .character-modal .dialog-body {
+    padding: 12px 16px 16px;
+  }
+  .character-modal .character-intro {
+    display: none;
+  }
+  .character-modal .character-layout {
+    gap: 14px;
+    margin: 0 0 16px;
+  }
+  .character-modal .character-preview {
+    min-height: 96px;
+    padding: 8px 16px;
+    flex-direction: row;
+    gap: 18px;
+  }
+  .character-modal .character-preview canvas {
+    width: 72px !important;
+    height: 81px !important;
+    flex-shrink: 0;
+  }
+  .character-modal .character-preview > span {
+    margin: 0;
+    max-width: 140px;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+  .character-modal .preview-spark {
+    display: none;
+  }
+  .character-modal .character-options {
+    gap: 12px;
+  }
+  .character-modal legend {
+    font-size: 17px;
+    margin-bottom: 6px;
+  }
+  .character-modal .option-row {
+    gap: 8px;
+  }
+  .character-modal .option {
+    flex: 1;
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 17px;
+  }
+  .character-modal .swatch {
+    width: 44px;
+    height: 44px;
+  }
+  .character-modal .button.full {
+    min-height: 48px;
+    font-size: 18px;
+    padding: 10px 12px;
+  }
+  .character-modal .save-note {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+}
+@media (max-height: 500px) and (min-width: 540px) {
+  .character-modal {
+    max-height: calc(100dvh - 16px);
+    width: min(740px, calc(100% - 24px));
+  }
+  .character-modal .dialog-head {
+    padding: 10px 16px;
+  }
+  .character-modal .dialog-head .eyebrow,
+  .character-modal .character-intro {
+    display: none;
+  }
+  .character-modal .dialog-head h2 {
+    font-size: 30px;
+    margin: 0;
+  }
+  .character-modal .dialog-body {
+    padding: 10px 16px 14px;
+  }
+  .character-modal .character-layout {
+    grid-template-columns: 140px 1fr;
+    gap: 16px;
+    margin: 0 0 12px;
+  }
+  .character-modal .character-preview {
+    flex-direction: column;
+    min-height: 0;
+    gap: 8px;
+    padding: 10px;
+  }
+  .character-modal .character-preview canvas {
+    width: 72px !important;
+    height: 81px !important;
+  }
+  .character-modal .character-preview > span {
+    font-size: 20px;
+    margin: 0;
+  }
+  .character-modal .character-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .character-modal .character-options fieldset:first-child {
+    grid-column: 1 / -1;
+  }
+  .character-modal legend {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  .character-modal .swatch {
+    width: 44px;
+    height: 44px;
+  }
+  .character-modal .option-row {
+    gap: 8px;
+  }
+  .character-modal .option {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+  .character-modal .button.full {
+    min-height: 44px;
+    font-size: 18px;
+  }
+  .character-modal .save-note {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+}
