@@ -114,3 +114,21 @@ test('file route requires admin, validates payload, and public API excludes hidd
     store.db.close();
   }
 });
+
+test('saving editor draft without uploaded profile photo accepts null and preserves fallback', () => {
+  const draft = structuredClone(seed);
+  draft.profile.photo = null;
+  for (const key of [
+    'projects',
+    'services',
+    'skills',
+    'experience',
+    'certificates',
+  ])
+    draft[key][0].hidden = true;
+  assert.equal(validPortfolio(draft), true);
+  draft.profile.photo = 'javascript:alert(1)';
+  assert.equal(validPortfolio(draft), false);
+  draft.profile.photo = 'https://i.ibb.co/test/profile.png';
+  assert.equal(validPortfolio(draft), true);
+});

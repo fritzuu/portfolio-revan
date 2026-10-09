@@ -19,6 +19,7 @@ export function validPortfolio(p) {
       (k) => safeLink(p.profile[k]) && p.profile[k],
     ) &&
     (p.profile.photo === undefined ||
+      p.profile.photo === null ||
       (typeof p.profile.photo === 'string' && safeLink(p.profile.photo))) &&
     ['projects', 'services', 'skills', 'experience', 'certificates'].every(
       (key) =>
