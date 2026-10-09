@@ -9,7 +9,10 @@ export async function api(url, options = {}) {
     error: 'Backend belum tersedia. Jalankan npm run dev atau coba lagi nanti.',
   }));
   if (!response.ok)
-    throw new Error(data.error || 'Permintaan gagal. Coba lagi.');
+    throw Object.assign(
+      new Error(data.error || 'Permintaan gagal. Coba lagi.'),
+      { status: response.status },
+    );
   return data;
 }
 function MessageForm({ type, onSubmitted }) {
