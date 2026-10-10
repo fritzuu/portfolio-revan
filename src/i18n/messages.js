@@ -1,4 +1,12 @@
 export default [
+  ['Project pages', 'Halaman proyek'],
+  ['Page {n} of {n}', 'Halaman {n} dari {n}'],
+  ['← Previous', '← Sebelumnya'],
+  ['Next →', 'Berikutnya →'],
+  [
+    'No projects yet. A new chapter is on its way.',
+    'Belum ada proyek. Bab baru akan segera hadir.',
+  ],
   ['Tour with Revan', 'Tur bersama Revan'],
   ['Revan, your tour guide', 'Revan, pemandu tur'],
   ['Your world guide', 'Pemandu duniamu'],

@@ -1,44 +1,110 @@
+/* A shared bound journal for every portfolio chapter. */
 .portfolio-room.dialog-content {
-  background: #f4ead2;
-  border: 3px solid #a5885c;
-  border-radius: 12px;
+  background: #fbf3df;
+  border: 3px solid #705039;
+  border-left: 12px solid #705039;
+  border-radius: 5px 16px 16px 5px;
   box-shadow:
-    0 0 0 5px #e4d2ae,
+    3px 3px 0 #e1d2b4,
+    6px 6px 0 #af9774,
+    9px 9px 0 #e1d2b4,
     0 18px 70px #172f4260;
   background-image: linear-gradient(
     90deg,
-    #d2bb91 0,
-    #ead8b8 14px,
-    transparent 32px
+    #cbb590 0,
+    #eaddc1 12px,
+    transparent 35px
   );
   animation: room-arrival 240ms ease-out;
 }
 .portfolio-room .dialog-head {
-  border-bottom: 2px solid #c8b18a;
-  background: #f4ead2;
+  background: transparent;
+  border-bottom: 1px solid #c8b18a;
+  padding-left: 38px;
 }
 .portfolio-room .dialog-head .eyebrow {
-  color: #766140;
+  color: #876345;
+}
+.portfolio-room .dialog-head h2,
+.portfolio-room .dialog-body h3,
+.portfolio-room .dialog-body h4 {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #513d2c;
 }
 .portfolio-room .dialog-body {
-  padding-left: 30px;
+  padding-left: 38px;
+  background-image: linear-gradient(
+    90deg,
+    transparent 22px,
+    #b78d6a40 22px,
+    #b78d6a40 23px,
+    transparent 23px
+  );
 }
-.room-projects.dialog-content,
-.room-skills.dialog-content {
-  border: 6px solid #876345;
-  box-shadow:
-    0 0 0 3px #c29d70,
-    0 18px 70px #172f4260;
-  background: #e4e7d8;
+.portfolio-room .project-card,
+.portfolio-room .skill-card,
+.portfolio-room .service-list article {
+  border-color: #d4c09c;
+  border-radius: 2px;
+  background: #fffaf0;
+  box-shadow: 2px 3px 0 #9a785f15;
 }
-.room-projects .dialog-head,
-.room-skills .dialog-head {
-  background: #e4e7d8;
-  border-color: #acb59f;
+.portfolio-room .project-card {
+  display: grid;
+  grid-template-columns: 34% 1fr;
 }
-.room-projects .dialog-body,
-.room-skills .dialog-body {
-  padding-left: 24px;
+.portfolio-room .project-image {
+  height: 100%;
+  min-height: 190px;
+  background: #eee3ca;
+  border-bottom: 0;
+  border-right: 1px solid #d4c09c;
+}
+.portfolio-room .project-image > span {
+  background: #705039;
+  color: #fff4db;
+  border-radius: 0 0 4px 4px;
+}
+.portfolio-room .project-body {
+  padding: 20px;
+}
+.book-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid #c8b18a;
+}
+.book-pagination > span {
+  font:
+    italic 14px Georgia,
+    serif;
+  color: #705039;
+  text-align: center;
+}
+.book-pagination button {
+  border: 1px solid #b39872;
+  border-radius: 3px;
+  padding: 10px 13px;
+  background: #f0e2c5;
+  color: #513d2c;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.book-pagination button:hover:not(:disabled) {
+  background: #e4d1aa;
+}
+.book-pagination button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.book-pagination button:focus-visible,
+.portfolio-room .project-list:focus-visible {
+  outline: 2px solid #876345;
+  outline-offset: 4px;
 }
 @keyframes room-arrival {
   from {
@@ -51,37 +117,38 @@
   }
 }
 @media (max-width: 760px) {
+  .portfolio-room .dialog-head,
   .portfolio-room .dialog-body {
-    padding-left: 18px;
+    padding-left: 22px;
+  }
+  .portfolio-room .dialog-body {
+    background-image: none;
   }
   .portfolio-room.dialog-content {
+    border-left-width: 7px;
     box-shadow:
-      0 0 0 2px #e4d2ae,
+      2px 2px 0 #e1d2b4,
+      4px 4px 0 #af9774,
       0 12px 40px #172f4260;
+  }
+  .portfolio-room .project-card {
+    grid-template-columns: 1fr;
+  }
+  .portfolio-room .project-image {
+    height: 170px;
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid #d4c09c;
+  }
+  .book-pagination {
+    gap: 6px;
+  }
+  .book-pagination button {
+    padding: 10px 8px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .portfolio-room.dialog-content {
     animation: none;
   }
-}
-.room-projects .project-card,
-.room-skills .skill-card {
-  position: relative;
-  border-color: #bbc1ad;
-  box-shadow: 2px 4px 0 #66775c25;
-}
-.room-projects .project-card::before,
-.room-skills .skill-card::before {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  width: 9px;
-  height: 9px;
-  border: 2px solid #976b51;
-  border-radius: 50%;
-  background: #d09371;
-  z-index: 1;
-  pointer-events: none;
 }

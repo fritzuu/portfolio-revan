@@ -1,6 +1,6 @@
 import { publicPortfolio } from '../data/visibility';
 import { Localized } from '../i18n';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowUpRight, Download, Mail } from 'lucide-react';
 export async function api(url, options = {}) {
   const response = await fetch(url, {
@@ -107,6 +107,80 @@ function MessageForm({ type, onSubmitted }) {
     </Localized>
   );
 }
+function ProjectBook({ projects }) {
+  const [selectedPage, setSelectedPage] = useState(1);
+  const listRef = useRef(null);
+  const pageCount = Math.max(1, Math.ceil(projects.length / 5));
+  const page = Math.min(selectedPage, pageCount);
+  const offset = (page - 1) * 5;
+  const visibleProjects = projects.slice(offset, offset + 5);
+  function turnPage(nextPage) {
+    setSelectedPage(nextPage);
+    listRef.current?.focus({ preventScroll: true });
+    listRef.current?.closest('.dialog-body')?.scrollTo({ top: 0 });
+  }
+  return (
+    <Localized>
+      <>
+        <p>A few things I’ve turned from ideas into working products.</p>
+        <div className="project-list" ref={listRef} tabIndex={-1}>
+          {visibleProjects.map((p, i) => (
+            <article className="project-card" key={p.title}>
+              <div className="project-image">
+                <img src={p.img} alt={p.imgAlt || p.title} loading="lazy" />
+                <span>{String(offset + i + 1).padStart(2, '0')}</span>
+              </div>
+              <div className="project-body">
+                <h3>{p.title}</h3>
+                <p>{p.desc}</p>
+                <div className="tags">
+                  {p.tags.map((t) => (
+                    <span key={t}>{t}</span>
+                  ))}
+                </div>
+                <div className="link-row">
+                  {p.demoLink && (
+                    <a href={p.demoLink} target="_blank" rel="noreferrer">
+                      Live demo ↗
+                    </a>
+                  )}
+                  {p.codeLink && (
+                    <a href={p.codeLink} target="_blank" rel="noreferrer">
+                      Source code ↗
+                    </a>
+                  )}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+        {!projects.length && (
+          <p>No projects yet. A new chapter is on its way.</p>
+        )}
+        <nav className="book-pagination" aria-label="Project pages">
+          <button
+            type="button"
+            disabled={page === 1}
+            onClick={() => turnPage(page - 1)}
+          >
+            ← Previous
+          </button>
+          <span
+            role="status"
+            aria-live="polite"
+          >{`Page ${page} of ${pageCount}`}</span>
+          <button
+            type="button"
+            disabled={page === pageCount}
+            onClick={() => turnPage(page + 1)}
+          >
+            Next →
+          </button>
+        </nav>
+      </>
+    </Localized>
+  );
+}
 export default function PortfolioContent({ section, data }) {
   data = publicPortfolio(data);
   if (section === 'about')
@@ -149,45 +223,7 @@ export default function PortfolioContent({ section, data }) {
         </>
       </Localized>
     );
-  if (section === 'projects')
-    return (
-      <Localized>
-        <>
-          <p>A few things I’ve turned from ideas into working products.</p>
-          <div className="project-list">
-            {data.projects.map((p, i) => (
-              <article className="project-card" key={p.title}>
-                <div className="project-image">
-                  <img src={p.img} alt={p.imgAlt || p.title} loading="lazy" />
-                  <span>0{i + 1}</span>
-                </div>
-                <div className="project-body">
-                  <h3>{p.title}</h3>
-                  <p>{p.desc}</p>
-                  <div className="tags">
-                    {p.tags.map((t) => (
-                      <span key={t}>{t}</span>
-                    ))}
-                  </div>
-                  <div className="link-row">
-                    {p.demoLink && (
-                      <a href={p.demoLink} target="_blank" rel="noreferrer">
-                        Live demo ↗
-                      </a>
-                    )}
-                    {p.codeLink && (
-                      <a href={p.codeLink} target="_blank" rel="noreferrer">
-                        Source code ↗
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </>
-      </Localized>
-    );
+  if (section === 'projects') return <ProjectBook projects={data.projects} />;
   if (section === 'skills')
     return (
       <Localized>
